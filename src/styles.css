@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Aptos", "Neue Haas Grotesk Text", "Inter", "Segoe UI", "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color-scheme: light;
+  font-size: 14px;
+}
+
+.dark { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, .font-black {
+  letter-spacing: -0.025em;
+}
+
+.font-black { font-weight: 700 !important; }
+.font-extrabold { font-weight: 650 !important; }
+.font-bold { font-weight: 560 !important; }
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+.luxury-panel {
+  background-image: linear-gradient(135deg, #064e3b, #022c22), radial-gradient(circle at top right, rgba(16,185,129,.18), transparent 34%);
+}
+
+.pro-panel {
+  background: linear-gradient(135deg, #ffffff, #f0fdf4 58%, #dcfce7);
+}
+.dark .pro-panel {
+  background: linear-gradient(135deg, #02130e, #052e22 58%, #064e3b);
+}
