@@ -48,7 +48,7 @@ export function PastExams() {
             <CardTitle className="text-xl sm:text-2xl">Past Exams, Quizzes & Labs</CardTitle>
             <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">Score reports with timing, domains, retakes, and weak-area insights.</p>
           </div>
-          <Badge className="shrink-0 bg-amber-300 text-slate-950">{attempts.length} saved</Badge>
+          <Badge className="shrink-0 bg-amber-300 text-slate-950">{attempts.length} attempts</Badge>
         </CardHeader>
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="rounded-xl bg-slate-100 p-3 dark:bg-white/10 sm:rounded-2xl sm:p-4">
