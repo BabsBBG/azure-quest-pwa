@@ -1,0 +1,18 @@
+name: Sync to deploy fork
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Nehemiah's deploy fork
+        run: |
+          git remote add fork https://x-access-token:${{ secrets.DEPLOY_FORK_PAT }}@github.com/nehyabah/azure-quest-pwa.git
+          git push fork HEAD:main --force
