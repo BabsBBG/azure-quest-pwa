@@ -14,6 +14,7 @@
     "validate:duplicates": "node scripts/validate-duplicates.mjs",
     "validate:source-grounding": "node scripts/validate-source-grounding.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
+    "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {

@@ -14,6 +14,7 @@ Harness state:
 - M5 final sign-off is currently FAIL because baseline principal engineering and QA audits found open S1/S2 defects recorded in `docs/qa/M5_DEFECT_LEDGER.md`.
 - M5.0 authorization hardening migration `0006_m5_authorization_hardening.sql` was added to separate review/publish authority, block reviewer publication, harden audit actors, and fix imported-project cloud row collisions. Live Supabase RLS application remains pending.
 - M5.1 Reliable Assessment Sessions are implemented in repo with local/cloud session persistence, recovery choices, timestamp expiry, direct question grid, mark/review/low-confidence filters, deliberate submission review, and confidence persistence. M5.12 E2E/live verification remains pending.
+- M5.2 Rich Assessment Item Types are implemented in repo with a discriminated item union, scoring helpers, walkthrough-only sample items, `/exam-walkthrough`, and CI validation. Full browser E2E verification remains pending.
 
 M5.0 rebrand status:
 
@@ -112,6 +113,7 @@ It has:
 - M5.2 validation on 2026-07-22 passed install, lint, tests, harness validation, question validation, source-grounding validation, duplicate validation, strict duplicate validation, route checks, and production build.
 - M5.2 production deployment on 2026-07-22 completed READY at `https://azure-quest-azwmivyy6-tonybabalola-1114s-projects.vercel.app` and was aliased to `https://azure-quest-pwa.vercel.app`.
 - M5.1 implementation validation on 2026-07-22 passed focused tests, lint, and production build.
+- M5.2 implementation validation on 2026-07-22 passed rich-item validation, scoring tests, route check, and production build.
 
 ## What is demo/static
 
@@ -167,7 +169,7 @@ M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approv
 ## Current blockers
 
 - Approved M5.1 Reliable Assessment Sessions are fixed in repo; M5.12 browser E2E and live Supabase recovery verification remain pending.
-- Approved M5.2 Rich Assessment Item Types is not complete; the runtime is still single-choice only.
+- Approved M5.2 Rich Assessment Item Types are fixed in repo through the Exam Walkthrough and shared rich item/scoring contracts; M5.12 browser E2E verification remains pending.
 - Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
 - `/admin` review studio is not implemented yet.
 - KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.

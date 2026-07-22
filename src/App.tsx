@@ -11,6 +11,7 @@ import { CertHome } from "./pages/CertHome";
 import { KnowledgeCheck } from "./pages/KnowledgeCheck";
 import { JobReadiness } from "./pages/JobReadiness";
 import { PracticeArena } from "./pages/PracticeArena";
+import { ExamWalkthrough } from "./pages/ExamWalkthrough";
 import { PastExams } from "./pages/PastExams";
 import { Flashcards } from "./pages/Flashcards";
 import { StudyMode } from "./pages/StudyMode";
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="/cert/:cert/job" element={<JobReadiness />} />
             <Route path="/study" element={<StudyMode />} />
             <Route path="/arena" element={<PracticeArena />} />
+            <Route path="/exam-walkthrough" element={<ExamWalkthrough />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/history" element={<PastExams />} />
             <Route path="/settings" element={<Settings />} />

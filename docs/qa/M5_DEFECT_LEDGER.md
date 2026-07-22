@@ -12,7 +12,7 @@ Date opened: 2026-07-22
 | M5-DEF-004 | S2 | Security/Data QA | M4/M5 data | Fixed in repo; live RLS verification pending | Imported project IDs collide globally when multiple users import the same public repo. |
 | M5-DEF-005 | S1 | Product QA | M5.1 | Fixed in repo; E2E/live verification pending | In-progress assessment sessions are not recoverable after refresh/browser closure. |
 | M5-DEF-006 | S2 | Product QA | Career Lab | Open | In-progress mock interview sessions are volatile until completion. |
-| M5-DEF-007 | S2 | Product QA | M5.2 | Open | Runtime item support is single-choice only; rich item types are absent. |
+| M5-DEF-007 | S2 | Product QA | M5.2 | Fixed in repo; E2E verification pending | Runtime item support is single-choice only; rich item types are absent. |
 | M5-DEF-008 | S2 | Product QA | M5.8 | Open | No active `/admin` review studio route exists. |
 | M5-DEF-009 | S2 | Product QA | Trust/accessibility | Open | KQL Gym lacks the demo/seed trust notice and reveals explanations immediately. |
 | M5-DEF-010 | S3 | Product QA | Accessibility | Open | Mobile nav grid, answer option semantics, loading announcements, and progress labels need hardening. |
@@ -145,11 +145,11 @@ Actual result: Mock interview state is component-local until `finishSession`.
 
 Root cause: No in-progress mock interview persistence.
 
-Fix: Pending.
+Fix: Added rich assessment item discriminated union, walkthrough-only data covering all item types, scoring helpers/tests, `/exam-walkthrough` route, rich item validator, and CI coverage.
 
-Retest result: Pending.
+Retest result: `npm run validate:rich-items`, `npm test -- src/utils/richItemScoring.test.ts`, `npm run check:routes`, and `npm run build` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; M5.12 browser E2E verification pending.
 
 ### M5-DEF-007 Missing Rich Assessment Items
 

@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5.2 rich item TypeScript narrowing failure
+
+Date:
+2026-07-22
+
+Command:
+`npm run build`
+
+Error:
+TypeScript rejected `src/utils/richItemScoring.ts` because item/answer union narrowing was insufficient, and `src/utils/richItemScoring.test.ts` used a readonly fixture that did not satisfy mutable `AssessmentItem` arrays.
+
+Likely cause:
+The first rich-item scoring implementation compared `item.type !== answer.type`, but TypeScript did not narrow both discriminated unions across all branches.
+
+Fix attempted:
+Rewrote scoring branches to narrow on both `item.type` and `answer.type`; changed the test fixture to avoid readonly `tags`.
+
+Result:
+Resolved. `npm test -- src/utils/richItemScoring.test.ts` and `npm run build` passed after the narrowing/type fixes.
+
+Remaining issue:
+None.
+
 ## Format
 
 ### Failure title

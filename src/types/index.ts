@@ -35,6 +35,87 @@ export interface AnswerRecord {
   tags: string[];
 }
 
+export type AssessmentItemType = "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "ORDERING" | "MATCHING" | "CASE_STUDY_QUESTION";
+
+interface AssessmentItemBase {
+  id: string;
+  type: AssessmentItemType;
+  cert: Cert;
+  domain: string;
+  difficulty: Difficulty;
+  stem: string;
+  explanation: string;
+  tags: string[];
+  walkthroughOnly?: boolean;
+}
+
+export interface SingleChoiceAssessmentItem extends AssessmentItemBase {
+  type: "SINGLE_CHOICE";
+  options: QuizOption[];
+  answer: QuizOption["id"];
+  whyWrong: Partial<Record<QuizOption["id"], string>>;
+}
+
+export interface MultipleChoiceAssessmentItem extends AssessmentItemBase {
+  type: "MULTIPLE_CHOICE";
+  options: QuizOption[];
+  answers: QuizOption["id"][];
+  minSelections: number;
+  maxSelections: number;
+  exactSelectionCount: number;
+  allowPartialCredit: boolean;
+  whyWrong: Partial<Record<QuizOption["id"], string>>;
+}
+
+export interface OrderingAssessmentItem extends AssessmentItemBase {
+  type: "ORDERING";
+  choices: Array<{ id: string; text: string }>;
+  correctOrder: string[];
+  allowPartialCredit: boolean;
+}
+
+export interface MatchingAssessmentItem extends AssessmentItemBase {
+  type: "MATCHING";
+  prompts: Array<{ id: string; text: string }>;
+  matches: Array<{ id: string; text: string }>;
+  correctMatches: Record<string, string>;
+  allowPartialCredit: boolean;
+}
+
+export interface CaseStudySection {
+  id: string;
+  title: string;
+  body: string;
+}
+
+export interface CaseStudyExhibit {
+  id: string;
+  title: string;
+  body: string;
+}
+
+export interface CaseStudyAssessmentItem extends AssessmentItemBase {
+  type: "CASE_STUDY_QUESTION";
+  caseStudyId: string;
+  caseTitle: string;
+  overview: string;
+  sections: CaseStudySection[];
+  exhibits: CaseStudyExhibit[];
+  requirements: string[];
+  constraints: string[];
+  relatedQuestionIds: string[];
+  options: QuizOption[];
+  answer: QuizOption["id"];
+  whyWrong: Partial<Record<QuizOption["id"], string>>;
+}
+
+export type AssessmentItem =
+  | SingleChoiceAssessmentItem
+  | MultipleChoiceAssessmentItem
+  | OrderingAssessmentItem
+  | MatchingAssessmentItem
+  | CaseStudyAssessmentItem;
+
 export interface DomainBreakdown {
   correct: number;
   total: number;

@@ -17,6 +17,7 @@ const requiredRoutes = [
   "/cert/:cert/readiness",
   "/cert/:cert/job",
   "/arena",
+  "/exam-walkthrough",
   "/history",
   "/settings"
 ];
@@ -27,6 +28,7 @@ const routeFiles = [
   "src/pages/Readiness.tsx",
   "src/pages/JobReadiness.tsx",
   "src/pages/PracticeArena.tsx",
+  "src/pages/ExamWalkthrough.tsx",
   "src/pages/PastExams.tsx",
   "src/pages/Settings.tsx",
   "src/pages/Account.tsx"

@@ -28,7 +28,7 @@ Release blockers from the 2026-07-22 baseline audit:
 - Audit rows can be caller-shaped or manually inserted by privileged users. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
 - Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006` and `importedProjectRowId()`; live Supabase RLS verification pending.
 - In-progress assessment sessions are fixed in repo with local/cloud persistence and recovery choices; M5.12 browser E2E and live Supabase verification pending.
-- Runtime item support is single-choice only.
+- Rich item type support is implemented in repo through walkthrough-only items and shared scoring contracts; production pool use remains blocked until source-grounded approved content, Admin publication, curated quiz placement, and Certification Run placement are complete.
 - `/admin` review studio is not implemented yet.
 - M5 final sign-off reports are currently FAIL until defects are fixed and retested.
 

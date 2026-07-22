@@ -25,5 +25,6 @@ jobs:
       - run: npm run validate:source-grounding
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
+      - run: npm run validate:rich-items
       - run: node scripts/check-routes.mjs
       - run: npm run build

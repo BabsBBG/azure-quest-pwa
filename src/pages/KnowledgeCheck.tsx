@@ -32,6 +32,9 @@ export function KnowledgeCheck() {
         {meta.status !== "ACTIVE" ? <Badge className="mb-3 ml-2 border-amber-300 bg-amber-50 text-amber-900 dark:bg-amber-300 dark:text-slate-950">{meta.status}</Badge> : null}
         <h1 className="max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">Domain quizzes and certification runs.</h1>
         <p className="mt-3 max-w-2xl text-sm font-semibold text-[var(--aq-muted)]">Focused quick quizzes and finite certification runs. Answers stay hidden until you finish, so timing stays realistic.</p>
+        <div className="mt-4">
+          <Button asChild variant="soft"><Link to="/exam-walkthrough">Open Exam Walkthrough</Link></Button>
+        </div>
         {meta.transitionMessage ? <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">{meta.transitionMessage}</p> : null}
       </section>
 

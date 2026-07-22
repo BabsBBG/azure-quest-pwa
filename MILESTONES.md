@@ -58,9 +58,9 @@ Implemented:
 
 ## M5.2 Rich Assessment Item Types
 
-Status: not complete.
+Status: complete in repo; M5.12 E2E verification pending.
 
-Required:
+Implemented:
 
 - Safe discriminated union for SINGLE_CHOICE, MULTIPLE_CHOICE, ORDERING, MATCHING, and CASE_STUDY_QUESTION.
 - Runtime renderer, answer capture, scoring, accessibility, and restoration for each item type.
