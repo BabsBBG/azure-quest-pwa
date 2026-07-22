@@ -6,6 +6,7 @@ import { ArrowLeft, Bookmark, CheckCircle2, Clock, Flag, RotateCcw, ShieldCheck 
 import { useAppStore } from "../store/useAppStore";
 import type { AssessmentSession, ConfidenceRating, Cert, ExamMode, Question, QuizOption } from "../types";
 import { buildExam, scoreAttempt } from "../utils/quizEngine";
+import { SIMULATED_SCORE_DISCLAIMER } from "../utils/simulatedScoring";
 import { formatSeconds } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -677,11 +678,13 @@ export function PracticeArena() {
             </div>
           </CardHeader>
           <Progress value={finalAttempt.percentage} />
-          <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
             <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.score}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Correct</p></div>
             <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.total}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Total</p></div>
+            <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.simulatedScore}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Sim score</p></div>
             <div className="aq-metric"><p className="text-xl font-bold">+{finalAttempt.readinessDelta ?? 0}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Progress</p></div>
           </div>
+          <p className="mt-4 text-xs font-semibold text-[var(--aq-muted)]">{SIMULATED_SCORE_DISCLAIMER}</p>
         </Card>
 
         {saveError ? (
@@ -833,6 +836,15 @@ export function PracticeArena() {
               <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">Marks, confidence, and flags are saved locally first; flags sync to Supabase when signed in.</p>
             </div>
           </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Adaptive practice signals</CardTitle><ShieldCheck className="h-6 w-6 text-blue-500" /></CardHeader>
+          <div className="grid gap-2">
+            {(finalAttempt.adaptationSignals ?? []).map((signal) => (
+              <div key={signal} className="aq-subtle-panel p-3 text-sm font-semibold">{signal}</div>
+            ))}
+          </div>
         </Card>
 
         <div className="grid gap-3">

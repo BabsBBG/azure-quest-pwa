@@ -137,6 +137,10 @@ export interface ExamAttempt {
   score: number;
   total: number;
   percentage: number;
+  rawPercentage: number;
+  simulatedScore: number;
+  confidenceInsights?: Record<ConfidenceRating, number>;
+  adaptationSignals?: string[];
   passed: boolean;
   timeTakenSeconds: number;
   timeLimitSeconds?: number;

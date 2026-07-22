@@ -1,6 +1,7 @@
 import type { AnswerRecord, AttemptKind, Cert, ConfidenceRating, DomainBreakdown, ExamAttempt, ExamMode, Question, QuizOption } from "../types";
 import { pickQuestions } from "./random";
 import { readinessDeltaFromAttempt } from "./readiness";
+import { adaptationSignals, confidenceInsights, simulatedScore } from "./simulatedScoring";
 
 export function buildExam(args: {
   bank: Question[];
@@ -72,6 +73,8 @@ export function scoreAttempt(args: {
   const started = new Date(args.startedAt).getTime();
   const timeTakenSeconds = Math.max(1, Math.round((Date.now() - started) / 1000));
   const percentage = total ? Math.round((score / total) * 100) : 0;
+  const rawPercentage = total ? Math.round((score / total) * 10_000) / 100 : 0;
+  const hardQuestionCount = args.questions.filter((question) => question.difficulty === "hard").length;
   const passed = percentage >= 70;
   const kind = args.kind ?? (args.mode === "quiz" ? "quiz" : args.mode === "daily" ? "daily" : args.mode === "timed" ? "exam" : "practice");
   const streakBonus = percentage >= 80 ? 25 : 0;
@@ -95,6 +98,9 @@ export function scoreAttempt(args: {
     score,
     total,
     percentage,
+    rawPercentage,
+    simulatedScore: simulatedScore({ percentage, answers, hardQuestionCount }),
+    confidenceInsights: confidenceInsights(answers),
     passed,
     timeTakenSeconds,
     timeLimitSeconds: args.timeLimitSeconds,
@@ -102,7 +108,8 @@ export function scoreAttempt(args: {
     readinessDelta,
     domains,
     answers,
-    retakeSeed: args.seed
+    retakeSeed: args.seed,
+    adaptationSignals: adaptationSignals({ answers, percentage, domains })
   };
 }
 

@@ -68,9 +68,9 @@ Implemented:
 
 ## M5.3 Confidence, Scoring, And Adaptation
 
-Status: not complete.
+Status: complete in repo; M5.12 E2E verification pending.
 
-Required:
+Implemented:
 
 - Confidence ratings: GUESSING, UNSURE, FAIRLY_CONFIDENT, CERTAIN.
 - Deterministic PraxisGrid simulated score on a 1-1000 scale with clear non-provider-equivalence disclaimer.
