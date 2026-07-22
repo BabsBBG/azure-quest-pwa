@@ -78,14 +78,14 @@ Implemented:
 
 ## M5.4 Official Source Ingestion
 
-Status: not complete.
+Status: complete in repo; external production activation pending.
 
 Completed foundations:
 
 - Static Microsoft Learn sample source docs and source chunks exist.
 - Source-grounded sample records include source URLs, chunks, critic notes, generation controls, and validation.
 
-Required:
+Implemented:
 
 - Provider-neutral source registry.
 - Server-side retrieval adapter, deterministic fixture adapter, content hashing, source versions, idempotent jobs, bounded retries, failure logging, freshness/change/removal detection, blueprint/domain/objective extraction, and source-section mapping.

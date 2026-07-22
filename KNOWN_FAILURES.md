@@ -25,6 +25,29 @@ Resolved. `npm test -- src/utils/richItemScoring.test.ts` and `npm run build` pa
 Remaining issue:
 None.
 
+### M5.4 source ingestion Node crypto build failure
+
+Date:
+2026-07-22
+
+Command:
+`npm run build`
+
+Error:
+TypeScript could not resolve `node:crypto` from `src/data/sourceIngestion.ts`.
+
+Likely cause:
+The Vite frontend TypeScript configuration does not expose Node built-in module declarations for browser source files.
+
+Fix attempted:
+Replaced the Node crypto import with a deterministic browser-safe 64-character content hash helper for the local ingestion scaffold.
+
+Result:
+Resolved. `npm test -- src/data/sourceIngestion.test.ts`, `npm run validate:source-ingestion`, and `npm run build` passed after replacing the Node crypto import.
+
+Remaining issue:
+None.
+
 ## Format
 
 ### Failure title
