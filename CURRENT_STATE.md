@@ -12,6 +12,7 @@ Harness state:
 - M6: NOT APPROVED.
 - The approved milestone sequence was restored on 2026-07-22. Previous source-pipeline contract and duplicate-gate work is preserved as foundation work under M5.4/M5.6/M5.7, not as completion of approved M5.1/M5.2.
 - M5 final sign-off is currently FAIL because baseline principal engineering and QA audits found open S1/S2 defects recorded in `docs/qa/M5_DEFECT_LEDGER.md`.
+- M5.0 authorization hardening migration `0006_m5_authorization_hardening.sql` was added to separate review/publish authority, block reviewer publication, harden audit actors, and fix imported-project cloud row collisions. Live Supabase RLS application remains pending.
 
 M5.0 rebrand status:
 
@@ -165,7 +166,7 @@ M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approv
 
 - Approved M5.1 Reliable Assessment Sessions is not complete; in-progress assessment state is currently component-local and not recoverable after refresh/browser closure.
 - Approved M5.2 Rich Assessment Item Types is not complete; the runtime is still single-choice only.
-- Authorization/RLS foundation has release-blocking defects: reviewer publication path, insufficient approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions.
+- Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
 - `/admin` review studio is not implemented yet.
 - KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.

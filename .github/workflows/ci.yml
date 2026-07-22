@@ -24,5 +24,6 @@ jobs:
       - run: node scripts/validate-question-bank.mjs
       - run: npm run validate:source-grounding
       - run: npm run validate:duplicates
+      - run: npm run validate:authorization
       - run: node scripts/check-routes.mjs
       - run: npm run build

@@ -8,7 +8,7 @@ Role: Senior QA Engineer - Security, Authorization, Data Integrity and Content G
 
 Status: `FAIL`
 
-M5 is blocked by open S1/S2 defects in `docs/qa/M5_DEFECT_LEDGER.md`.
+The baseline S1/S2 authorization defects have been fixed in-repo and statically retested, but M5 remains blocked until live Supabase RLS/application verification, admin route/API verification, and the remaining product S1/S2 defects are complete.
 
 ## Test Inventory
 
@@ -29,22 +29,24 @@ M5 is blocked by open S1/S2 defects in `docs/qa/M5_DEFECT_LEDGER.md`.
 
 | Role | Expected M5 authority | Baseline result |
 | --- | --- | --- |
-| MAIN_ADMIN | May approve/publish/override with audit where allowed. | Partially scaffolded; needs stricter function/policy separation. |
-| CONTENT_REVIEWER | May edit/recommend/flag but may not publish. | Fails: publication-adjacent paths exist. |
+| MAIN_ADMIN | May approve/publish/override with audit where allowed. | In-repo migration hardening added; live verification pending. |
+| CONTENT_REVIEWER | May edit/recommend/flag but may not publish. | In-repo migration now blocks approved publication; live verification pending. |
 | SUPPORT_ADMIN | Support-only access, no editorial publication. | Needs final policy coverage. |
 | USER | No admin/draft access. | Needs final admin route/API verification. |
 
 ## RLS Results
 
-Failing at baseline. Source-pipeline policies need stricter separation between review and publish authority.
+Baseline failed. Repository migration `0006_m5_authorization_hardening.sql` now separates review and publish authority, blocks reviewer publication, requires Main Admin for approved-question insertion, derives audit actor fields, and scopes imported project rows by user/content.
+
+Live Supabase RLS application and direct database threat-case execution are still pending.
 
 ## Migration Results
 
-Migrations exist and are versioned. Live Supabase application was not verified. Additional migrations are required.
+Migrations exist and are versioned. Migration `0006_m5_authorization_hardening.sql` was added. Live Supabase application was not verified.
 
 ## Data-Isolation Results
 
-Imported project rows can collide for users importing the same public repo because IDs are global content-hash derived.
+Fixed in repo. Supabase upsert row IDs are now user/content scoped through `importedProjectRowId()`, and migration `0006` adds `(user_id, content_hash)` uniqueness.
 
 ## Defects Discovered
 
@@ -55,13 +57,14 @@ Imported project rows can collide for users importing the same public repo becau
 
 ## Defects Retested
 
-None yet.
+- `npm run validate:authorization` passed on 2026-07-22.
+- `npm test -- src/lib/cloudSync.test.ts` passed on 2026-07-22.
 
 ## Remaining Risks
 
 - Live Supabase RLS behavior unverified.
 - Admin APIs/routes not implemented yet.
-- Publication gate semantics not yet durable enough.
+- Full direct database threat-case suite is not yet automated.
 
 ## Pass Or Fail
 

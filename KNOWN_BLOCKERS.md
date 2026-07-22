@@ -21,12 +21,12 @@ The approved M5 sequence is now:
 - M5.11 User Reporting and Content-Quality Feedback
 - M5.12 Completion and Validation
 
-Open release blockers from the 2026-07-22 baseline audit:
+Release blockers from the 2026-07-22 baseline audit:
 
-- Content reviewers can reach publication paths in source-pipeline RLS scaffolding.
-- Public approved-question serving trusts `review_status` without enough database-level integrity enforcement.
-- Audit rows can be caller-shaped or manually inserted by privileged users.
-- Imported project IDs collide globally when multiple users import the same public repo.
+- Content reviewers can reach publication paths in source-pipeline RLS scaffolding. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
+- Public approved-question serving trusts `review_status` without enough database-level integrity enforcement. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
+- Audit rows can be caller-shaped or manually inserted by privileged users. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
+- Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006` and `importedProjectRowId()`; live Supabase RLS verification pending.
 - In-progress assessment sessions are not recoverable after refresh/browser closure.
 - Runtime item support is single-choice only.
 - `/admin` review studio is not implemented yet.

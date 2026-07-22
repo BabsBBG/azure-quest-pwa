@@ -6,10 +6,10 @@ Date opened: 2026-07-22
 
 | ID | Severity | Reporter | Milestone | Status | Summary |
 | --- | --- | --- | --- | --- | --- |
-| M5-DEF-001 | S1 | Security/Data QA | Authorization | Open | Content reviewers can reach source-pipeline publication paths in RLS scaffolding. |
-| M5-DEF-002 | S1 | Security/Data QA | Authorization | Open | Public approved-question serving trusts `review_status` without enough database-level payload/source integrity. |
-| M5-DEF-003 | S2 | Security/Data QA | Governance | Open | Audit rows can be caller-shaped or manually inserted by privileged users. |
-| M5-DEF-004 | S2 | Security/Data QA | M4/M5 data | Open | Imported project IDs collide globally when multiple users import the same public repo. |
+| M5-DEF-001 | S1 | Security/Data QA | Authorization | Fixed in repo; live RLS verification pending | Content reviewers can reach source-pipeline publication paths in RLS scaffolding. |
+| M5-DEF-002 | S1 | Security/Data QA | Authorization | Fixed in repo; live RLS verification pending | Public approved-question serving trusts `review_status` without enough database-level payload/source integrity. |
+| M5-DEF-003 | S2 | Security/Data QA | Governance | Fixed in repo; live RLS verification pending | Audit rows can be caller-shaped or manually inserted by privileged users. |
+| M5-DEF-004 | S2 | Security/Data QA | M4/M5 data | Fixed in repo; live RLS verification pending | Imported project IDs collide globally when multiple users import the same public repo. |
 | M5-DEF-005 | S1 | Product QA | M5.1 | Open | In-progress assessment sessions are not recoverable after refresh/browser closure. |
 | M5-DEF-006 | S2 | Product QA | Career Lab | Open | In-progress mock interview sessions are volatile until completion. |
 | M5-DEF-007 | S2 | Product QA | M5.2 | Open | Runtime item support is single-choice only; rich item types are absent. |
@@ -35,11 +35,11 @@ Actual result: Current scaffolding allows reviewer-adjacent insert/update paths 
 
 Root cause: Review and publish authority are not separated strongly enough in database policies/functions.
 
-Fix: Pending.
+Fix: Added `supabase/migrations/0006_m5_authorization_hardening.sql` with `can_publish_content()`, Main Admin-only source insertion, Main Admin-only approved-question insertion, reviewer update restrictions, and trigger enforcement blocking non-Main-Admin approval.
 
-Retest result: Pending.
+Retest result: `npm run validate:authorization` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; live Supabase RLS verification pending.
 
 ### M5-DEF-002 Approved Serving Integrity
 
@@ -57,11 +57,11 @@ Actual result: Public serving is primarily gated by `review_status = 'approved'`
 
 Root cause: Scaffold-level policies lack full payload/source validation constraints.
 
-Fix: Pending.
+Fix: Added database payload/source integrity checks through `source_question_payload_is_valid()` and hardened `approved_question_candidate_is_valid()` to require approved candidate, Microsoft Learn source URL, critic notes, payload validity, non-kill-switch generation run, and Main Admin publication policy.
 
-Retest result: Pending.
+Retest result: `npm run validate:authorization` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; live Supabase RLS verification pending.
 
 ### M5-DEF-003 Audit Spoofing
 
@@ -79,11 +79,11 @@ Actual result: Some audit fields can be shaped by caller-controlled values.
 
 Root cause: Scaffold-level audit tables allow manual/privileged inserts without enough trigger enforcement.
 
-Fix: Pending.
+Fix: Dropped direct role-change and review-event insert policies, added `guard_user_role_write()`, and changed role-change audit to derive `changed_by` from `auth.uid()` where available.
 
-Retest result: Pending.
+Retest result: `npm run validate:authorization` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; live Supabase RLS verification pending.
 
 ### M5-DEF-004 Imported Project Collision
 
@@ -101,11 +101,11 @@ Actual result: Global primary key collides and owner-only RLS can block the seco
 
 Root cause: Project ID is global content-hash derived without owner scoping.
 
-Fix: Pending.
+Fix: Added owner/content-hash uniqueness in migration `0006` and changed Supabase imported-project upsert rows to use `importedProjectRowId(userId, project)`.
 
-Retest result: Pending.
+Retest result: `npm run validate:authorization` and `npm test -- src/lib/cloudSync.test.ts` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; live Supabase RLS verification pending.
 
 ### M5-DEF-005 Volatile Assessment Sessions
 

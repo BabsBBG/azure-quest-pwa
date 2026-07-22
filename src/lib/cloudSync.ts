@@ -87,7 +87,7 @@ export async function syncImportedProject(project: ImportedProject) {
   if (!userId || !supabase) return { ok: false, skipped: true };
 
   const { error } = await supabase.from("imported_projects").upsert({
-    id: project.id,
+    id: importedProjectRowId(userId, project),
     user_id: userId,
     owner: project.owner,
     repo: project.repo,
@@ -99,6 +99,10 @@ export async function syncImportedProject(project: ImportedProject) {
   });
 
   return { ok: !error, skipped: false, error };
+}
+
+export function importedProjectRowId(userId: string, project: Pick<ImportedProject, "id" | "contentHash">) {
+  return `${userId}:${project.contentHash || project.id}`;
 }
 
 export async function fetchCloudLearningData() {
