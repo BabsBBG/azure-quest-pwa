@@ -1,5 +1,37 @@
 # KNOWN_BLOCKERS.md
 
+## M5 restored harness blockers
+
+The approved M5 sequence is now:
+
+- M5.0 Immediate corrections, PraxisGrid rebrand and governance foundations
+- M5.1 Reliable Assessment Sessions
+- M5.2 Rich Assessment Item Types
+- M5.3 Confidence, Scoring and Adaptation
+- M5.4 Official Source Ingestion
+- M5.4A Certification Knowledge Graph
+- M5.5 Official Learning Summaries
+- M5.6 Controlled Question-Generation Factory
+- M5.6A Graph-Based Content Orchestration
+- M5.7 Automated Critic and Duplicate Prevention
+- M5.7A Source Dependency and Impact Graph
+- M5.8 Separate PraxisGrid Admin Review Studio
+- M5.9 Curated Domain Quiz Structure
+- M5.10 Finite Certification Runs
+- M5.11 User Reporting and Content-Quality Feedback
+- M5.12 Completion and Validation
+
+Open release blockers from the 2026-07-22 baseline audit:
+
+- Content reviewers can reach publication paths in source-pipeline RLS scaffolding.
+- Public approved-question serving trusts `review_status` without enough database-level integrity enforcement.
+- Audit rows can be caller-shaped or manually inserted by privileged users.
+- Imported project IDs collide globally when multiple users import the same public repo.
+- In-progress assessment sessions are not recoverable after refresh/browser closure.
+- Runtime item support is single-choice only.
+- `/admin` review studio is not implemented yet.
+- M5 final sign-off reports are currently FAIL until defects are fixed and retested.
+
 ## Production question-bank blocker
 
 The current static question bank is not production-trusted.

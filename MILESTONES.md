@@ -1,12 +1,33 @@
 # MILESTONES.md
 
-## Current Approved Milestone
+## Harness State
 
-M5 continuation is approved through M5 only. M6 is not approved.
+Product: PraxisGrid
 
-## M5.0 PraxisGrid Foundation
+Active phase: M5
 
-Status: complete.
+Current permitted work: M5.0 through M5.12
+
+M6: NOT APPROVED
+
+## Current Status
+
+M5 is in progress. The previous repository state mislabelled source-pipeline contract work as M5.1 and duplicate-gate work as M5.2. Those implementations are preserved as useful foundations, but the approved M5 sequence below is now the source of truth.
+
+M5 cannot be marked complete until:
+
+- M5.0 through M5.12 are implemented.
+- Principal engineering review passes.
+- Security/data/governance QA passes.
+- Product/regression/accessibility QA passes.
+- Required validation commands pass.
+- No unresolved S1/S2 defects remain.
+
+## M5.0 Immediate Corrections, PraxisGrid Rebrand, And Governance Foundations
+
+Status: in progress.
+
+Completed foundations:
 
 - Rename product to PraxisGrid.
 - Use tagline: Learn it. Practise it. Prove it.
@@ -15,29 +36,177 @@ Status: complete.
 - Rename GitHub repo to `BabsBBG/praxisgrid`.
 - Remove founder-specific project fixtures from the Career Lab.
 - Mark AZ-500 as RETIRING on 2026-08-31, preserve history, and recommend SC-500 for new activation.
-- Add role foundations for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, and USER with audit logging.
+- Add role foundations for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, and USER.
 - Keep demo/seed question-bank warnings visible until approved source-grounded replacement content is broad enough.
 
-## M5.1 Source-Grounded Pipeline Contract
+Open M5.0 work:
 
-Status: complete.
+- Correct authorization defects in role/RLS/publication policy foundations.
+- Harden audit actor derivation and imported-project owner scoping.
+- Confirm provider-neutral metadata and hard-coded naming after M5 harness repair.
 
-- Add structured validator for source-grounded question records.
-- Require approved questions to have source chunk, Microsoft Learn URL, answer option, explanation, why-wrong coverage, approval timestamp, and clean generation-run controls.
-- Track admin-only batch limits, source chunk limits, budget caps, failure logs, and kill-switch-blocked runs.
-- Add Supabase reviewer/admin policies and review-event audit table for source docs, chunks, generation runs, candidates, and approved questions.
-- Keep draft/rejected candidates out of learner-serving helpers.
+## M5.1 Reliable Assessment Sessions
 
-## M5.2 Duplicate Detection Gate
+Status: not complete.
 
-Status: complete.
+Required:
 
-- Add a dedicated duplicate validation script using the same typed data modules and duplicate helpers as the app.
-- Check normalized seed/demo question fingerprints.
-- Strictly fail approved source-grounded duplicate fingerprints at validation and approved-serving time.
-- Strictly fail globally duplicated approved source-grounded duplicate keys.
-- Wire duplicate and source-grounding validation into CI.
-- Keep seed/demo content labelled as non-production even if duplicate checks pass.
+- Persistent assessment-session model with ACTIVE, PAUSED, SUBMITTED, EXPIRED, and ABANDONED states.
+- Local-first save, authenticated cloud sync where available, corruption detection, conflict resolution, stale submission protection, and recovery choices.
+- Accessible question navigation grid with current/unseen/answered/unanswered/marked/answered-and-marked/low-confidence states.
+- Mark for review, unanswered filter, low-confidence filter, timestamp-based timing, expiration handling, and deliberate submission review.
+
+## M5.2 Rich Assessment Item Types
+
+Status: not complete.
+
+Required:
+
+- Safe discriminated union for SINGLE_CHOICE, MULTIPLE_CHOICE, ORDERING, MATCHING, and CASE_STUDY_QUESTION.
+- Runtime renderer, answer capture, scoring, accessibility, and restoration for each item type.
+- Exam Walkthrough that demonstrates all supported item types and never enters the certification assessment pool.
+
+## M5.3 Confidence, Scoring, And Adaptation
+
+Status: not complete.
+
+Required:
+
+- Confidence ratings: GUESSING, UNSURE, FAIRLY_CONFIDENT, CERTAIN.
+- Deterministic PraxisGrid simulated score on a 1-1000 scale with clear non-provider-equivalence disclaimer.
+- Adaptive practice rules for daily/targeted/correction/review/personalized paths without altering standard certification runs.
+
+## M5.4 Official Source Ingestion
+
+Status: not complete.
+
+Completed foundations:
+
+- Static Microsoft Learn sample source docs and source chunks exist.
+- Source-grounded sample records include source URLs, chunks, critic notes, generation controls, and validation.
+
+Required:
+
+- Provider-neutral source registry.
+- Server-side retrieval adapter, deterministic fixture adapter, content hashing, source versions, idempotent jobs, bounded retries, failure logging, freshness/change/removal detection, blueprint/domain/objective extraction, and source-section mapping.
+- Knowledge Unit extraction from official-source material.
+
+## M5.4A Certification Knowledge Graph
+
+Status: not complete.
+
+Required:
+
+- PostgreSQL/Supabase relationship tables connecting Provider, Certification, Certification Version, Domain, Objective, Knowledge Unit, Source Document, Learning Summary, Assessment Item, Domain Quiz placement, and Certification Run placement.
+- Typed relation kinds, evidence, confidence, review state, useful indexes, integrity tests, traversal tests, and RLS where user-specific data exists.
+
+## M5.5 Official Learning Summaries
+
+Status: not complete.
+
+Required:
+
+- Source-grounded draft learning workspaces for certification domains.
+- Domain overview, learning sequence, terminology, configuration steps, decision rules, mistakes, examples, source links, blueprint version, and review status.
+- Main Admin approval and immutable published versions.
+
+## M5.6 Controlled Question-Generation Factory
+
+Status: not complete.
+
+Completed foundations:
+
+- Generation run scaffolding has admin-only flags, budget caps, batch limits, kill-switch examples, and failure logs.
+
+Required:
+
+- Server-side provider interface, deterministic test generator, coverage matrix, generation jobs, draft metadata, batch/rate/cost/retry controls, cancellation, idempotency, quarantine, and disabled-by-default production behavior until configured.
+
+## M5.6A Graph-Based Content Orchestration
+
+Status: not complete.
+
+Required:
+
+- Typed workflow nodes for coverage planning, source resolution, question generation, grounding verification, ambiguity/distractor critics, duplicate detection, difficulty estimation, and admin handoff.
+- Durable workflow state, retries, failure reasons, cost, duration, and events.
+- No workflow may publish automatically.
+
+## M5.7 Automated Critic And Duplicate Prevention
+
+Status: not complete.
+
+Completed foundations:
+
+- `src/utils/questionQuality.ts` has duplicate normalization/fingerprints.
+- `scripts/validate-duplicates.mjs` checks seed/demo fingerprints and approved source-grounded duplicates.
+- Approved source-grounded helper refuses duplicate approved records.
+
+Required:
+
+- Critic checks for source support, answer uniqueness, distractor plausibility, ambiguity, hidden assumptions, objective alignment, difficulty, freshness, item-type validity, accessibility, wording leakage, semantic similarity, unsupported claims, and scenario consistency.
+- Draft gating before Admin review.
+- Non-overridable integrity failures and audited Main Admin override path for allowed warnings.
+
+## M5.7A Source Dependency And Impact Graph
+
+Status: not complete.
+
+Required:
+
+- Dependency chain from source document through Knowledge Units, summaries, assessment items, Domain Quiz placements, and Certification Run placements.
+- Source version diffs, affected-content traversal, risk states, targeted replacement jobs, and Main Admin review.
+
+## M5.8 Separate PraxisGrid Admin Review Studio
+
+Status: not complete.
+
+Required:
+
+- Distinct `/admin` back-office interface, separate from learner layout.
+- Persistent sidebar, utility bar, dense tables, filters, queues, split-pane review, sticky actions, audit timelines, revision history, warning banners, keyboard-friendly workflows, and responsive fallback.
+- Role-protected Main Admin, Content Reviewer, Support Admin, and User access boundaries.
+
+## M5.9 Curated Domain Quiz Structure
+
+Status: not complete.
+
+Required:
+
+- Per-domain curated quizzes: Foundations, Configuration, Scenarios, Troubleshooting, Domain Challenge.
+- Explicit quiz definitions and item placements using only Main Admin-approved published items.
+- Unlock and timing rules.
+
+## M5.10 Finite Certification Runs
+
+Status: not complete.
+
+Required:
+
+- Versioned Baseline, Applied, Pressure, Final, and Personalized runs.
+- Explicit run definitions, distribution rules, publication state, effective dates, and Main Admin publication.
+
+## M5.11 User Reporting And Content-Quality Feedback
+
+Status: not complete.
+
+Required:
+
+- Report a problem workflow for every published assessment item.
+- Stored item/version/source/attempt context, reason, optional comment, status, and Admin quality queue.
+- Reports never auto-edit, remove, replace, or publish content.
+
+## M5.12 Completion And Validation
+
+Status: not complete.
+
+Required:
+
+- Complete command suite and any additional scripts needed for typecheck, integration, E2E, migration, RLS, route, accessibility, and content-pipeline validation.
+- Final M5 completion report.
+- Principal Engineer PASS.
+- Security/Data/Governance QA PASS.
+- Product/Regression/Accessibility QA PASS.
 
 ## Not Approved
 
@@ -46,6 +215,7 @@ Status: complete.
 - Private repository import.
 - Client-side LLM calls or frontend LLM API keys.
 - Live LLM question generation during attempts.
+- Production replacement of the static question bank before approved source-grounded content is broad enough.
 - Payments.
 - Native mobile apps.
 - Voice/audio grading.

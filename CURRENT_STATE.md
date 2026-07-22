@@ -4,6 +4,15 @@
 
 The app currently exists as a frontend-first PWA in `BabsBBG/praxisgrid`.
 
+Harness state:
+
+- Product: PraxisGrid.
+- Active phase: M5.
+- Current permitted work: M5.0 through M5.12.
+- M6: NOT APPROVED.
+- The approved milestone sequence was restored on 2026-07-22. Previous source-pipeline contract and duplicate-gate work is preserved as foundation work under M5.4/M5.6/M5.7, not as completion of approved M5.1/M5.2.
+- M5 final sign-off is currently FAIL because baseline principal engineering and QA audits found open S1/S2 defects recorded in `docs/qa/M5_DEFECT_LEDGER.md`.
+
 M5.0 rebrand status:
 
 - Product name is now PraxisGrid.
@@ -26,6 +35,10 @@ M5.0 rebrand status:
 - M5.2 production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
 - M5.2 production deployment ID: `dpl_4RzMGkKVnHT2J1gynrZZhLJ3QoLS`.
 - M5.2 deployment URL: `https://azure-quest-azwmivyy6-tonybabalola-1114s-projects.vercel.app`.
+
+Important correction:
+
+- The labels above describe prior repository submilestone naming before the approved M5 harness was restored. Approved M5.1 now means Reliable Assessment Sessions and approved M5.2 now means Rich Assessment Item Types. Those approved submilestones are not yet complete.
 
 It has:
 
@@ -146,10 +159,15 @@ Required UI copy or equivalent:
 
 ## Current approved milestone
 
-M5 continuation - M2 through M5 approved by the user on 2026-07-14.
+M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approved.
 
 ## Current blockers
 
+- Approved M5.1 Reliable Assessment Sessions is not complete; in-progress assessment state is currently component-local and not recoverable after refresh/browser closure.
+- Approved M5.2 Rich Assessment Item Types is not complete; the runtime is still single-choice only.
+- Authorization/RLS foundation has release-blocking defects: reviewer publication path, insufficient approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions.
+- `/admin` review studio is not implemented yet.
+- KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.
 - The M5 scaffold proves approved-only serving, validation, and role-gated review policy shape, but production-scale ingestion, real embeddings, real batch generation, automated critic execution, and admin review UI still need backend/admin implementation before launch.
 - GitHub import is public-read-only. GitHub OAuth, write scopes, and private repo access remain blocked.
