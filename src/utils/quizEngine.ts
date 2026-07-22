@@ -1,4 +1,4 @@
-import type { AnswerRecord, AttemptKind, Cert, DomainBreakdown, ExamAttempt, ExamMode, Question, QuizOption } from "../types";
+import type { AnswerRecord, AttemptKind, Cert, ConfidenceRating, DomainBreakdown, ExamAttempt, ExamMode, Question, QuizOption } from "../types";
 import { pickQuestions } from "./random";
 import { readinessDeltaFromAttempt } from "./readiness";
 
@@ -42,6 +42,7 @@ export function scoreAttempt(args: {
   seed: string;
   questions: Question[];
   selections: Record<string, QuizOption["id"] | null>;
+  confidenceRatings?: Record<string, ConfidenceRating>;
   secondsByQuestion: Record<string, number>;
   timeLimitSeconds?: number;
 }): ExamAttempt {
@@ -51,6 +52,7 @@ export function scoreAttempt(args: {
       questionId: question.id,
       selected,
       correct: selected === question.answer,
+      confidence: args.confidenceRatings?.[question.id],
       timeSeconds: args.secondsByQuestion[question.id] ?? 0,
       domain: question.domain,
       tags: question.tags

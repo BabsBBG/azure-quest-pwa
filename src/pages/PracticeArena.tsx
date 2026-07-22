@@ -1,10 +1,10 @@
 import { useEffect, useCallback, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Clock, Flag, RotateCcw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Bookmark, CheckCircle2, Clock, Flag, RotateCcw, ShieldCheck } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
-import type { Cert, ExamMode, Question, QuizOption } from "../types";
+import type { AssessmentSession, ConfidenceRating, Cert, ExamMode, Question, QuizOption } from "../types";
 import { buildExam, scoreAttempt } from "../utils/quizEngine";
 import { formatSeconds } from "../lib/utils";
 import { Button } from "../components/ui/button";
@@ -29,11 +29,32 @@ function optionTone(optionId: QuizOption["id"], selected: QuizOption["id"] | nul
   return "border-[#9cc9f5] bg-white text-[var(--aq-ink)] hover:border-[var(--aq-blue-600)] hover:bg-[var(--aq-blue-50)] dark:border-[#24486f] dark:bg-[#081d38] dark:text-[#e7f3ff] dark:hover:bg-[#0b2545]";
 }
 
+function runKindFor(mode: ExamMode) {
+  return mode === "quiz" ? "quiz" : mode === "daily" ? "daily" : mode === "case" ? "case" : mode === "kql" ? "kql" : mode === "timed" ? "exam" : "practice";
+}
+
+function sessionIsRecoverable(session: AssessmentSession | null) {
+  return session?.status === "ACTIVE" || session?.status === "PAUSED" || session?.status === "EXPIRED";
+}
+
+const confidenceOptions: Array<{ value: ConfidenceRating; label: string; shortLabel: string }> = [
+  { value: "GUESSING", label: "Guessing", shortLabel: "Guess" },
+  { value: "UNSURE", label: "Unsure", shortLabel: "Unsure" },
+  { value: "FAIRLY_CONFIDENT", label: "Fairly confident", shortLabel: "Fair" },
+  { value: "CERTAIN", label: "Certain", shortLabel: "Certain" }
+];
+
 export function PracticeArena() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const hydrated = useAppStore((state) => state.hydrated);
   const questions = useAppStore((state) => state.questions);
   const recordAttempt = useAppStore((state) => state.recordAttempt);
   const recordQuestionFlag = useAppStore((state) => state.recordQuestionFlag);
+  const assessmentSession = useAppStore((state) => state.assessmentSession);
+  const saveAssessmentSession = useAppStore((state) => state.saveAssessmentSession);
+  const updateAssessmentSession = useAppStore((state) => state.updateAssessmentSession);
+  const finishAssessmentSession = useAppStore((state) => state.finishAssessmentSession);
   const userProgress = useAppStore((state) => state.progress);
   const settings = useAppStore((state) => state.settings);
 
@@ -55,15 +76,34 @@ export function PracticeArena() {
   const fighter = params.get("fighter");
   const blueprint = blueprintId ? examBlueprints.find((item) => item.id === blueprintId) : undefined;
   const weights = blueprint?.domainWeights ?? (!focusDomain && mode === "timed" ? domainWeights[cert] : undefined);
+  const sessionMatchesRoute = assessmentSession?.cert === cert
+    && assessmentSession.mode === mode
+    && assessmentSession.title === examTitle
+    && assessmentSession.count === count
+    && assessmentSession.minutes === minutes
+    && assessmentSession.blueprintId === blueprintId
+    && assessmentSession.quizId === quizId
+    && assessmentSession.focusDomain === focusDomain
+    && assessmentSession.focusTags.join(",") === focusTags.join(",");
+  const recoverableSession = sessionMatchesRoute && sessionIsRecoverable(assessmentSession) ? assessmentSession : null;
 
-  const exam = useMemo(
+  const builtExam = useMemo(
     () => buildExam({ bank: questions, cert, mode, count, weakTags, seed: seedParam, focusDomain, focusTags, domainWeights: weights }),
     // Fresh randomized structure each launch unless a retake seed is supplied.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cert, mode, count, seedParam, focusDomain, params.toString()]
   );
+  const resumedQuestions = useMemo(() => {
+    if (!recoverableSession) return [];
+    const byId = new Map(questions.map((item) => [item.id, item]));
+    return recoverableSession.questionIds.map((id) => byId.get(id)).filter((item): item is Question => Boolean(item));
+  }, [questions, recoverableSession]);
+  const exam = recoverableSession && resumedQuestions.length === recoverableSession.questionIds.length
+    ? { seed: recoverableSession.seed, questions: resumedQuestions }
+    : builtExam;
 
   const [loading, setLoading] = useState(true);
+  const [recoveryChoice, setRecoveryChoice] = useState<"pending" | "resume" | "restart">("pending");
   const [loadProgress, setLoadProgress] = useState(0);
   const [grading, setGrading] = useState(false);
   const [gradeProgress, setGradeProgress] = useState(0);
@@ -71,13 +111,18 @@ export function PracticeArena() {
   const [selected, setSelected] = useState<QuizOption["id"] | null>(null);
   const [selections, setSelections] = useState<Record<string, QuizOption["id"] | null>>({});
   const [secondsByQuestion, setSecondsByQuestion] = useState<Record<string, number>>({});
-  const [startedAt] = useState(() => new Date().toISOString());
+  const [startedAt, setStartedAt] = useState(() => new Date().toISOString());
   const [elapsed, setElapsed] = useState(0);
   const [finished, setFinished] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingAttempt, setSavingAttempt] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<Record<string, boolean>>({});
+  const [markedQuestionIds, setMarkedQuestionIds] = useState<Record<string, boolean>>({});
+  const [confidenceRatings, setConfidenceRatings] = useState<Record<string, ConfidenceRating>>({});
+  const [submissionReviewOpen, setSubmissionReviewOpen] = useState(false);
+  const [questionFilter, setQuestionFilter] = useState<"all" | "marked" | "unanswered" | "low-confidence">("all");
+  const currentSessionId = useRef<string | null>(null);
 
   useEffect(() => {
     const duration = 1800;
@@ -97,20 +142,112 @@ export function PracticeArena() {
   const qStart = useRef(Date.now());
   const question = exam.questions[index];
 
+  const startNewSession = useCallback(async (sourceExam = builtExam) => {
+    if (!sourceExam.questions.length) return;
+    const now = new Date().toISOString();
+    const sessionId = crypto.randomUUID?.() ?? `session-${Date.now()}`;
+    const nextSession: AssessmentSession = {
+      id: sessionId,
+      cert,
+      mode,
+      kind: runKindFor(mode),
+      title: examTitle,
+      blueprintId,
+      quizId,
+      focusDomain,
+      focusTags,
+      count,
+      minutes,
+      timeLimitSeconds,
+      questionIds: sourceExam.questions.map((item) => item.id),
+      currentIndex: 0,
+      answers: {},
+      secondsByQuestion: {},
+      markedQuestionIds: [],
+      confidenceRatings: {},
+      seed: sourceExam.seed,
+      startedAt: now,
+      updatedAt: now,
+      expiresAt: new Date(Date.now() + Math.max(timeLimitSeconds, 60) * 1000).toISOString(),
+      status: "ACTIVE",
+      version: { schemaVersion: 1, appVersion: "0.1.0", storageNamespace: "praxisgrid" }
+    };
+    currentSessionId.current = sessionId;
+    setStartedAt(now);
+    setIndex(0);
+    setSelected(null);
+    setSelections({});
+    setSecondsByQuestion({});
+    setMarkedQuestionIds({});
+    setConfidenceRatings({});
+    setElapsed(0);
+    await saveAssessmentSession(nextSession);
+  }, [blueprintId, builtExam, cert, count, examTitle, focusDomain, focusTags, minutes, mode, quizId, saveAssessmentSession, timeLimitSeconds]);
+
+  const resumeSession = useCallback(async (session: AssessmentSession) => {
+    currentSessionId.current = session.id;
+    setStartedAt(session.startedAt);
+    setIndex(Math.min(session.currentIndex, Math.max(0, exam.questions.length - 1)));
+    setSelections(session.answers);
+    setSecondsByQuestion(session.secondsByQuestion);
+    setMarkedQuestionIds(Object.fromEntries(session.markedQuestionIds.map((id) => [id, true])));
+    setConfidenceRatings(session.confidenceRatings);
+    setElapsed(Math.max(0, Math.round((Date.now() - new Date(session.startedAt).getTime()) / 1000)));
+    if (session.status !== "EXPIRED") await updateAssessmentSession(session.id, { status: "ACTIVE" });
+  }, [exam.questions.length, updateAssessmentSession]);
+
+  useEffect(() => {
+    if (!hydrated || loading || !exam.questions.length || currentSessionId.current || recoveryChoice !== "pending") return;
+    if (recoverableSession) return;
+    void startNewSession();
+  }, [exam.questions.length, hydrated, loading, recoverableSession, recoveryChoice, startNewSession]);
+
   useEffect(() => {
     const timer = window.setInterval(() => setElapsed(Math.round((Date.now() - new Date(startedAt).getTime()) / 1000)), 1000);
     return () => window.clearInterval(timer);
   }, [startedAt]);
 
   useEffect(() => {
-    if (!finished && elapsed >= timeLimitSeconds) setFinished(true);
-  }, [elapsed, finished, timeLimitSeconds]);
+    if (!finished && elapsed >= timeLimitSeconds) {
+      if (currentSessionId.current) void finishAssessmentSession(currentSessionId.current, "EXPIRED").catch(() => undefined);
+      setFinished(true);
+    }
+  }, [elapsed, finishAssessmentSession, finished, timeLimitSeconds]);
 
   useEffect(() => {
     qStart.current = Date.now();
     const q = exam.questions[index];
     setSelected(q ? (selections[q.id] ?? null) : null);
   }, [exam.questions, index, selections]);
+
+  useEffect(() => {
+    if (!currentSessionId.current || finished || !question) return;
+    const timer = window.setTimeout(() => {
+      void updateAssessmentSession(currentSessionId.current as string, {
+        currentIndex: index,
+        answers: selections,
+        secondsByQuestion,
+        markedQuestionIds: Object.entries(markedQuestionIds).filter(([, marked]) => marked).map(([id]) => id),
+        confidenceRatings,
+        status: "ACTIVE",
+        expiresAt: new Date(new Date(startedAt).getTime() + Math.max(timeLimitSeconds, 60) * 1000).toISOString()
+      }).catch(() => undefined);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [confidenceRatings, finished, index, markedQuestionIds, question, secondsByQuestion, selections, startedAt, timeLimitSeconds, updateAssessmentSession]);
+
+  useEffect(() => {
+    const sessionId = currentSessionId.current;
+    if (!sessionId || finished) return;
+    const pauseSession = () => {
+      void updateAssessmentSession(sessionId, { status: "PAUSED" }).catch(() => undefined);
+    };
+    window.addEventListener("beforeunload", pauseSession);
+    return () => {
+      window.removeEventListener("beforeunload", pauseSession);
+      pauseSession();
+    };
+  }, [finished, updateAssessmentSession]);
 
   const attempted = Object.keys(selections).length;
   const progressPercent = ((index + 1) / exam.questions.length) * 100;
@@ -131,14 +268,70 @@ export function PracticeArena() {
 
   function next() {
     if (!selected || !question) return;
-    if (index + 1 >= exam.questions.length) setFinished(true);
+    if (index + 1 >= exam.questions.length) setSubmissionReviewOpen(true);
     else setIndex((v) => v + 1);
+  }
+
+  function goToQuestion(nextIndex: number) {
+    setSubmissionReviewOpen(false);
+    setIndex(Math.min(Math.max(0, nextIndex), exam.questions.length - 1));
+  }
+
+  const reviewSummary = useMemo(() => {
+    const answeredIds = new Set(Object.entries(selections).filter(([, value]) => Boolean(value)).map(([id]) => id));
+    const markedIds = new Set(Object.entries(markedQuestionIds).filter(([, value]) => value).map(([id]) => id));
+    const lowConfidenceIds = new Set(Object.entries(confidenceRatings).filter(([, value]) => value === "GUESSING" || value === "UNSURE").map(([id]) => id));
+    const unansweredQuestions = exam.questions.filter((item) => !answeredIds.has(item.id));
+    const markedQuestions = exam.questions.filter((item) => markedIds.has(item.id));
+    const lowConfidenceQuestions = exam.questions.filter((item) => lowConfidenceIds.has(item.id));
+
+    return {
+      answered: answeredIds.size,
+      unanswered: unansweredQuestions.length,
+      marked: markedQuestions.length,
+      lowConfidence: lowConfidenceQuestions.length,
+      unansweredQuestions,
+      markedQuestions,
+      lowConfidenceQuestions
+    };
+  }, [confidenceRatings, exam.questions, markedQuestionIds, selections]);
+
+  const visibleQuestionIndexes = useMemo(() => {
+    return exam.questions
+      .map((item, itemIndex) => ({ item, itemIndex }))
+      .filter(({ item }) => {
+        if (questionFilter === "marked") return Boolean(markedQuestionIds[item.id]);
+        if (questionFilter === "unanswered") return !selections[item.id];
+        if (questionFilter === "low-confidence") return confidenceRatings[item.id] === "GUESSING" || confidenceRatings[item.id] === "UNSURE";
+        return true;
+      });
+  }, [confidenceRatings, exam.questions, markedQuestionIds, questionFilter, selections]);
+
+  function questionStateLabel(targetQuestion: Question, targetIndex: number) {
+    const answered = Boolean(selections[targetQuestion.id]);
+    const marked = Boolean(markedQuestionIds[targetQuestion.id]);
+    const lowConfidence = confidenceRatings[targetQuestion.id] === "GUESSING" || confidenceRatings[targetQuestion.id] === "UNSURE";
+    if (targetIndex === index) return "CURRENT";
+    if (answered && marked) return "ANSWERED_AND_MARKED";
+    if (marked) return "MARKED";
+    if (lowConfidence) return "LOW_CONFIDENCE";
+    if (answered) return "ANSWERED";
+    return "UNANSWERED";
+  }
+
+  function questionStateTone(state: string) {
+    if (state === "CURRENT") return "border-[var(--aq-blue-700)] bg-[var(--aq-blue-700)] text-white";
+    if (state === "ANSWERED_AND_MARKED") return "border-sky-500 bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100";
+    if (state === "MARKED") return "border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100";
+    if (state === "LOW_CONFIDENCE") return "border-rose-400 bg-rose-50 text-rose-900 dark:bg-rose-950 dark:text-rose-100";
+    if (state === "ANSWERED") return "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100";
+    return "border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200";
   }
 
   const finalAttempt = useMemo(() => scoreAttempt({
     cert,
     mode,
-    kind: mode === "quiz" ? "quiz" : mode === "daily" ? "daily" : mode === "case" ? "case" : mode === "kql" ? "kql" : mode === "timed" ? "exam" : "practice",
+    kind: runKindFor(mode),
     title: examTitle,
     blueprintId,
     quizId,
@@ -148,9 +341,11 @@ export function PracticeArena() {
     seed: exam.seed,
     questions: exam.questions,
     selections,
+    confidenceRatings,
     secondsByQuestion,
     timeLimitSeconds
-  }), [blueprintId, cert, exam.questions, exam.seed, examTitle, focusDomain, focusTags, mode, quizId, secondsByQuestion, selections, startedAt, timeLimitSeconds]);
+  }), [blueprintId, cert, confidenceRatings, exam.questions, exam.seed, examTitle, focusDomain, focusTags, mode, quizId, secondsByQuestion, selections, startedAt, timeLimitSeconds]);
+  const finalAttemptWithSession = useMemo(() => ({ ...finalAttempt, assessmentSessionId: currentSessionId.current ?? undefined }), [finalAttempt]);
 
   function arenaUrl(seed?: string) {
     const next = new URLSearchParams({
@@ -166,6 +361,14 @@ export function PracticeArena() {
     if (blueprintId) next.set("examId", blueprintId);
     if (quizId) next.set("quizId", quizId);
     return `/arena?${next.toString()}`;
+  }
+
+  function toggleMarkedQuestion(targetQuestion: Question) {
+    setMarkedQuestionIds((prev) => ({ ...prev, [targetQuestion.id]: !prev[targetQuestion.id] }));
+  }
+
+  function rateConfidence(targetQuestion: Question, rating: ConfidenceRating) {
+    setConfidenceRatings((prev) => ({ ...prev, [targetQuestion.id]: rating }));
   }
 
   function toggleQuestionFlag(targetQuestion: Question) {
@@ -211,7 +414,8 @@ export function PracticeArena() {
     async function saveAttempt() {
       setSavingAttempt(true);
       try {
-        await recordAttempt(finalAttempt);
+        await recordAttempt(finalAttemptWithSession);
+        if (currentSessionId.current) await finishAssessmentSession(currentSessionId.current, "SUBMITTED", finalAttemptWithSession.id);
         if (cancelled) return;
         setSaved(true);
         gradingTimer = runGradingAnimation();
@@ -229,7 +433,7 @@ export function PracticeArena() {
       cancelled = true;
       if (gradingTimer) window.clearInterval(gradingTimer);
     };
-  }, [finalAttempt, finished, recordAttempt, runGradingAnimation, saveError, saved, savingAttempt]);
+  }, [finalAttemptWithSession, finishAssessmentSession, finished, recordAttempt, runGradingAnimation, saveError, saved, savingAttempt]);
 
   if (!certActive) {
     return (
@@ -288,8 +492,135 @@ export function PracticeArena() {
     );
   }
 
+  if (hydrated && recoverableSession && recoveryChoice === "pending") {
+    const answered = Object.keys(recoverableSession.answers).filter((id) => recoverableSession.answers[id]).length;
+    const isExpired = recoverableSession.status === "EXPIRED";
+    return (
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <QuestionBankNotice compact />
+        <Card className="border-l-4 border-l-[var(--aq-blue-600)]">
+          <CardHeader>
+            <div>
+              <Badge className="mb-2 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">{recoverableSession.status}</Badge>
+              <CardTitle className="text-2xl">Recover your assessment session?</CardTitle>
+              <p className="mt-2 text-sm font-semibold text-[var(--aq-muted)]">{recoverableSession.title} / {answered} of {recoverableSession.questionIds.length} answered / question {recoverableSession.currentIndex + 1}</p>
+            </div>
+            <Clock className="h-6 w-6 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-semibold text-[var(--aq-muted)]">
+              {isExpired ? "This saved session has expired. Restart or abandon it to keep your history clean." : "PraxisGrid found a locally saved in-progress run from this browser."}
+            </p>
+            <p className="mt-3 text-xs font-semibold text-[var(--aq-muted)]">{PLATFORM_DISCLAIMER}</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <Button
+                onClick={() => {
+                  setRecoveryChoice("resume");
+                  void resumeSession(recoverableSession);
+                }}
+                disabled={isExpired}
+                size="lg"
+                variant="hero"
+              >
+                Resume
+              </Button>
+              <Button
+                onClick={() => {
+                  setRecoveryChoice("restart");
+                  void finishAssessmentSession(recoverableSession.id, "ABANDONED").then(() => startNewSession());
+                }}
+                size="lg"
+                variant="soft"
+              >
+                Restart
+              </Button>
+              <Button
+                onClick={() => {
+                  void finishAssessmentSession(recoverableSession.id, "ABANDONED").then(() => navigate(`/cert/${cert.toLowerCase()}/knowledge`));
+                }}
+                size="lg"
+                variant="ghost"
+              >
+                Abandon
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   if (!exam.questions.length) {
     return <Card><CardTitle>No questions found for this run.</CardTitle><p className="mt-2 font-medium text-slate-500">Try a mixed exam or another quiz.</p></Card>;
+  }
+
+  if (submissionReviewOpen) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <QuestionBankNotice compact />
+        <Card className="border-l-4 border-l-[var(--aq-blue-600)]">
+          <CardHeader>
+            <div>
+              <Badge className="mb-2 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">Submission review</Badge>
+              <CardTitle className="text-2xl">Review before submitting</CardTitle>
+              <p className="mt-2 text-sm font-semibold text-[var(--aq-muted)]">Answers stay hidden until you submit this run.</p>
+            </div>
+            <ShieldCheck className="h-6 w-6 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-4">
+              <button type="button" onClick={() => setQuestionFilter("all")} className="aq-metric text-left">
+                <p className="text-xl font-bold">{exam.questions.length}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Total</p>
+              </button>
+              <button type="button" onClick={() => setQuestionFilter("unanswered")} className="aq-metric text-left">
+                <p className="text-xl font-bold">{reviewSummary.unanswered}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Unanswered</p>
+              </button>
+              <button type="button" onClick={() => setQuestionFilter("marked")} className="aq-metric text-left">
+                <p className="text-xl font-bold">{reviewSummary.marked}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Marked</p>
+              </button>
+              <button type="button" onClick={() => setQuestionFilter("low-confidence")} className="aq-metric text-left">
+                <p className="text-xl font-bold">{reviewSummary.lowConfidence}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Low confidence</p>
+              </button>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button onClick={() => setQuestionFilter("unanswered")} variant="soft">Return to unanswered</Button>
+              <Button onClick={() => setQuestionFilter("marked")} variant="soft">Review marked</Button>
+              <Button onClick={() => setQuestionFilter("low-confidence")} variant="soft">Review low confidence</Button>
+            </div>
+
+            <div className="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10" aria-label="Submission review question grid">
+              {visibleQuestionIndexes.map(({ item, itemIndex }) => {
+                const state = questionStateLabel(item, itemIndex);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => goToQuestion(itemIndex)}
+                    className={`min-h-12 rounded-md border px-2 py-2 text-xs font-bold ${questionStateTone(state)}`}
+                    aria-label={`Question ${itemIndex + 1}: ${state.replace(/_/g, " ").toLowerCase()}`}
+                  >
+                    <span className="block text-sm">{itemIndex + 1}</span>
+                    <span className="block text-[10px] uppercase">{state === "ANSWERED_AND_MARKED" ? "ANS+MARK" : state.replace("_", " ")}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="mt-4 text-xs font-semibold text-[var(--aq-muted)]">Time remaining: {formatSeconds(timeLeft)}. {PLATFORM_DISCLAIMER}</p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <Button onClick={() => setSubmissionReviewOpen(false)} size="lg" variant="soft">Return to current question</Button>
+              <Button onClick={() => setFinished(true)} size="lg" variant="hero">Submit final answers</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
   }
 
   if (finished && grading) {
@@ -434,6 +765,32 @@ export function PracticeArena() {
           </div>
         </CardHeader>
         <Progress value={progressPercent} />
+        <CardContent>
+          <div className="mb-3 flex flex-wrap gap-2">
+            <Button onClick={() => setQuestionFilter("all")} variant={questionFilter === "all" ? "hero" : "soft"} size="sm">All</Button>
+            <Button onClick={() => setQuestionFilter("unanswered")} variant={questionFilter === "unanswered" ? "hero" : "soft"} size="sm">Unanswered</Button>
+            <Button onClick={() => setQuestionFilter("marked")} variant={questionFilter === "marked" ? "hero" : "soft"} size="sm">Marked</Button>
+            <Button onClick={() => setQuestionFilter("low-confidence")} variant={questionFilter === "low-confidence" ? "hero" : "soft"} size="sm">Low confidence</Button>
+          </div>
+          <div className="grid grid-cols-5 gap-2 sm:grid-cols-10" aria-label="Question navigation grid">
+            {visibleQuestionIndexes.map(({ item, itemIndex }) => {
+              const state = questionStateLabel(item, itemIndex);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => goToQuestion(itemIndex)}
+                  className={`min-h-11 rounded-md border px-2 py-1 text-xs font-bold ${questionStateTone(state)}`}
+                  aria-current={itemIndex === index ? "step" : undefined}
+                  aria-label={`Question ${itemIndex + 1}: ${state.replace(/_/g, " ").toLowerCase()}`}
+                >
+                  <span className="block text-sm">{itemIndex + 1}</span>
+                  <span className="block text-[10px] uppercase">{state === "ANSWERED_AND_MARKED" ? "ANS+MARK" : state.replace("_", " ")}</span>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
       </Card>
 
       <motion.div key={question.id} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
@@ -442,15 +799,38 @@ export function PracticeArena() {
             <p className="text-xl font-semibold leading-tight">{question.stem}</p>
             {question.diagram ? <pre className="rounded-lg bg-slate-950 p-4 text-sm font-medium text-sky-200 dark:bg-black/40">{question.diagram}</pre> : null}
             <div className="aq-subtle-panel mt-4 border-dashed p-3">
-              <button
-                type="button"
-                onClick={() => toggleQuestionFlag(question)}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200"
-              >
-                <Flag className="h-4 w-4" />
-                {flaggedQuestionIds[question.id] ? "Flagged for review" : "Flag/report question"}
-              </button>
-              <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">Saved locally first; syncs to Supabase when signed in.</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleMarkedQuestion(question)}
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  {markedQuestionIds[question.id] ? "Marked" : "Mark for later"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleQuestionFlag(question)}
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                >
+                  <Flag className="h-4 w-4" />
+                  {flaggedQuestionIds[question.id] ? "Flagged for review" : "Flag/report question"}
+                </button>
+                <div className="flex items-center gap-1">
+                  {confidenceOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => rateConfidence(question, option.value)}
+                      aria-pressed={confidenceRatings[question.id] === option.value}
+                      className={`rounded-md border px-3 py-2 text-xs font-semibold ${confidenceRatings[question.id] === option.value ? "border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white" : "border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"}`}
+                    >
+                      {option.shortLabel}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">Marks, confidence, and flags are saved locally first; flags sync to Supabase when signed in.</p>
             </div>
           </CardContent>
         </Card>
@@ -469,7 +849,7 @@ export function PracticeArena() {
           <div className="grid grid-cols-[auto_1fr_auto] gap-2">
             <Button onClick={prev} disabled={index === 0} size="lg" variant="soft" className="h-12 px-4"><ArrowLeft className="h-4 w-4" /></Button>
             <Button onClick={next} disabled={!selected} size="lg" variant="hero" className="h-12 text-sm">{index + 1 >= exam.questions.length ? "Finish run" : "Next question"}</Button>
-            <Button onClick={() => setFinished(true)} size="lg" variant="soft" className="h-12 text-sm"><span className="hidden sm:inline">Finish Now</span><span className="sm:hidden">Finish</span></Button>
+            <Button onClick={() => setSubmissionReviewOpen(true)} size="lg" variant="soft" className="h-12 text-sm"><span className="hidden sm:inline">Review & submit</span><span className="sm:hidden">Review</span></Button>
           </div>
         </div>
       </motion.div>

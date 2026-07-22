@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from "./supabase";
-import type { ExamAttempt, ImportedProject, InterviewSessionAttempt, QuestionFlag } from "../types";
+import type { AssessmentSession, ExamAttempt, ImportedProject, InterviewSessionAttempt, QuestionFlag } from "../types";
 
 async function currentUserId() {
   if (!isSupabaseConfigured || !supabase) return null;
@@ -82,6 +82,28 @@ export async function syncQuestionFlag(flag: QuestionFlag) {
   return { ok: !error, skipped: false, error };
 }
 
+export async function syncAssessmentSession(session: AssessmentSession) {
+  const userId = await currentUserId();
+  if (!userId || !supabase) return { ok: false, skipped: true };
+
+  const { error } = await supabase.from("assessment_sessions").upsert({
+    id: session.id,
+    user_id: userId,
+    cert: session.cert,
+    mode: session.mode,
+    kind: session.kind,
+    title: session.title,
+    status: session.status,
+    started_at: session.startedAt,
+    updated_at: session.updatedAt,
+    expires_at: session.expiresAt,
+    submitted_attempt_id: session.submittedAttemptId ?? null,
+    payload: session
+  });
+
+  return { ok: !error, skipped: false, error };
+}
+
 export async function syncImportedProject(project: ImportedProject) {
   const userId = await currentUserId();
   if (!userId || !supabase) return { ok: false, skipped: true };
@@ -107,19 +129,21 @@ export function importedProjectRowId(userId: string, project: Pick<ImportedProje
 
 export async function fetchCloudLearningData() {
   const userId = await currentUserId();
-  if (!userId || !supabase) return { attempts: [], interviewSessions: [], questionFlags: [], importedProjects: [] };
+  if (!userId || !supabase) return { attempts: [], interviewSessions: [], questionFlags: [], importedProjects: [], assessmentSession: null };
 
-  const [attemptsResult, interviewsResult, flagsResult, projectsResult] = await Promise.all([
+  const [attemptsResult, interviewsResult, flagsResult, projectsResult, assessmentSessionResult] = await Promise.all([
     supabase.from("quiz_attempts").select("payload").eq("user_id", userId).order("completed_at", { ascending: false }),
     supabase.from("interview_sessions").select("payload").eq("user_id", userId).order("completed_at", { ascending: false }),
     supabase.from("question_flags").select("payload").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("imported_projects").select("payload").eq("user_id", userId).order("imported_at", { ascending: false })
+    supabase.from("imported_projects").select("payload").eq("user_id", userId).order("imported_at", { ascending: false }),
+    supabase.from("assessment_sessions").select("payload").eq("user_id", userId).in("status", ["ACTIVE", "PAUSED", "EXPIRED"]).order("updated_at", { ascending: false }).limit(1)
   ]);
 
   return {
     attempts: attemptsResult.data?.map((row) => row.payload as ExamAttempt).filter(Boolean) ?? [],
     interviewSessions: interviewsResult.data?.map((row) => row.payload as InterviewSessionAttempt).filter(Boolean) ?? [],
     questionFlags: flagsResult.data?.map((row) => row.payload as QuestionFlag).filter(Boolean) ?? [],
-    importedProjects: projectsResult.data?.map((row) => row.payload as ImportedProject).filter(Boolean) ?? []
+    importedProjects: projectsResult.data?.map((row) => row.payload as ImportedProject).filter(Boolean) ?? [],
+    assessmentSession: (assessmentSessionResult.data?.[0]?.payload as AssessmentSession | undefined) ?? null
   };
 }

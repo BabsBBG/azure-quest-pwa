@@ -7,7 +7,8 @@ describe("cloudSync", () => {
       attempts: [],
       interviewSessions: [],
       questionFlags: [],
-      importedProjects: []
+      importedProjects: [],
+      assessmentSession: null
     });
   });
 

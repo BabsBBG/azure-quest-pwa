@@ -27,7 +27,7 @@ Release blockers from the 2026-07-22 baseline audit:
 - Public approved-question serving trusts `review_status` without enough database-level integrity enforcement. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
 - Audit rows can be caller-shaped or manually inserted by privileged users. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
 - Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006` and `importedProjectRowId()`; live Supabase RLS verification pending.
-- In-progress assessment sessions are not recoverable after refresh/browser closure.
+- In-progress assessment sessions are fixed in repo with local/cloud persistence and recovery choices; M5.12 browser E2E and live Supabase verification pending.
 - Runtime item support is single-choice only.
 - `/admin` review studio is not implemented yet.
 - M5 final sign-off reports are currently FAIL until defects are fixed and retested.

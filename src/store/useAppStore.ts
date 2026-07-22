@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import localforage from "localforage";
 import questionBank from "../data/questions.json";
-import type { Cert, ExamAttempt, FlashcardProgress, ImportedProject, InterviewSessionAttempt, Question, QuestionFlag, SettingsState, UserProgress } from "../types";
+import type { AssessmentSession, AssessmentSessionStatus, Cert, ExamAttempt, FlashcardProgress, ImportedProject, InterviewSessionAttempt, Question, QuestionFlag, SettingsState, UserProgress } from "../types";
 import { levelFromXp } from "../utils/quizEngine";
 import { todayKey } from "../lib/utils";
-import { fetchCloudLearningData, syncExamAttempt, syncImportedProject, syncInterviewSession, syncQuestionFlag } from "../lib/cloudSync";
+import { fetchCloudLearningData, syncAssessmentSession, syncExamAttempt, syncImportedProject, syncInterviewSession, syncQuestionFlag } from "../lib/cloudSync";
 
 function dayDiff(from?: string, to = todayKey()) {
   if (!from) return undefined;
@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   interviewSessions: "praxisgrid:interview-sessions",
   questionFlags: "praxisgrid:question-flags",
   importedProjects: "praxisgrid:imported-projects",
+  assessmentSession: "praxisgrid:assessment-session",
   migration: "praxisgrid:migration:v1"
 };
 
@@ -31,7 +32,8 @@ const LEGACY_STORAGE_KEYS = {
   flashcards: "azure-quest:flashcards",
   interviewSessions: "azure-quest:interview-sessions",
   questionFlags: "azure-quest:question-flags",
-  importedProjects: "azure-quest:imported-projects"
+  importedProjects: "azure-quest:imported-projects",
+  assessmentSession: "azure-quest:assessment-session"
 };
 
 const legacyForage = localforage.createInstance({ name: "AzureQuest", storeName: "study_progress" });
@@ -68,8 +70,12 @@ interface AppStore {
   interviewSessions: InterviewSessionAttempt[];
   questionFlags: QuestionFlag[];
   importedProjects: ImportedProject[];
+  assessmentSession: AssessmentSession | null;
   hydrate: () => Promise<void>;
   recordAttempt: (attempt: ExamAttempt) => Promise<void>;
+  saveAssessmentSession: (session: AssessmentSession) => Promise<void>;
+  updateAssessmentSession: (sessionId: string, patch: Partial<AssessmentSession>) => Promise<void>;
+  finishAssessmentSession: (sessionId: string, status: Extract<AssessmentSessionStatus, "SUBMITTED" | "EXPIRED" | "ABANDONED">, submittedAttemptId?: string) => Promise<void>;
   recordInterviewSession: (session: InterviewSessionAttempt) => Promise<void>;
   recordQuestionFlag: (flag: QuestionFlag) => Promise<void>;
   recordImportedProject: (project: ImportedProject) => Promise<void>;
@@ -113,6 +119,32 @@ function mergeById<T extends { id: string }>(localItems: T[], cloudItems: T[], l
   return [...merged.values()].slice(0, limit);
 }
 
+export function isTerminalAssessmentStatus(status: AssessmentSessionStatus) {
+  return status === "SUBMITTED" || status === "EXPIRED" || status === "ABANDONED";
+}
+
+export function normalizeAssessmentSession(session?: AssessmentSession | null) {
+  if (!session) return null;
+  if (isTerminalAssessmentStatus(session.status)) return session;
+  if (new Date(session.expiresAt).getTime() <= Date.now()) {
+    return { ...session, status: "EXPIRED" as const, updatedAt: new Date().toISOString() };
+  }
+  return session;
+}
+
+export function chooseLatestRecoverableSession(localSession: AssessmentSession | null, cloudSession: AssessmentSession | null) {
+  if (localSession?.status === "SUBMITTED" || cloudSession?.status === "SUBMITTED") {
+    return localSession?.status === "SUBMITTED" ? localSession : cloudSession;
+  }
+
+  const recoverable = [localSession, cloudSession]
+    .filter((session): session is AssessmentSession => Boolean(session))
+    .filter((session) => session.status === "ACTIVE" || session.status === "PAUSED" || session.status === "EXPIRED")
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+  return recoverable[0] ?? null;
+}
+
 async function readWithLegacyFallback<T>(key: keyof typeof LEGACY_STORAGE_KEYS) {
   const current = await localforage.getItem<T>(STORAGE_KEYS[key]);
   if (current !== null && current !== undefined) return current;
@@ -152,23 +184,26 @@ export const useAppStore = create<AppStore>((set, get) => ({
   interviewSessions: [],
   questionFlags: [],
   importedProjects: [],
+  assessmentSession: null,
 
   hydrate: async () => {
     await migrateLegacyStorage();
-    const [progress, attempts, settings, flashcards, interviewSessions, questionFlags, importedProjects] = await Promise.all([
+    const [progress, attempts, settings, flashcards, interviewSessions, questionFlags, importedProjects, assessmentSession] = await Promise.all([
       readWithLegacyFallback<UserProgress>("progress"),
       readWithLegacyFallback<ExamAttempt[]>("attempts"),
       readWithLegacyFallback<SettingsState>("settings"),
       readWithLegacyFallback<Record<string, FlashcardProgress>>("flashcards"),
       readWithLegacyFallback<InterviewSessionAttempt[]>("interviewSessions"),
       readWithLegacyFallback<QuestionFlag[]>("questionFlags"),
-      readWithLegacyFallback<ImportedProject[]>("importedProjects")
+      readWithLegacyFallback<ImportedProject[]>("importedProjects"),
+      readWithLegacyFallback<AssessmentSession>("assessmentSession")
     ]);
 
     const localAttempts = attempts ?? [];
     const localInterviewSessions = interviewSessions ?? [];
     const localQuestionFlags = questionFlags ?? [];
     const localImportedProjects = importedProjects ?? [];
+    const localAssessmentSession = normalizeAssessmentSession(assessmentSession);
 
     set({
       progress: progress ?? defaultProgress,
@@ -178,8 +213,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
       interviewSessions: localInterviewSessions,
       questionFlags: localQuestionFlags,
       importedProjects: localImportedProjects,
+      assessmentSession: localAssessmentSession,
       hydrated: true
     });
+    if (localAssessmentSession) await localforage.setItem(STORAGE_KEYS.assessmentSession, localAssessmentSession);
 
     try {
       const cloudData = await fetchCloudLearningData();
@@ -187,21 +224,60 @@ export const useAppStore = create<AppStore>((set, get) => ({
       const mergedInterviewSessions = mergeById(localInterviewSessions, cloudData.interviewSessions, 100);
       const mergedQuestionFlags = mergeById(localQuestionFlags, cloudData.questionFlags, 500);
       const mergedImportedProjects = mergeById(localImportedProjects, cloudData.importedProjects, 50);
+      const cloudAssessmentSession = normalizeAssessmentSession(cloudData.assessmentSession);
+      const mergedAssessmentSession = chooseLatestRecoverableSession(localAssessmentSession, cloudAssessmentSession);
       set({
         attempts: mergedAttempts,
         interviewSessions: mergedInterviewSessions,
         questionFlags: mergedQuestionFlags,
-        importedProjects: mergedImportedProjects
+        importedProjects: mergedImportedProjects,
+        assessmentSession: mergedAssessmentSession
       });
       await Promise.all([
         localforage.setItem(STORAGE_KEYS.attempts, mergedAttempts),
         localforage.setItem(STORAGE_KEYS.interviewSessions, mergedInterviewSessions),
         localforage.setItem(STORAGE_KEYS.questionFlags, mergedQuestionFlags),
-        localforage.setItem(STORAGE_KEYS.importedProjects, mergedImportedProjects)
+        localforage.setItem(STORAGE_KEYS.importedProjects, mergedImportedProjects),
+        mergedAssessmentSession ? localforage.setItem(STORAGE_KEYS.assessmentSession, mergedAssessmentSession) : Promise.resolve()
       ]);
     } catch {
       // Local study mode remains authoritative if cloud sync is unavailable.
     }
+  },
+
+  saveAssessmentSession: async (session) => {
+    const current = get().assessmentSession;
+    if (current?.id === session.id && isTerminalAssessmentStatus(current.status) && !isTerminalAssessmentStatus(session.status)) return;
+    set({ assessmentSession: session });
+    await localforage.setItem(STORAGE_KEYS.assessmentSession, session);
+    void syncAssessmentSession(session).catch(() => undefined);
+  },
+
+  updateAssessmentSession: async (sessionId, patch) => {
+    const current = get().assessmentSession;
+    if (!current || current.id !== sessionId) return;
+    if (isTerminalAssessmentStatus(current.status) && (!patch.status || !isTerminalAssessmentStatus(patch.status))) return;
+    const next = { ...current, ...patch, id: current.id, updatedAt: patch.updatedAt ?? new Date().toISOString() };
+    set({ assessmentSession: next });
+    await localforage.setItem(STORAGE_KEYS.assessmentSession, next);
+    void syncAssessmentSession(next).catch(() => undefined);
+  },
+
+  finishAssessmentSession: async (sessionId, status, submittedAttemptId) => {
+    const current = get().assessmentSession;
+    if (!current || current.id !== sessionId) return;
+    if (current.status === "SUBMITTED" && status !== "SUBMITTED") return;
+    const now = new Date().toISOString();
+    const next = {
+      ...current,
+      status,
+      submittedAttemptId: submittedAttemptId ?? current.submittedAttemptId,
+      submittedAt: status === "SUBMITTED" ? now : current.submittedAt,
+      updatedAt: now
+    };
+    set({ assessmentSession: next });
+    await localforage.setItem(STORAGE_KEYS.assessmentSession, next);
+    void syncAssessmentSession(next).catch(() => undefined);
   },
 
   recordAttempt: async (attempt) => {
@@ -299,13 +375,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
       flashcards: get().flashcards,
       interviewSessions: get().interviewSessions,
       questionFlags: get().questionFlags,
-      importedProjects: get().importedProjects
+      importedProjects: get().importedProjects,
+      assessmentSession: get().assessmentSession
     };
     return JSON.stringify(data, null, 2);
   },
 
   resetLocalData: async () => {
     await localforage.clear();
-    set({ attempts: [], progress: defaultProgress, settings: defaultSettings, flashcards: {}, interviewSessions: [], questionFlags: [], importedProjects: [] });
+    set({ attempts: [], progress: defaultProgress, settings: defaultSettings, flashcards: {}, interviewSessions: [], questionFlags: [], importedProjects: [], assessmentSession: null });
   }
 }));

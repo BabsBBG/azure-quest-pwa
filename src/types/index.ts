@@ -29,6 +29,7 @@ export interface AnswerRecord {
   questionId: string;
   selected: QuizOption["id"] | null;
   correct: boolean;
+  confidence?: ConfidenceRating;
   timeSeconds: number;
   domain: string;
   tags: string[];
@@ -41,6 +42,7 @@ export interface DomainBreakdown {
 
 export interface ExamAttempt {
   id: string;
+  assessmentSessionId?: string;
   cert: Cert;
   mode: ExamMode;
   kind: AttemptKind;
@@ -63,6 +65,44 @@ export interface ExamAttempt {
   domains: Record<string, DomainBreakdown>;
   answers: AnswerRecord[];
   retakeSeed?: string;
+}
+
+export type AssessmentSessionStatus = "ACTIVE" | "PAUSED" | "SUBMITTED" | "EXPIRED" | "ABANDONED";
+export type ConfidenceRating = "GUESSING" | "UNSURE" | "FAIRLY_CONFIDENT" | "CERTAIN";
+
+export interface AssessmentSessionVersionMetadata {
+  schemaVersion: 1;
+  appVersion: string;
+  storageNamespace: "praxisgrid";
+}
+
+export interface AssessmentSession {
+  id: string;
+  cert: Cert;
+  mode: ExamMode;
+  kind: AttemptKind;
+  title: string;
+  blueprintId?: string;
+  quizId?: string;
+  focusDomain?: string;
+  focusTags: string[];
+  count: number;
+  minutes: number;
+  timeLimitSeconds: number;
+  questionIds: string[];
+  currentIndex: number;
+  answers: Record<string, QuizOption["id"] | null>;
+  secondsByQuestion: Record<string, number>;
+  markedQuestionIds: string[];
+  confidenceRatings: Record<string, ConfidenceRating>;
+  seed: string;
+  startedAt: string;
+  updatedAt: string;
+  expiresAt: string;
+  status: AssessmentSessionStatus;
+  version: AssessmentSessionVersionMetadata;
+  submittedAttemptId?: string;
+  submittedAt?: string;
 }
 
 export interface UserProgress {

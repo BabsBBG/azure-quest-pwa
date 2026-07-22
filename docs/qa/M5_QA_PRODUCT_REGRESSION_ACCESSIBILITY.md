@@ -8,7 +8,7 @@ Role: Senior QA Engineer - Product Quality, Regression, Accessibility and End-to
 
 Status: `FAIL`
 
-M5 is blocked by missing reliable sessions, rich item types, admin route, and accessibility/trust fixes.
+M5.1 reliable sessions are fixed in repo and statically retested. M5 remains blocked by rich item types, admin route, KQL trust behavior, accessibility gaps, and final E2E/live verification.
 
 ## Browsers And Viewport Sizes Tested
 
@@ -43,7 +43,7 @@ Working baseline:
 
 Blocking regressions/gaps:
 
-- In-progress assessments do not recover after refresh/closure.
+- In-progress assessments now have local/cloud session recovery in repo; browser refresh/closure E2E verification remains pending.
 - In-progress mock interviews do not recover before completion.
 - Rich assessment item types are absent.
 - `/admin` review studio is absent.
@@ -60,7 +60,7 @@ Blocking regressions/gaps:
 
 ## Defects Retested
 
-None yet.
+- M5-DEF-005: `npm test -- src/lib/cloudSync.test.ts src/store/useAppStore.test.ts src/utils/quizEngine.test.ts`, `npm run lint`, and `npm run build` passed on 2026-07-22.
 
 ## Remaining Limitations
 

@@ -47,12 +47,12 @@ Open M5.0 work:
 
 ## M5.1 Reliable Assessment Sessions
 
-Status: not complete.
+Status: complete in repo; M5.12 E2E/live verification pending.
 
-Required:
+Implemented:
 
 - Persistent assessment-session model with ACTIVE, PAUSED, SUBMITTED, EXPIRED, and ABANDONED states.
-- Local-first save, authenticated cloud sync where available, corruption detection, conflict resolution, stale submission protection, and recovery choices.
+- Local-first save, authenticated cloud sync where available, expiration normalization, latest-session merge, stale submission protection, and recovery choices.
 - Accessible question navigation grid with current/unseen/answered/unanswered/marked/answered-and-marked/low-confidence states.
 - Mark for review, unanswered filter, low-confidence filter, timestamp-based timing, expiration handling, and deliberate submission review.
 

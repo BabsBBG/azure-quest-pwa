@@ -10,7 +10,7 @@ Date opened: 2026-07-22
 | M5-DEF-002 | S1 | Security/Data QA | Authorization | Fixed in repo; live RLS verification pending | Public approved-question serving trusts `review_status` without enough database-level payload/source integrity. |
 | M5-DEF-003 | S2 | Security/Data QA | Governance | Fixed in repo; live RLS verification pending | Audit rows can be caller-shaped or manually inserted by privileged users. |
 | M5-DEF-004 | S2 | Security/Data QA | M4/M5 data | Fixed in repo; live RLS verification pending | Imported project IDs collide globally when multiple users import the same public repo. |
-| M5-DEF-005 | S1 | Product QA | M5.1 | Open | In-progress assessment sessions are not recoverable after refresh/browser closure. |
+| M5-DEF-005 | S1 | Product QA | M5.1 | Fixed in repo; E2E/live verification pending | In-progress assessment sessions are not recoverable after refresh/browser closure. |
 | M5-DEF-006 | S2 | Product QA | Career Lab | Open | In-progress mock interview sessions are volatile until completion. |
 | M5-DEF-007 | S2 | Product QA | M5.2 | Open | Runtime item support is single-choice only; rich item types are absent. |
 | M5-DEF-008 | S2 | Product QA | M5.8 | Open | No active `/admin` review studio route exists. |
@@ -123,11 +123,11 @@ Actual result: Current question index, answers, timer, and finish state are comp
 
 Root cause: No persisted in-progress assessment-session model.
 
-Fix: Pending.
+Fix: Added local/cloud assessment-session model, persistent route recovery UI, resume/restart/abandon choices, timestamp-based elapsed recovery, expiration handling, direct question grid, deliberate submission review, stale submitted-session protection, and confidence persistence.
 
-Retest result: Pending.
+Retest result: `npm test -- src/lib/cloudSync.test.ts src/store/useAppStore.test.ts src/utils/quizEngine.test.ts`, `npm run lint`, and `npm run build` passed on 2026-07-22.
 
-Final status: Open.
+Final status: Fixed in repo; M5.12 browser E2E/live Supabase verification pending.
 
 ### M5-DEF-006 Volatile Mock Interview Sessions
 

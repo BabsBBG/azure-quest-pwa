@@ -40,5 +40,20 @@ describe("scoreAttempt", () => {
     expect(attempt.percentage).toBe(50);
     expect(attempt.answers[1].correct).toBe(false);
   });
-});
 
+  it("persists confidence ratings on answer records", () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "confidence-attempt" });
+    const attempt = scoreAttempt({
+      cert: "SC-300",
+      mode: "quiz",
+      startedAt: new Date(Date.now() - 30_000).toISOString(),
+      seed: "seed",
+      questions: [question("q1", "A")],
+      selections: { q1: "A" },
+      confidenceRatings: { q1: "CERTAIN" },
+      secondsByQuestion: { q1: 12 }
+    });
+
+    expect(attempt.answers[0].confidence).toBe("CERTAIN");
+  });
+});
