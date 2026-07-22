@@ -88,6 +88,11 @@ export const certifications: CertificationRegistryEntry[] = [
     officialStudyGuide: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-300",
     domains: [
       {
+        id: "sc300-auth-access",
+        title: "Implement authentication and access management",
+        objectives: ["Implement Conditional Access", "Implement authentication methods and access controls"]
+      },
+      {
         id: "sc300-identity-governance",
         title: "Plan and implement identity governance",
         objectives: ["Plan and implement access reviews", "Plan and implement entitlement management"]
@@ -108,6 +113,25 @@ export const certifications: CertificationRegistryEntry[] = [
         id: "sc500-end-to-end-security",
         title: "Implement end-to-end Microsoft security",
         objectives: ["Implement identity and access controls", "Implement security operations"]
+      }
+    ]
+  },
+  {
+    id: "cert-az500-2026",
+    providerId: "provider-microsoft",
+    code: "AZ-500",
+    version: "2026-retiring",
+    status: "retiring",
+    effectiveDate: "2026-01-01",
+    retirementDate: "2026-08-31",
+    replacementCertification: "SC-500",
+    officialExamPage: "https://learn.microsoft.com/en-us/credentials/certifications/exams/az-500/",
+    officialStudyGuide: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-500",
+    domains: [
+      {
+        id: "az500-defender-sentinel",
+        title: "Secure Azure using Microsoft Defender for Cloud and Microsoft Sentinel",
+        objectives: ["Configure Microsoft Defender for Cloud", "Configure and manage Microsoft Sentinel"]
       }
     ]
   }

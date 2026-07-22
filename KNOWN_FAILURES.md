@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5.4A knowledge graph TypeScript narrowing failure
+
+Date:
+2026-07-22
+
+Command:
+`npm run build`
+
+Error:
+TypeScript reported `node` is possibly `undefined` in `src/data/knowledgeGraph.ts` filter predicates after mapping graph edges back to optional nodes.
+
+Likely cause:
+The predicates used `Boolean(node) && node.kind === ...`, which did not narrow the optional node before reading `kind` under the active TypeScript settings.
+
+Fix attempted:
+Changed the predicates to explicit `node !== undefined` type guards before checking node kind.
+
+Result:
+Resolved. `npm test -- src/data/knowledgeGraph.test.ts` and `npm run build` passed after the type guard fix.
+
+Remaining issue:
+None.
+
 ### M5.2 rich item TypeScript narrowing failure
 
 Date:

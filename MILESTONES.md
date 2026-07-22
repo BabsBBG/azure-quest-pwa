@@ -93,12 +93,13 @@ Implemented:
 
 ## M5.4A Certification Knowledge Graph
 
-Status: not complete.
+Status: complete in repo; live Supabase verification pending in M5.12.
 
-Required:
+Implemented:
 
 - PostgreSQL/Supabase relationship tables connecting Provider, Certification, Certification Version, Domain, Objective, Knowledge Unit, Source Document, Learning Summary, Assessment Item, Domain Quiz placement, and Certification Run placement.
 - Typed relation kinds, evidence, confidence, review state, useful indexes, integrity tests, traversal tests, and RLS where user-specific data exists.
+- Local typed graph model, traversal helpers, validator, CI hook, and report.
 
 ## M5.5 Official Learning Summaries
 
