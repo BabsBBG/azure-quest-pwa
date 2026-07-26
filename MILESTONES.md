@@ -138,7 +138,7 @@ Implemented:
 
 ## M5.7 Automated Critic And Duplicate Prevention
 
-Status: not complete.
+Status: complete in repo; live RLS/admin override verification pending in M5.12.
 
 Completed foundations:
 
@@ -146,11 +146,12 @@ Completed foundations:
 - `scripts/validate-duplicates.mjs` checks seed/demo fingerprints and approved source-grounded duplicates.
 - Approved source-grounded helper refuses duplicate approved records.
 
-Required:
+Implemented:
 
 - Critic checks for source support, answer uniqueness, distractor plausibility, ambiguity, hidden assumptions, objective alignment, difficulty, freshness, item-type validity, accessibility, wording leakage, semantic similarity, unsupported claims, and scenario consistency.
 - Draft gating before Admin review.
 - Non-overridable integrity failures and audited Main Admin override path for allowed warnings.
+- Supabase critic reports/findings/overrides, validation script, CI hook, and report.
 
 ## M5.7A Source Dependency And Impact Graph
 

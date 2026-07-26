@@ -28,6 +28,7 @@ jobs:
       - run: npm run validate:learning-summaries
       - run: npm run validate:question-generation
       - run: npm run validate:content-orchestration
+      - run: npm run validate:question-critic
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
       - run: npm run validate:rich-items

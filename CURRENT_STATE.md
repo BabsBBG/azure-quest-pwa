@@ -21,6 +21,7 @@ Harness state:
 - M5.5 Official Learning Summaries are implemented in repo with source-grounded domain summary workspaces, immutable Main Admin-approved published versions, Supabase migration `0010`, learner-facing approved summaries on Learn pages, tests, and CI validation. Live Supabase publication/RLS verification remains pending in M5.12.
 - M5.6 Controlled Question-Generation Factory is implemented in repo with a server-side-oriented provider interface, deterministic test generator, generation jobs, idempotency, cancellation, batch/rate/cost/retry controls, kill switch and quarantine gates, Supabase migration `0011`, tests, and CI validation. Production external provider activation remains disabled by default.
 - M5.6A Graph-Based Content Orchestration is implemented in repo with typed workflow nodes, graph coverage planning, source resolution, generation job handoff, critic placeholders, duplicate/difficulty stages, admin handoff, durable workflow/event migration `0012`, tests, and CI validation. Workflows cannot auto-publish.
+- M5.7 Automated Critic and Duplicate Prevention is implemented in repo with critic checks for source support, answer uniqueness, distractor quality, ambiguity, hidden assumptions, objective alignment, difficulty, freshness, item validity, accessibility, wording leakage, semantic similarity, unsupported claims, and scenario consistency; hard failures are non-overridable, warning overrides require Main Admin records, migration `0013`, tests, and CI validation.
 
 M5.0 rebrand status:
 
