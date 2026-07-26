@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### KQL feedback regression test localForage failure
+
+Date:
+2026-07-26
+
+Command:
+`npm test -- src/pages/KqlGym.test.tsx src/components/QuestionBankNotice.test.tsx`
+
+Error:
+The new KQL regression test failed after clicking `Finish now` with `No available storage method found`.
+
+Likely cause:
+The component called the real Zustand `recordAttempt` action, which writes through localForage; the Vitest/jsdom environment for this focused test did not provide a usable storage backend.
+
+Fix attempted:
+Mocked `recordAttempt` through `useAppStore.setState()` inside the KQL test so the test verifies feedback timing without invoking localForage.
+
+Result:
+Resolved. `npm test -- src/pages/KqlGym.test.tsx src/components/QuestionBankNotice.test.tsx` passed after mocking the store persistence action.
+
+Remaining issue:
+None.
+
 ### Google SSO Vercel log scan fetch failure
 
 Date:

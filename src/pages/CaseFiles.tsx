@@ -5,6 +5,7 @@ import { caseFiles } from "../data/caseFiles";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { QuestionBankNotice } from "../components/QuestionBankNotice";
 
 export function CaseFiles() {
   return (
@@ -12,6 +13,7 @@ export function CaseFiles() {
       <Card className="aq-hero">
         <CardHeader><div><Badge className="border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">Scenario Challenge</Badge><CardTitle className="mt-3 text-4xl">Enterprise scenario practice</CardTitle><p className="font-semibold text-[var(--aq-muted)]">One company, one architecture, 6-8 questions. Built for scenario stamina.</p></div><BriefcaseBusiness className="h-8 w-8 text-[var(--aq-blue-600)]" /></CardHeader>
       </Card>
+      <QuestionBankNotice compact />
       <div className="grid gap-4 md:grid-cols-2">
         {caseFiles.map(file => (
           <Card key={file.id} className="aq-row-card overflow-hidden">
