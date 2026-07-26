@@ -17,6 +17,7 @@ Harness state:
 - M5/M6 production-hardening branch `codex/m5-m6-production-hardening` has started.
 - First hardening slice adds `/auth`, public legal/status routes, protected learner routing, protected Admin routing, server-backed user role loading, and Learn/Practise/Prove primary navigation. Local focused auth tests, route check, lint, and build passed after this slice.
 - Second hardening slice aligns secondary practice trust behavior: KQL Gym, Case Files, and Scenario Player show the shared demo/seed notice before practice; KQL explanations/correctness are hidden until run completion; focused KQL/notice tests passed.
+- Third hardening slice adds Playwright browser gates for auth routing, public legal/status routes, axe accessibility, mobile/tablet/desktop viewports, WebKit, Chromium, visual-tagged auth layout, production-smoke configuration, and CI commands. Local slices passed: Chromium 10/10, WebKit 10/10, mobile 20/20, accessibility 36/36, visual 6/6, and tablet+desktop 20/20. The aggregate `npm run test:e2e` command exceeded the local shell timeout, so the equivalent coverage was run as slices.
 - M5.0 authorization hardening migration `0006_m5_authorization_hardening.sql` was added to separate review/publish authority, block reviewer publication, harden audit actors, and fix imported-project cloud row collisions. Live Supabase RLS application remains pending.
 - M5.1 Reliable Assessment Sessions are implemented in repo with local/cloud session persistence, recovery choices, timestamp expiry, direct question grid, mark/review/low-confidence filters, deliberate submission review, and confidence persistence. M5.12 E2E/live verification remains pending.
 - M5.2 Rich Assessment Item Types are implemented in repo with a discriminated item union, scoring helpers, walkthrough-only sample items, `/exam-walkthrough`, and CI validation. Full browser E2E verification remains pending.
@@ -202,13 +203,13 @@ M5 Production Perfection followed by Phase 6 public beta delivery is approved by
 - Approved M5.2 Rich Assessment Item Types are fixed in repo through the Exam Walkthrough and shared rich item/scoring contracts; M5.12 browser E2E verification remains pending.
 - Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
 - Google SSO is implemented in repo, but live Supabase Google provider setup and redirect allow-list verification remain pending for each deployed environment.
-- `/admin` review studio is not implemented yet.
-- KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.
+- `/admin` review studio exists and is now route-protected in repo, but live role-specific browser verification remains pending.
+- KQL Gym trust-copy and answer-reveal alignment is fixed in repo; broader learner browser verification remains pending.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.
 - The M5 scaffold proves approved-only serving, validation, and role-gated review policy shape, but production-scale ingestion, real embeddings, real batch generation, automated critic execution, and admin review UI still need backend/admin implementation before launch.
 - GitHub import is public-read-only. GitHub OAuth, write scopes, and private repo access remain blocked.
 - LLM-backed project stories, embeddings, source ingestion, and generated questions remain blocked until server-side execution, rate limits, content-hash caching, budget caps or kill switches, and failure logging are fully implemented for the live backend path.
 - Bundle size warning remains: Vite reports the main JS chunk is larger than 500 kB after minification. This is not a build failure, but future M6 work should consider route-level code splitting.
 - First dev-server verification attempt on `127.0.0.1:5173` did not respond and was restarted on `localhost:5174`, where checks passed.
-- Automated M1 E2E tests are still missing.
+- Initial Playwright browser, mobile, WebKit, axe, and visual gates exist and pass locally for the public auth/legal/status and anonymous routing contract. Broader learner/admin signed-in E2E coverage remains pending.
 - Duplicate validation is strict for approved source-grounded fingerprints and duplicate keys. Seed/demo duplicate warnings remain non-blocking because the bank is still labelled demo/seed content.

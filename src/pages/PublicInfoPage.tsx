@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { PRODUCT_NAME, PROVIDER_NEUTRAL_DISCLAIMER } from "../lib/brand";
 
 interface PublicInfoPageProps {
@@ -29,21 +28,24 @@ export function PublicInfoPage({ kind }: PublicInfoPageProps) {
   const content = copy[kind];
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-10 text-[var(--aq-ink)] dark:bg-[#061227]">
-      <Card className="w-full max-w-2xl border-[var(--aq-border)] bg-white dark:bg-[#0b1b33]">
-        <CardHeader>
+    <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-10 text-slate-950">
+      <section
+        className="w-full max-w-2xl rounded-md border border-[var(--aq-border)] bg-white p-5 text-slate-950 shadow-[var(--aq-shadow)] sm:p-6"
+        style={{ colorScheme: "light" }}
+      >
+        <header className="mb-5">
           <div>
             <Badge className="mb-2">{content.label}</Badge>
-            <CardTitle>{content.title}</CardTitle>
-            <p className="mt-2 text-sm font-semibold text-[var(--aq-muted)]">{PRODUCT_NAME}</p>
+            <h1 className="text-2xl font-bold leading-tight text-slate-950">{content.title}</h1>
+            <p className="mt-2 text-sm font-semibold text-slate-700">{PRODUCT_NAME}</p>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{content.body}</p>
-          <p className="rounded-md border border-[var(--aq-border)] bg-[var(--aq-blue-50)] p-3 text-xs font-semibold text-[var(--aq-muted)]">{PROVIDER_NEUTRAL_DISCLAIMER}</p>
-          <Link className="text-sm font-bold text-[var(--aq-blue-700)]" to="/auth?mode=signup">Return to sign up</Link>
-        </CardContent>
-      </Card>
+        </header>
+        <div className="space-y-4">
+          <p className="text-sm font-medium leading-7 text-slate-700">{content.body}</p>
+          <p className="rounded-md border border-[#b9d8f8] bg-[#eef6ff] p-3 text-xs font-semibold text-slate-800 dark:border-[#b9d8f8] dark:bg-[#eef6ff] dark:text-slate-800">{PROVIDER_NEUTRAL_DISCLAIMER}</p>
+          <Link className="text-sm font-bold text-[#0057b8] underline underline-offset-4" to="/auth?mode=signup">Return to sign up</Link>
+        </div>
+      </section>
     </main>
   );
 }

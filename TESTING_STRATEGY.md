@@ -32,6 +32,16 @@ Current scripts:
 - validate-question-bank.mjs
 - validate-source-grounding.mjs
 - check-routes.mjs
+- `npm run typecheck`
+- `npm run test:integration`
+- `npm run test:e2e`
+- `npm run test:e2e:chromium`
+- `npm run test:e2e:webkit`
+- `npm run test:e2e:mobile`
+- `npm run test:accessibility`
+- `npm run test:visual`
+- `npm run test:production-smoke`
+- `npm run validate:routes`
 
 Current Vitest coverage:
 
@@ -47,17 +57,25 @@ Current Vitest coverage:
 Current CI:
 
 - npm install --legacy-peer-deps
+- npm run typecheck
 - npm run lint
 - npm test
+- npm run test:integration
 - node scripts/validate-harness.mjs
 - node scripts/validate-question-bank.mjs
 - node scripts/validate-source-grounding.mjs
 - node scripts/check-routes.mjs
+- npm run test:e2e:chromium
+- npm run test:e2e:webkit
+- npm run test:e2e:mobile
+- npm run test:accessibility
+- npm run test:visual
 - npm run build
+- npm run test:production-smoke on `main` when GitHub Actions variable `PRODUCTION_BASE_URL` is configured
 
 ## Required M5/M6 E2E and Production Checks
 
-Missing scripts to add during the programme:
+Added scripts:
 
 - `npm run typecheck`
 - `npm run test:integration`
@@ -69,6 +87,9 @@ Missing scripts to add during the programme:
 - `npm run test:visual`
 - `npm run test:production-smoke`
 - `npm run validate:routes`
+
+Missing scripts to add during the programme:
+
 - `npm run validate:migrations`
 - `npm run validate:rls`
 - `npm run validate:assessment-shell`

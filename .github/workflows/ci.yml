@@ -18,8 +18,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm install --legacy-peer-deps
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - run: npm run test:integration
       - run: node scripts/validate-harness.mjs
       - run: node scripts/validate-question-bank.mjs
       - run: npm run validate:source-grounding
@@ -37,5 +40,14 @@ jobs:
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
       - run: npm run validate:rich-items
-      - run: node scripts/check-routes.mjs
+      - run: npm run validate:routes
+      - run: npm run test:e2e:chromium
+      - run: npm run test:e2e:webkit
+      - run: npm run test:e2e:mobile
+      - run: npm run test:accessibility
+      - run: npm run test:visual
       - run: npm run build
+      - run: npm run test:production-smoke
+        if: github.ref == 'refs/heads/main' && vars.PRODUCTION_BASE_URL != ''
+        env:
+          PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}

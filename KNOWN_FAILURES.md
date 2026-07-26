@@ -2,6 +2,217 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 PowerShell git staging separator failure
+
+Date:
+2026-07-26
+
+Command:
+`git add ... && git status --short`
+
+Error:
+PowerShell rejected `&&` with `The token '&&' is not a valid statement separator in this version`.
+
+Likely cause:
+The shell version for this workspace does not support `&&` command chaining.
+
+Fix attempted:
+Run `git add` and `git status --short` as separate PowerShell commands.
+
+Result:
+Resolved. The separate `git add` command staged the intended files, and `git status --short` confirmed the staged set.
+
+Remaining issue:
+None.
+
+### M5/M6 Vitest imported Playwright specs
+
+Date:
+2026-07-26
+
+Command:
+`npm test`
+
+Error:
+Vitest tried to import `tests/e2e/accessibility.spec.ts` and `tests/e2e/auth-routing.spec.ts`, then failed because Playwright's `test()` API cannot be called inside the Vitest runner.
+
+Likely cause:
+Adding Playwright specs under `tests/e2e` without excluding that folder from Vitest's default file discovery.
+
+Fix attempted:
+Updated `vitest.config.ts` to exclude `tests/e2e/**` while preserving the existing jsdom test environment.
+
+Result:
+Resolved. `npm test` passed after excluding `tests/e2e/**` from Vitest.
+
+Remaining issue:
+None.
+
+### M5/M6 admin validator expected unprotected route
+
+Date:
+2026-07-26
+
+Command:
+`npm run validate:admin-review-studio`
+
+Error:
+The validator failed with `/admin must be routed outside the learner Layout` and then with `missing ProtectedAdminRoute`.
+
+Likely cause:
+The validator used a broad `App.tsx` string-position check built for the old direct `/admin` route. After the auth hardening fix, `/admin` is intentionally routed through `ProtectedAdminRoute`, and `<Layout>` appears inside the `ProtectedLearnerShell` helper.
+
+Fix attempted:
+Updated `scripts/validate-admin-review-studio.mjs` to require `/admin` to use `ProtectedAdminRoute`, verify it is declared before the wildcard learner shell route, and check learner layout containment directly.
+
+Result:
+Resolved. `npm run validate:admin-review-studio` passed after the validator update.
+
+Remaining issue:
+None.
+
+### PowerShell Playwright grep token failure
+
+Date:
+2026-07-26
+
+Command:
+`npx playwright test --project=desktop-1440 --grep @accessibility`
+
+Error:
+PowerShell treated `@accessibility` as a variable/splat token and failed with `The variable '$accessibility' cannot be retrieved because it has not been set`.
+
+Likely cause:
+The grep pattern was not quoted in PowerShell.
+
+Fix attempted:
+Rerun with `--grep "@accessibility"`.
+
+Result:
+Resolved. The quoted command ran correctly and exposed the real desktop accessibility contrast failures below.
+
+Remaining issue:
+None for command syntax.
+
+### M5/M6 full E2E desktop auth contrast failure
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e`
+
+Error:
+Full Playwright E2E passed 59 of 60 tests, but the `desktop-1440` accessibility check for `/auth?mode=signin` failed with serious color-contrast violations.
+
+Likely cause:
+The public auth shell inherited a dark background from persisted app theme state while some left-panel text computed as dark foreground during the full cross-project run.
+
+Fix attempted:
+Made public auth/legal/status shells deliberately light and stable instead of inheriting app dark-mode surfaces.
+
+Result:
+Resolved. Public auth/legal/status routes now use stable light wrappers and explicit accessible text/background colors. Targeted desktop accessibility passed 6/6, full accessibility passed 36/36, and tablet/desktop project slices passed 20/20.
+
+Remaining issue:
+The combined `npm run test:e2e` command exceeded the local 240-second shell timeout before returning output. Equivalent project slices passed: Chromium 10/10, WebKit 10/10, mobile 20/20, tablet+desktop 20/20, accessibility 36/36, visual 6/6.
+
+### M5/M6 combined Playwright matrix local timeout
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e`
+
+Error:
+The full six-project Playwright matrix exceeded the local 240-second command timeout before returning test output.
+
+Likely cause:
+The local matrix runs all browser, mobile, tablet, desktop, accessibility, routing, and visual-tagged checks serially with one worker to avoid dev-server/artifact contention.
+
+Fix attempted:
+Stopped the timed-out Playwright/Vite processes, cleared stale artifacts, and reran the same coverage as project/tag slices with longer per-command timeouts.
+
+Result:
+Resolved for coverage. Passing slices: `npm run test:e2e:chromium` 10/10, `npm run test:e2e:webkit` 10/10, `npm run test:e2e:mobile` 20/20, `npm run test:accessibility` 36/36, `npm run test:visual` 6/6, and `npx playwright test --project=tablet --project=desktop-1440` 20/20.
+
+Remaining issue:
+The single aggregate command should be run in CI or a longer local shell window if an all-in-one transcript is required.
+
+### M5/M6 parallel Playwright matrix timeout
+
+Date:
+2026-07-26
+
+Command:
+Parallel run of:
+`npm run test:e2e:webkit`
+`npm run test:e2e:mobile`
+`npm run test:accessibility`
+`npm run test:visual`
+
+Error:
+The WebKit, mobile, and accessibility commands timed out after the tool timeout. The visual command failed with Playwright test timeouts and artifact `ENOENT` errors while multiple Playwright processes were running concurrently against the same local server/artifact output.
+
+Likely cause:
+Several Playwright commands launched simultaneously, contending for the same Vite dev server, browser resources, and `test-results` artifact paths.
+
+Fix attempted:
+Increased Playwright test timeout to 60 seconds and limited local workers to one while keeping CI at two workers.
+
+Result:
+Resolved. Sequential reruns passed: WebKit E2E, mobile E2E, accessibility, and visual checks all completed successfully after the timeout/worker adjustment.
+
+Remaining issue:
+None.
+
+### M5/M6 typecheck script invalid noEmit with project references
+
+Date:
+2026-07-26
+
+Command:
+`npm run typecheck`
+
+Error:
+TypeScript reported `Referenced project ... tsconfig.node.json may not disable emit` when running `tsc -b --noEmit`.
+
+Likely cause:
+The repo uses TypeScript project references, and the referenced Node config disables emit. Combining `--build` and `--noEmit` was incompatible with the existing configuration.
+
+Fix attempted:
+Changed `typecheck` to `tsc -b`, matching the existing production build typecheck behavior.
+
+Result:
+Resolved. `npm run typecheck` passed after changing the script to `tsc -b`.
+
+Remaining issue:
+None.
+
+### M5/M6 accessibility gate contrast failure
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e:chromium`
+
+Error:
+Chromium Playwright E2E passed routing tests but failed axe checks on public auth/legal routes for serious color-contrast and link-in-text-block violations.
+
+Likely cause:
+Azure-blue links/buttons used `text-[var(--aq-blue-700)]` on dark cards, and legal inline links relied on color without underline.
+
+Fix attempted:
+Added higher-contrast dark-mode link color and underline/offset styling to auth mode controls, legal links, and public-info return links.
+
+Result:
+Resolved. `npm run test:e2e:chromium` passed after the contrast and link styling fixes.
+
+Remaining issue:
+None.
+
 ### KQL feedback regression test localForage failure
 
 Date:
