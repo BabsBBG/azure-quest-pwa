@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { BarChart3, BrainCircuit, Clock, DatabaseZap, FileQuestion, FlaskConical, Play, RotateCcw } from "lucide-react";
 import { certFromSlug, isCertActivatable, metaFor, pathFor } from "../data/certPaths";
 import { examBlueprints } from "../data/examBlueprints";
-import { quizBlueprints } from "../data/quizBlueprints";
+import { curatedQuizCoverageSummary, curatedQuizzesForCert } from "../data/curatedDomainQuizzes";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -17,7 +17,8 @@ export function KnowledgeCheck() {
   const cert = certFromSlug(slug);
   const meta = metaFor(cert);
   const attempts = useAppStore((state) => state.attempts).filter((a) => a.cert === cert);
-  const certQuizzes = quizBlueprints.filter((q) => q.cert === cert);
+  const certQuizzes = curatedQuizzesForCert(cert);
+  const curatedSummary = curatedQuizCoverageSummary(cert);
   const certExams = examBlueprints.filter((e) => e.cert === cert);
   const approvedSourceQuestions = approvedSourceGroundedQuestions().filter((question) => question.cert === cert);
   const latestGenerationRun = generationRuns[0];
@@ -111,17 +112,23 @@ export function KnowledgeCheck() {
       <Card>
         <CardHeader><CardTitle>Quick Quizzes</CardTitle><BrainCircuit className="h-6 w-6" /></CardHeader>
         <div className="mb-3"><QuestionBankNotice compact /></div>
+        <div className="mb-3 grid gap-3 sm:grid-cols-3">
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Curated structures: {curatedSummary.total}</div>
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Published: {curatedSummary.published}</div>
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Missing approved placements: {curatedSummary.missingApprovedItems}</div>
+        </div>
         {!active ? <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">New {cert} quiz activation is disabled. Existing attempts remain in Activity History. Continue with {meta.replacementCert ?? "an active certification"}.</p> : null}
         <div className="grid gap-3 sm:grid-cols-2">
           {certQuizzes.map((quiz) => (
             <div key={quiz.id} className="aq-row-card p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <Badge className="mb-2">{quiz.domain}</Badge>
+                  <div className="mb-2 flex flex-wrap gap-2"><Badge>{quiz.domain}</Badge><Badge>{quiz.track}</Badge><Badge>{quiz.publicationStatus}</Badge></div>
                   <h3 className="text-base font-semibold">{quiz.title}</h3>
-                  <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{quiz.focusTags.join(" / ")}</p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{quiz.targetQuestions}Q / {quiz.minutes}m / {quiz.unlockRule}</p>
+                  {quiz.missingApprovedItems > 0 ? <p className="mt-2 text-xs font-bold text-amber-700 dark:text-amber-200">Blocked pending {quiz.missingApprovedItems} approved source-grounded item placements.</p> : null}
                 </div>
-                  <Button asChild size="sm" variant={active ? "hero" : "soft"} className="shrink-0"><Link to={active ? `/arena?cert=${cert}&mode=quiz&count=10&minutes=12&quizId=${quiz.id}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}&examTitle=${encodeURIComponent(`${cert} ${quiz.title}`)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/knowledge`}><Play className="h-4 w-4" /> {active ? "Start" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
+                  <Button asChild size="sm" variant={active && quiz.publicationStatus === "published" ? "hero" : "soft"} className="shrink-0"><Link to={active && quiz.publicationStatus === "published" ? `/arena?cert=${cert}&mode=quiz&count=${quiz.targetQuestions}&minutes=${quiz.minutes}&quizId=${quiz.id}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}&examTitle=${encodeURIComponent(`${cert} ${quiz.title}`)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/knowledge`}><Play className="h-4 w-4" /> {active && quiz.publicationStatus === "published" ? "Start" : quiz.publicationStatus === "blocked" ? "Blocked" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
               </div>
             </div>
           ))}

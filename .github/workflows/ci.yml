@@ -31,6 +31,7 @@ jobs:
       - run: npm run validate:question-critic
       - run: npm run validate:source-impact
       - run: npm run validate:admin-review-studio
+      - run: npm run validate:curated-domain-quizzes
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
       - run: npm run validate:rich-items

@@ -176,13 +176,14 @@ Implemented:
 
 ## M5.9 Curated Domain Quiz Structure
 
-Status: not complete.
+Status: complete in repo; publication blocked until approved item coverage is sufficient.
 
-Required:
+Implemented:
 
 - Per-domain curated quizzes: Foundations, Configuration, Scenarios, Troubleshooting, Domain Challenge.
 - Explicit quiz definitions and item placements using only Main Admin-approved published items.
 - Unlock and timing rules.
+- Missing approved placement tracking, blocked publication status, Supabase publication guard, validation script, CI hook, and report.
 
 ## M5.10 Finite Certification Runs
 

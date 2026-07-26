@@ -8,7 +8,7 @@ import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { StatCard } from "../components/game/StatCard";
 import { examBlueprints } from "../data/examBlueprints";
-import { quizBlueprints } from "../data/quizBlueprints";
+import { curatedDomainQuizzes } from "../data/curatedDomainQuizzes";
 import { readinessAll } from "../utils/readiness";
 
 export function Dashboard() {
@@ -18,7 +18,7 @@ export function Dashboard() {
   const reports = readinessAll(attempts, questions);
   const weakTags = Object.entries(progress.weakTags).sort((a, b) => b[1] - a[1]).filter(([, score]) => score > 0).slice(0, 4);
   const dailyPct = Math.min(100, (progress.completedToday / progress.dailyGoal) * 100);
-  const featuredQuizzes = quizBlueprints.filter((_, index) => index % 5 === 0).slice(0, 9);
+  const featuredQuizzes = curatedDomainQuizzes.filter((_, index) => index % 5 === 0).slice(0, 9);
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-5">
@@ -72,7 +72,7 @@ export function Dashboard() {
       </section>
 
       <Card><CardHeader><div><CardTitle>Quick Quizzes</CardTitle><p className="text-sm font-bold text-slate-500 dark:text-slate-400">10 questions / 12 minutes / focused skill.</p></div><BookOpenCheck className="h-6 w-6 text-sky-500" /></CardHeader><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {featuredQuizzes.map((quiz) => <Link key={quiz.id} to={`/arena?cert=${quiz.cert}&mode=quiz&count=${quiz.targetQuestions}&minutes=${quiz.minutes}&quizId=${quiz.id}&examTitle=${encodeURIComponent(quiz.title)}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}`} className="aq-row-card p-4"><p className="font-semibold">{quiz.title}</p><p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{quiz.subtitle}</p><p className="text-xs font-semibold text-[var(--aq-muted)]">{quiz.targetQuestions}Q / {quiz.minutes}m / Domain {quiz.domainNumber}</p></Link>)}
+        {featuredQuizzes.map((quiz) => <Link key={quiz.id} to={quiz.publicationStatus === "published" ? `/arena?cert=${quiz.cert}&mode=quiz&count=${quiz.targetQuestions}&minutes=${quiz.minutes}&quizId=${quiz.id}&examTitle=${encodeURIComponent(quiz.title)}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}` : `/cert/${quiz.cert.toLowerCase()}/knowledge`} className="aq-row-card p-4"><p className="font-semibold">{quiz.title}</p><p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{quiz.track} / {quiz.publicationStatus}</p><p className="text-xs font-semibold text-[var(--aq-muted)]">{quiz.targetQuestions}Q / {quiz.minutes}m / Domain {quiz.domainNumber}</p></Link>)}
       </div></Card>
 
       <section className="grid gap-4 sm:grid-cols-3"><Button asChild size="lg" variant="hero" className="h-20 justify-between"><Link to="/study"><span>Study Review</span><Brain /></Link></Button><Button asChild size="lg" variant="success" className="h-20 justify-between"><Link to="/flashcards"><span>Flashcards</span><Gauge /></Link></Button><Button asChild size="lg" variant="default" className="h-20 justify-between"><Link to="/history"><span>Activity History</span><History /></Link></Button></section>
