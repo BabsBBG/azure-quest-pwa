@@ -197,13 +197,14 @@ Implemented:
 
 ## M5.11 User Reporting And Content-Quality Feedback
 
-Status: not complete.
+Status: complete in repo; live persistence verification pending in M5.12.
 
-Required:
+Implemented:
 
 - Report a problem workflow for every published assessment item.
 - Stored item/version/source/attempt context, reason, optional comment, status, and Admin quality queue.
 - Reports never auto-edit, remove, replace, or publish content.
+- Supabase report/event tables, no-auto-mutation guard, Assessment Center action, Admin Review Studio queue, validation script, CI hook, and report.
 
 ## M5.12 Completion And Validation
 

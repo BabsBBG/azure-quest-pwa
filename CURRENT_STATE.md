@@ -26,6 +26,7 @@ Harness state:
 - M5.8 Admin Review Studio is implemented in repo with a separate `/admin` route outside learner layout, persistent sidebar, utility bar, dense queues, split-pane review, sticky actions, audit timeline, role-boundary messaging, route validation, and CI validation. Live role-auth enforcement remains pending in M5.12.
 - M5.9 Curated Domain Quiz Structure is implemented in repo with five quiz tracks per domain, explicit timing/unlock rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0015`, tests, and CI validation.
 - M5.10 Finite Certification Runs are implemented in repo with Baseline, Applied, Pressure, Final, and Personalized run definitions, version/effective metadata, distribution rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0016`, tests, and CI validation.
+- M5.11 User Reporting and Content-Quality Feedback is implemented in repo with approved-item-only report creation, item/source/attempt/session context fields, no-auto-mutation guard, Assessment Center report action, Admin Review Studio queue summary, migration `0017`, tests, and CI validation.
 
 M5.0 rebrand status:
 

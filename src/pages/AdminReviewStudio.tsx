@@ -8,6 +8,7 @@ import { createContentOrchestrationWorkflow, runContentOrchestrationWorkflow } f
 import { createSourceVersionDiff, createTargetedReplacementJob, impactRecordsForSourceDiff } from "../data/sourceImpactGraph";
 import { critiqueSourceGroundedQuestion } from "../utils/questionCritic";
 import { PRODUCT_NAME, PROVIDER_NEUTRAL_DISCLAIMER } from "../lib/brand";
+import { contentQualityReportSummary, sampleContentQualityReports } from "../data/contentQualityReports";
 
 const workflow = runContentOrchestrationWorkflow(createContentOrchestrationWorkflow({ idempotencyKey: "admin-review-studio" }));
 const sourceDiff = createSourceVersionDiff({
@@ -20,12 +21,14 @@ const impactRecords = impactRecordsForSourceDiff(sourceDiff);
 const replacementJob = createTargetedReplacementJob(sourceDiff, impactRecords);
 const reviewedCandidate = sourceQuestionCandidates[0];
 const criticReport = critiqueSourceGroundedQuestion(reviewedCandidate);
+const reportSummary = contentQualityReportSummary(sampleContentQualityReports);
 
 const queueRows = [
   { id: "queue-generation", label: "Generation Jobs", count: workflow.generationJob ? 1 : 0, status: workflow.generationJob?.status ?? "none", role: "MAIN_ADMIN" },
   { id: "queue-critic", label: "Critic Reports", count: sourceQuestionCandidates.length, status: criticReport.status, role: "CONTENT_REVIEWER" },
   { id: "queue-impact", label: "Source Impact", count: impactRecords.filter((item) => item.riskState !== "unchanged").length, status: replacementJob.status, role: "MAIN_ADMIN" },
-  { id: "queue-summaries", label: "Learning Summaries", count: approvedLearningSummaries().length, status: "approved", role: "CONTENT_REVIEWER" }
+  { id: "queue-summaries", label: "Learning Summaries", count: approvedLearningSummaries().length, status: "approved", role: "CONTENT_REVIEWER" },
+  { id: "queue-quality-reports", label: "Quality Reports", count: reportSummary.open, status: "open", role: "SUPPORT_ADMIN" }
 ];
 
 export function AdminReviewStudio() {

@@ -11,6 +11,7 @@ import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import { QuestionBankNotice } from "../components/QuestionBankNotice";
 import { approvedSourceGroundedQuestions, generationRuns, sourceGroundingSummary } from "../data/sourceGrounding";
+import { createContentQualityReport } from "../data/contentQualityReports";
 
 export function KnowledgeCheck() {
   const { cert: slug } = useParams();
@@ -85,7 +86,10 @@ export function KnowledgeCheck() {
               <div key={question.id} className="aq-subtle-panel p-3">
                 <div className="mb-2 flex flex-wrap gap-2"><Badge>{question.domain}</Badge><Badge>Source chunk linked</Badge></div>
                 <p className="text-sm font-semibold">{question.stem}</p>
-                <a className="mt-2 inline-flex text-xs font-bold text-[var(--aq-blue-700)] underline dark:text-[var(--aq-blue-300)]" href={question.sourceUrl} target="_blank" rel="noreferrer">Microsoft Learn source</a>
+                <div className="mt-2 flex flex-wrap gap-3">
+                  <a className="inline-flex text-xs font-bold text-[var(--aq-blue-700)] underline dark:text-[var(--aq-blue-300)]" href={question.sourceUrl} target="_blank" rel="noreferrer">Microsoft Learn source</a>
+                  <button type="button" className="text-xs font-bold text-[var(--aq-blue-700)] underline dark:text-[var(--aq-blue-300)]" onClick={() => { createContentQualityReport({ assessmentItemId: question.id, reason: "unclear", comment: "Learner requested review from Assessment Center." }); }}>Report a problem</button>
+                </div>
               </div>
             ))}
           </div>

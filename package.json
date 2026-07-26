@@ -23,6 +23,7 @@
     "validate:admin-review-studio": "node scripts/validate-admin-review-studio.mjs",
     "validate:curated-domain-quizzes": "node scripts/validate-curated-domain-quizzes.mjs",
     "validate:finite-runs": "node scripts/validate-finite-certification-runs.mjs",
+    "validate:content-quality-reports": "node scripts/validate-content-quality-reports.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "check:routes": "node scripts/check-routes.mjs"
