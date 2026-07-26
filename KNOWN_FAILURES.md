@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5.6 deterministic generator option literal widening
+
+Date:
+2026-07-26
+
+Command:
+`npm run build`
+
+Error:
+TypeScript rejected `src/data/questionGenerationFactory.ts` because deterministic generated option IDs widened to `string` instead of the `QuizOption["id"]` union.
+
+Likely cause:
+The returned option array did not have an explicit `QuizOption[]` annotation, so object literal IDs were widened inside the class method return inference.
+
+Fix attempted:
+Added an explicit `Omit<SourceGroundedQuestion, ...>` return type and a `QuizOption[]` annotation for deterministic options.
+
+Result:
+Resolved. `npm test -- src/data/questionGenerationFactory.test.ts`, `npm run validate:question-generation`, and `npm run build` passed.
+
+Remaining issue:
+None.
+
 ### M5.5 learning summary missing configuration steps
 
 Date:

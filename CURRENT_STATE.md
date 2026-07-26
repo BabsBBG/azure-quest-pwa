@@ -19,6 +19,7 @@ Harness state:
 - M5.4 Official Source Ingestion is implemented in repo with provider/certification registry, fixture fetch adapter, canonical URL normalization, official-domain allowlist, content hashing, source version/change detection, Knowledge Unit extraction, migration `0008`, and CI validation. Production activation remains externally blocked until live retrieval/runtime setup.
 - M5.4A Certification Knowledge Graph is implemented in repo with typed local graph helpers, Supabase migration `0009`, source/objective/KU/item/summary/quiz/run placement relations, traversal tests, and CI validation. Live Supabase migration/RLS verification remains pending in M5.12.
 - M5.5 Official Learning Summaries are implemented in repo with source-grounded domain summary workspaces, immutable Main Admin-approved published versions, Supabase migration `0010`, learner-facing approved summaries on Learn pages, tests, and CI validation. Live Supabase publication/RLS verification remains pending in M5.12.
+- M5.6 Controlled Question-Generation Factory is implemented in repo with a server-side-oriented provider interface, deterministic test generator, generation jobs, idempotency, cancellation, batch/rate/cost/retry controls, kill switch and quarantine gates, Supabase migration `0011`, tests, and CI validation. Production external provider activation remains disabled by default.
 
 M5.0 rebrand status:
 

@@ -114,15 +114,16 @@ Implemented:
 
 ## M5.6 Controlled Question-Generation Factory
 
-Status: not complete.
+Status: complete in repo; production provider activation disabled.
 
 Completed foundations:
 
 - Generation run scaffolding has admin-only flags, budget caps, batch limits, kill-switch examples, and failure logs.
 
-Required:
+Implemented:
 
 - Server-side provider interface, deterministic test generator, coverage matrix, generation jobs, draft metadata, batch/rate/cost/retry controls, cancellation, idempotency, quarantine, and disabled-by-default production behavior until configured.
+- Supabase tables, RLS, validator, CI hook, and report.
 
 ## M5.6A Graph-Based Content Orchestration
 
