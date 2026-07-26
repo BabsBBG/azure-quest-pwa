@@ -40,6 +40,7 @@ jobs:
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
       - run: npm run validate:rich-items
+      - run: npm run validate:github-import-controls
       - run: npm run validate:routes
       - run: npm run test:e2e:chromium
       - run: npm run test:e2e:webkit

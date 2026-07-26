@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 GitHub import client duplicate data binding
+
+Date:
+2026-07-26
+
+Command:
+`npm test -- src/lib/githubProjectImport.test.ts`
+
+Error:
+The focused Vitest run failed during transform because `src/lib/githubProjectImport.ts` declared `data` for both the Supabase session response and the API JSON response.
+
+Likely cause:
+The auth-token fetch was added above existing response parsing without renaming the local binding.
+
+Fix attempted:
+Renamed the Supabase session binding to `sessionData`.
+
+Result:
+Resolved. Focused GitHub import tests, typecheck, and lint passed after renaming the binding.
+
+Remaining issue:
+None.
+
 ### M5/M6 CI WebKit auth signup contrast failure
 
 Date:

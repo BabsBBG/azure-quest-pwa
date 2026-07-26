@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 
 const dailyLimit = Number(process.env.GITHUB_IMPORT_DAILY_LIMIT ?? 8);
-const cache = new Map();
-const rateBuckets = new Map();
+const cacheTtlHours = Number(process.env.GITHUB_IMPORT_CACHE_TTL_HOURS ?? 24);
+const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 function parseRepoUrl(value) {
   const url = new URL(value);
@@ -19,20 +21,108 @@ function hash(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-function clientKey(req) {
-  return String(req.headers["x-forwarded-for"] ?? req.socket?.remoteAddress ?? "local").split(",")[0].trim();
+function serverSupabase() {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    const error = new Error("GitHub import is unavailable until server-side Supabase controls are configured.");
+    error.statusCode = 503;
+    throw error;
+  }
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
 }
 
-function checkRateLimit(req) {
-  const day = new Date().toISOString().slice(0, 10);
-  const key = `${clientKey(req)}:${day}`;
-  const count = rateBuckets.get(key) ?? 0;
+async function authenticateUser(req, db) {
+  const token = String(req.headers.authorization ?? "").replace(/^Bearer\s+/i, "").trim();
+  if (!token) {
+    const error = new Error("Sign in is required before importing a public GitHub repository.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const { data, error } = await db.auth.getUser(token);
+  if (error || !data.user) {
+    const authError = new Error("Your session could not be verified. Please sign in again.");
+    authError.statusCode = 401;
+    throw authError;
+  }
+  return data.user;
+}
+
+async function checkRateLimit(db, userId) {
+  const importDay = new Date().toISOString().slice(0, 10);
+  const { count, error } = await db
+    .from("github_import_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("import_day", importDay);
+
+  if (error) {
+    const dbError = new Error("Unable to verify public repo import limit.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
+
   if (count >= dailyLimit) {
     const error = new Error(`Daily public repo import limit reached (${dailyLimit}).`);
     error.statusCode = 429;
     throw error;
   }
-  rateBuckets.set(key, count + 1);
+  return { importDay, remaining: Math.max(0, dailyLimit - Number(count ?? 0) - 1) };
+}
+
+async function recordImportEvent(db, { userId, importDay, repoKey, contentHash }) {
+  const { error } = await db.from("github_import_events").insert({
+    user_id: userId,
+    import_day: importDay,
+    repo_key: repoKey,
+    content_hash: contentHash
+  });
+  if (error) {
+    const dbError = new Error("Unable to record public repo import usage.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
+}
+
+function isFreshCacheEntry(entry) {
+  if (!entry?.updated_at) return false;
+  const ageMs = Date.now() - new Date(entry.updated_at).getTime();
+  return ageMs >= 0 && ageMs <= cacheTtlHours * 60 * 60 * 1000;
+}
+
+async function readCachedImport(db, repoKey) {
+  const { data, error } = await db
+    .from("github_import_cache")
+    .select("payload, updated_at")
+    .eq("repo_key", repoKey)
+    .maybeSingle();
+  if (error) {
+    const dbError = new Error("Unable to read public repo import cache.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
+  if (!isFreshCacheEntry(data)) return null;
+  return data.payload;
+}
+
+async function writeCachedImport(db, { repoKey, parsed, result }) {
+  const { error } = await db.from("github_import_cache").upsert({
+    repo_key: repoKey,
+    owner: parsed.owner,
+    repo: parsed.repo,
+    source_url: parsed.url,
+    default_branch: result.project.defaultBranch,
+    content_hash: result.project.contentHash,
+    payload: result,
+    fetched_at: result.project.importedAt,
+    updated_at: new Date().toISOString()
+  });
+  if (error) {
+    const dbError = new Error("Unable to cache public repo import result.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
 }
 
 async function githubJson(url) {
@@ -91,13 +181,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    checkRateLimit(req);
+    const db = serverSupabase();
+    const user = await authenticateUser(req, db);
+    const rate = await checkRateLimit(db, user.id);
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const parsed = parseRepoUrl(String(body?.url ?? ""));
 
-    const cacheKey = `${parsed.owner}/${parsed.repo}`;
-    if (cache.has(cacheKey)) {
-      res.status(200).json({ ...cache.get(cacheKey), cached: true });
+    const repoKey = `${parsed.owner.toLowerCase()}/${parsed.repo.toLowerCase()}`;
+    const cached = await readCachedImport(db, repoKey);
+    if (cached) {
+      await recordImportEvent(db, { userId: user.id, importDay: rate.importDay, repoKey, contentHash: cached.project.contentHash });
+      res.status(200).json({
+        ...cached,
+        cached: true,
+        controls: { ...cached.controls, dailyLimit, remainingToday: rate.remaining, cacheTtlHours }
+      });
       return;
     }
 
@@ -134,12 +232,17 @@ export default async function handler(req, res) {
       controls: {
         permissionModel: "public-read-only",
         dailyLimit,
+        remainingToday: rate.remaining,
         cacheKey: contentHash,
-        storyGeneration: "server-side deterministic draft"
+        cacheTtlHours,
+        storyGeneration: "server-side deterministic draft",
+        rateLimitStorage: "supabase-user-day",
+        cacheStorage: "supabase-repo-content-hash"
       }
     };
 
-    cache.set(cacheKey, result);
+    await writeCachedImport(db, { repoKey, parsed, result });
+    await recordImportEvent(db, { userId: user.id, importDay: rate.importDay, repoKey, contentHash });
     res.status(200).json(result);
   } catch (error) {
     const statusCode = error.statusCode && Number(error.statusCode) >= 400 ? Number(error.statusCode) : 400;

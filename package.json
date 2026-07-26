@@ -36,6 +36,7 @@
     "validate:content-quality-reports": "node scripts/validate-content-quality-reports.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
+    "validate:github-import-controls": "node scripts/validate-github-import-controls.mjs",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {
