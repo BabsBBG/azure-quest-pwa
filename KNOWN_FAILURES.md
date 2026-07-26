@@ -25,6 +25,29 @@ Resolved locally. `CI=true npm run test:e2e:webkit` passed 10/10 after the compu
 Remaining issue:
 Push follow-up commit and verify PR CI turns green.
 
+### M5/M6 CI mobile auth opacity contrast failure
+
+Date:
+2026-07-26
+
+Command:
+GitHub Actions `npm run test:accessibility` in run `30213916042`.
+
+Error:
+The mobile-320 `/auth?mode=signin` and `/auth?mode=reset` axe checks failed because the PraxisGrid badge and intro text were computed with blended/partially transparent colors against the light page background.
+
+Likely cause:
+The public auth page intro used a Framer Motion fade-in. Fast CI accessibility scans can sample during opacity animation, making otherwise valid colors fail contrast.
+
+Fix attempted:
+Removed the intro fade animation from `AuthPage` and darkened the small intro copy to stable slate-800 computed colors.
+
+Result:
+Resolved locally. `CI=true npm run test:accessibility` passed 36/36 after removing the auth intro fade and darkening the intro copy.
+
+Remaining issue:
+Push follow-up commit and verify PR CI turns green.
+
 ### M5/M6 CSS lookup command misses
 
 Date:
