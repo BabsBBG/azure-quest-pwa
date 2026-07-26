@@ -23,6 +23,7 @@ import { CaseFiles } from "./pages/CaseFiles";
 import { KqlGym } from "./pages/KqlGym";
 import { Readiness } from "./pages/Readiness";
 import { Account } from "./pages/Account";
+import { AdminReviewStudio } from "./pages/AdminReviewStudio";
 import { PRODUCT_INITIALS, PRODUCT_NAME } from "./lib/brand";
 
 export default function App() {
@@ -47,7 +48,9 @@ export default function App() {
   return (
     <AnimatePresence mode="wait">
       <AuthProvider>
-        <Layout>
+        <Routes>
+          <Route path="/admin" element={<AdminReviewStudio />} />
+          <Route path="*" element={<Layout>
           <Routes>
             <Route path="/" element={<PathHome />} />
             <Route path="/legacy-dashboard" element={<Dashboard />} />
@@ -77,7 +80,8 @@ export default function App() {
             <Route path="/readiness" element={<Readiness />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Layout>
+        </Layout>} />
+        </Routes>
       </AuthProvider>
     </AnimatePresence>
   );

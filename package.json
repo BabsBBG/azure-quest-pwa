@@ -20,6 +20,7 @@
     "validate:content-orchestration": "node scripts/validate-content-orchestration.mjs",
     "validate:question-critic": "node scripts/validate-question-critic.mjs",
     "validate:source-impact": "node scripts/validate-source-impact.mjs",
+    "validate:admin-review-studio": "node scripts/validate-admin-review-studio.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "check:routes": "node scripts/check-routes.mjs"

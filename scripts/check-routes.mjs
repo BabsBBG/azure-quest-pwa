@@ -12,6 +12,7 @@ const requiredRoutes = [
   "/certification-runs",
   "/career-lab",
   "/progress",
+  "/admin",
   "/account",
   "/cert/:cert/knowledge",
   "/cert/:cert/readiness",
@@ -31,6 +32,7 @@ const routeFiles = [
   "src/pages/ExamWalkthrough.tsx",
   "src/pages/PastExams.tsx",
   "src/pages/Settings.tsx",
+  "src/pages/AdminReviewStudio.tsx",
   "src/pages/Account.tsx"
 ];
 

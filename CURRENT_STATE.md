@@ -23,6 +23,7 @@ Harness state:
 - M5.6A Graph-Based Content Orchestration is implemented in repo with typed workflow nodes, graph coverage planning, source resolution, generation job handoff, critic placeholders, duplicate/difficulty stages, admin handoff, durable workflow/event migration `0012`, tests, and CI validation. Workflows cannot auto-publish.
 - M5.7 Automated Critic and Duplicate Prevention is implemented in repo with critic checks for source support, answer uniqueness, distractor quality, ambiguity, hidden assumptions, objective alignment, difficulty, freshness, item validity, accessibility, wording leakage, semantic similarity, unsupported claims, and scenario consistency; hard failures are non-overridable, warning overrides require Main Admin records, migration `0013`, tests, and CI validation.
 - M5.7A Source Dependency and Impact Graph is implemented in repo with source version diffs, affected-content traversal through summaries/items/quiz/run placements, risk states, targeted replacement jobs requiring Main Admin review, migration `0014`, tests, and CI validation.
+- M5.8 Admin Review Studio is implemented in repo with a separate `/admin` route outside learner layout, persistent sidebar, utility bar, dense queues, split-pane review, sticky actions, audit timeline, role-boundary messaging, route validation, and CI validation. Live role-auth enforcement remains pending in M5.12.
 
 M5.0 rebrand status:
 
