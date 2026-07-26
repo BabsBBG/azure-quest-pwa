@@ -54,17 +54,17 @@ export function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-slate-50 text-slate-950" style={{ backgroundColor: "#f8fafc", color: "#0f172a", colorScheme: "light" }}>
       <section className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-[0.9fr_1.1fr]">
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-          <Badge className="border-[#004b9b] bg-[#004b9b] text-white dark:bg-[#004b9b] dark:text-white">{PRODUCT_NAME}</Badge>
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-5" style={{ color: "#0f172a" }}>
+          <Badge className="border-[#004b9b] bg-[#004b9b] text-white dark:bg-[#004b9b] dark:text-white" style={{ backgroundColor: "#004b9b", color: "#ffffff" }}>{PRODUCT_NAME}</Badge>
           <div>
-            <h1 className="max-w-xl text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">{PRODUCT_TAGLINE}</h1>
-            <p className="mt-4 max-w-lg text-base font-medium leading-7 text-slate-700">
+            <h1 className="max-w-xl text-4xl font-bold leading-tight text-slate-950 sm:text-5xl" style={{ color: "#0f172a" }}>{PRODUCT_TAGLINE}</h1>
+            <p className="mt-4 max-w-lg text-base font-medium leading-7 text-slate-700" style={{ color: "#334155" }}>
               A private learning workspace for certification practice, project evidence, and interview preparation.
             </p>
           </div>
-          <div className="grid gap-3 text-sm font-semibold text-slate-700">
+          <div className="grid gap-3 text-sm font-semibold text-slate-700" style={{ color: "#334155" }}>
             <p className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[var(--aq-blue-700)]" /> Personal progress and repository analysis stay tied to your account.</p>
             <p className="flex items-center gap-2"><LockKeyhole className="h-4 w-4 text-[var(--aq-blue-700)]" /> PraxisGrid is independent and not affiliated with certification providers.</p>
           </div>

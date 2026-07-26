@@ -2,6 +2,70 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 CI WebKit auth signup contrast failure
+
+Date:
+2026-07-26
+
+Command:
+GitHub Actions `npm run test:e2e:webkit` in run `30213592120`.
+
+Error:
+WebKit failed the `/auth?mode=signup` axe check with near-white foreground computed on a light `bg-slate-50` background.
+
+Likely cause:
+Under parallel GitHub Actions WebKit execution, the public auth page could retain the dark root text token while the light background utility was already active, producing unstable computed contrast.
+
+Fix attempted:
+Pinned public auth/legal shells to explicit light foreground/background/color-scheme inline styles and pinned auth intro text/badge computed colors.
+
+Result:
+Resolved locally. `CI=true npm run test:e2e:webkit` passed 10/10 after the computed color pinning.
+
+Remaining issue:
+Push follow-up commit and verify PR CI turns green.
+
+### M5/M6 CSS lookup command misses
+
+Date:
+2026-07-26
+
+Command:
+`rg -n "f6f8|f8fafc|color|--aq-ink|body|h1|\\.dark|color-scheme|@media" src index.html *.css`
+
+Error:
+The search partially ran but returned exit code 1 because PowerShell passed `*.css` in a way that produced a filename error.
+
+Likely cause:
+The workspace has CSS under `src/styles.css`; the extra root glob was unnecessary in PowerShell.
+
+Fix attempted:
+Read `src/styles.css` directly.
+
+Result:
+Resolved.
+
+Remaining issue:
+None.
+
+Command:
+`Get-Content -Path .\src\index.css`
+
+Error:
+The file does not exist.
+
+Likely cause:
+The repo uses `src/styles.css`.
+
+Fix attempted:
+Read `src/styles.css`.
+
+Result:
+Resolved.
+
+Remaining issue:
+None.
+
 ### M5/M6 PowerShell git staging separator failure
 
 Date:
