@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### Google SSO Vercel log scan fetch failure
+
+Date:
+2026-07-26
+
+Command:
+`npx vercel logs https://azure-quest-nenrffh2z-tonybabalola-1114s-projects.vercel.app --since 1h`
+
+Error:
+Vercel CLI resolved the deployment and project, then failed while fetching logs with `Error: fetch failed`.
+
+Likely cause:
+Transient Vercel CLI/network log retrieval failure. The deployment itself inspected as `Ready`, and `/account` returned `200 OK`.
+
+Fix attempted:
+Deployment was verified with `npx vercel inspect` and an HTTP request to the production `/account` route.
+
+Result:
+Deployment verification passed; log scan remains unavailable in this local run.
+
+Remaining issue:
+Retry Vercel log retrieval later if post-deploy log inspection is required.
+
 ### Google SSO Vitest mock hoisting failure
 
 Date:

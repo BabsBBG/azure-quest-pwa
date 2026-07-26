@@ -32,6 +32,10 @@ Harness state:
 - M5 production deployment ID: `dpl_GQJ2jVsRXWAeMX4SWvQHcTHKt6wi`.
 - M5 production deployment URL: `https://azure-quest-a7y7zxukg-tonybabalola-1114s-projects.vercel.app`.
 - M5 pushed GitHub Actions CI run `30200017797` passed for commit `ef0f6485202a8b1d9d6f837502baf33a08d61d32`.
+- Google SSO production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
+- Google SSO production deployment ID: `dpl_3p6upUV5Ve7Bxw6VBdBjvyY7Jyzk`.
+- Google SSO production deployment URL: `https://azure-quest-nenrffh2z-tonybabalola-1114s-projects.vercel.app`.
+- Google SSO pushed GitHub Actions CI run `30203475880` passed for commit `6f2cf10`.
 
 M5.0 rebrand status:
 
@@ -94,6 +98,8 @@ It has:
 - Browser verification found no Vite error overlay and no current-page console errors on the verified `localhost:5174` routes.
 - Production Vercel deployment is live at `https://azure-quest-pwa.vercel.app`.
 - Production deployment ID: `dpl_6cwQJjDeE8QUW9rXyC5KPSqfS6He`.
+- Latest production deployment ID: `dpl_3p6upUV5Ve7Bxw6VBdBjvyY7Jyzk`.
+- Latest production deployment URL: `https://azure-quest-nenrffh2z-tonybabalola-1114s-projects.vercel.app`.
 - Primary navigation now uses Home, Learn, Domain Quizzes, Career Lab, Progress, and Account.
 - Practice runs persist question flags locally and best-effort sync them to Supabase when signed in.
 - Practice runs preserve focus domain, focus tags, quiz ID, exam ID, and seed for retakes.
