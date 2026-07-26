@@ -20,6 +20,7 @@ Harness state:
 - M5.4A Certification Knowledge Graph is implemented in repo with typed local graph helpers, Supabase migration `0009`, source/objective/KU/item/summary/quiz/run placement relations, traversal tests, and CI validation. Live Supabase migration/RLS verification remains pending in M5.12.
 - M5.5 Official Learning Summaries are implemented in repo with source-grounded domain summary workspaces, immutable Main Admin-approved published versions, Supabase migration `0010`, learner-facing approved summaries on Learn pages, tests, and CI validation. Live Supabase publication/RLS verification remains pending in M5.12.
 - M5.6 Controlled Question-Generation Factory is implemented in repo with a server-side-oriented provider interface, deterministic test generator, generation jobs, idempotency, cancellation, batch/rate/cost/retry controls, kill switch and quarantine gates, Supabase migration `0011`, tests, and CI validation. Production external provider activation remains disabled by default.
+- M5.6A Graph-Based Content Orchestration is implemented in repo with typed workflow nodes, graph coverage planning, source resolution, generation job handoff, critic placeholders, duplicate/difficulty stages, admin handoff, durable workflow/event migration `0012`, tests, and CI validation. Workflows cannot auto-publish.
 
 M5.0 rebrand status:
 

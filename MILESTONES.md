@@ -127,13 +127,14 @@ Implemented:
 
 ## M5.6A Graph-Based Content Orchestration
 
-Status: not complete.
+Status: complete in repo; live workflow execution verification pending in M5.12.
 
-Required:
+Implemented:
 
 - Typed workflow nodes for coverage planning, source resolution, question generation, grounding verification, ambiguity/distractor critics, duplicate detection, difficulty estimation, and admin handoff.
 - Durable workflow state, retries, failure reasons, cost, duration, and events.
 - No workflow may publish automatically.
+- Supabase tables, RLS, validator, CI hook, and report.
 
 ## M5.7 Automated Critic And Duplicate Prevention
 
