@@ -208,9 +208,9 @@ Implemented:
 
 ## M5.12 Completion And Validation
 
-Status: not complete.
+Status: complete in repo; pushed CI verification pending.
 
-Required:
+Completed:
 
 - Complete command suite and any additional scripts needed for typecheck, integration, E2E, migration, RLS, route, accessibility, and content-pipeline validation.
 - Final M5 completion report.

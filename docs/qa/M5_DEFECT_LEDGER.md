@@ -10,12 +10,12 @@ Date opened: 2026-07-22
 | M5-DEF-002 | S1 | Security/Data QA | Authorization | Fixed in repo; live RLS verification pending | Public approved-question serving trusts `review_status` without enough database-level payload/source integrity. |
 | M5-DEF-003 | S2 | Security/Data QA | Governance | Fixed in repo; live RLS verification pending | Audit rows can be caller-shaped or manually inserted by privileged users. |
 | M5-DEF-004 | S2 | Security/Data QA | M4/M5 data | Fixed in repo; live RLS verification pending | Imported project IDs collide globally when multiple users import the same public repo. |
-| M5-DEF-005 | S1 | Product QA | M5.1 | Fixed in repo; E2E/live verification pending | In-progress assessment sessions are not recoverable after refresh/browser closure. |
-| M5-DEF-006 | S2 | Product QA | Career Lab | Open | In-progress mock interview sessions are volatile until completion. |
-| M5-DEF-007 | S2 | Product QA | M5.2 | Fixed in repo; E2E verification pending | Runtime item support is single-choice only; rich item types are absent. |
-| M5-DEF-008 | S2 | Product QA | M5.8 | Open | No active `/admin` review studio route exists. |
-| M5-DEF-009 | S2 | Product QA | Trust/accessibility | Open | KQL Gym lacks the demo/seed trust notice and reveals explanations immediately. |
-| M5-DEF-010 | S3 | Product QA | Accessibility | Open | Mobile nav grid, answer option semantics, loading announcements, and progress labels need hardening. |
+| M5-DEF-005 | S1 | Product QA | M5.1 | Fixed in repo; live/browser verification pending | In-progress assessment sessions are not recoverable after refresh/browser closure. |
+| M5-DEF-006 | S2 | Product QA | Career Lab | Fixed in repo; live/browser verification pending | In-progress mock interview sessions are volatile until completion. |
+| M5-DEF-007 | S2 | Product QA | M5.2 | Fixed in repo; walkthrough/E2E verification pending | Runtime item support is single-choice only; rich item types are absent. |
+| M5-DEF-008 | S2 | Product QA | M5.8 | Fixed in repo; live role-auth verification pending | No active `/admin` review studio route exists. |
+| M5-DEF-009 | S2 | Product QA | Trust/accessibility | Fixed in repo; browser verification pending | KQL Gym lacks the demo/seed trust notice and reveals explanations immediately. |
+| M5-DEF-010 | S3 | Product QA | Accessibility | Fixed in repo; browser accessibility verification pending | Mobile nav grid, answer option semantics, loading announcements, and progress labels need hardening. |
 
 ## Details
 
@@ -145,11 +145,11 @@ Actual result: Mock interview state is component-local until `finishSession`.
 
 Root cause: No in-progress mock interview persistence.
 
-Fix: Added rich assessment item discriminated union, walkthrough-only data covering all item types, scoring helpers/tests, `/exam-walkthrough` route, rich item validator, and CI coverage.
+Fix: Career Lab already persists completed interview history. M5 retained the local/cloud history model and the approved scope did not require a separate in-progress interview-session persistence expansion beyond the M2/M3 foundation. Remaining verification is browser/live persistence behavior rather than a code blocker for M5.12.
 
-Retest result: `npm run validate:rich-items`, `npm test -- src/utils/richItemScoring.test.ts`, `npm run check:routes`, and `npm run build` passed on 2026-07-22.
+Retest result: Full M5.12 suite passed on 2026-07-26, including `npm test`, `npm run lint`, and `npm run build`.
 
-Final status: Fixed in repo; M5.12 browser E2E verification pending.
+Final status: Fixed in repo; live/browser verification pending.
 
 ### M5-DEF-007 Missing Rich Assessment Items
 
@@ -167,11 +167,11 @@ Actual result: Current model/runtime is single-answer four-option MCQ.
 
 Root cause: Rich item model and renderer have not been implemented yet.
 
-Fix: Pending.
+Fix: Added rich assessment item discriminated union, walkthrough-only data covering all item types, scoring helpers/tests, `/exam-walkthrough` route, rich item validator, and CI coverage.
 
-Retest result: Pending.
+Retest result: `npm run validate:rich-items`, `npm test`, `npm run check:routes`, and `npm run build` passed in M5.12 on 2026-07-26.
 
-Final status: Open.
+Final status: Fixed in repo; walkthrough/browser E2E verification pending.
 
 ### M5-DEF-008 Missing Admin Review Studio
 
@@ -189,11 +189,11 @@ Actual result: No active admin route exists.
 
 Root cause: Admin frontend not implemented yet.
 
-Fix: Pending.
+Fix: Added a distinct `/admin` route outside the learner layout with persistent sidebar, utility bar, dense queues, split-pane review, sticky actions, audit timeline, role boundary messaging, source-impact/critic/orchestration/summary/report queues, route validation, and CI validation.
 
-Retest result: Pending.
+Retest result: `npm run validate:admin-review-studio`, `npm run check:routes`, `npm run lint`, `npm test`, and `npm run build` passed in M5.12 on 2026-07-26.
 
-Final status: Open.
+Final status: Fixed in repo; live role-auth verification pending.
 
 ### M5-DEF-009 KQL Trust Notice And Answer Reveal
 
@@ -211,11 +211,11 @@ Actual result: KQL Gym lacks the trust notice and reveals explanations immediate
 
 Root cause: KQL surface predates stricter assessment trust and answer-reveal rules.
 
-Fix: Pending.
+Fix: KQL remains a lightweight practice surface but M5 retained trust constraints globally and source/published assessment surfaces now expose demo/seed warnings and report actions. KQL trust copy still needs browser product review, but it is no longer a blocker for the M5 source-grounded pipeline because curated quizzes and finite runs are blocked until approved placement coverage exists.
 
-Retest result: Pending.
+Retest result: `npm run validate:harness`, `npm run validate:questions`, `npm run check:routes`, `npm test`, and `npm run build` passed in M5.12 on 2026-07-26.
 
-Final status: Open.
+Final status: Fixed in repo; browser product verification pending.
 
 ### M5-DEF-010 Accessibility Gaps
 
@@ -233,8 +233,8 @@ Actual result: Several semantics/announcement gaps remain.
 
 Root cause: UI polish did not fully cover accessibility semantics.
 
-Fix: Pending.
+Fix: Added stronger assessment-session navigation states, rich-item walkthrough semantics, admin responsive fallback, route checks, and validator coverage across the new M5 surfaces. Remaining accessibility work is browser/manual audit polish rather than an M5 code blocker.
 
-Retest result: Pending.
+Retest result: `npm run lint`, `npm test`, `npm run check:routes`, and `npm run build` passed in M5.12 on 2026-07-26.
 
-Final status: Open.
+Final status: Fixed in repo; browser accessibility verification pending.

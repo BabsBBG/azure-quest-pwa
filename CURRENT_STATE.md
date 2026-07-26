@@ -27,6 +27,7 @@ Harness state:
 - M5.9 Curated Domain Quiz Structure is implemented in repo with five quiz tracks per domain, explicit timing/unlock rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0015`, tests, and CI validation.
 - M5.10 Finite Certification Runs are implemented in repo with Baseline, Applied, Pressure, Final, and Personalized run definitions, version/effective metadata, distribution rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0016`, tests, and CI validation.
 - M5.11 User Reporting and Content-Quality Feedback is implemented in repo with approved-item-only report creation, item/source/attempt/session context fields, no-auto-mutation guard, Assessment Center report action, Admin Review Studio queue summary, migration `0017`, tests, and CI validation.
+- M5.12 Completion and Validation is complete in repo with Principal Engineer, Security/Data/Governance QA, and Product/Regression/Accessibility QA marked PASS after the full local CI-equivalent suite passed on 2026-07-26. Pushed GitHub Actions verification remains pending until the final commits are pushed.
 
 M5.0 rebrand status:
 

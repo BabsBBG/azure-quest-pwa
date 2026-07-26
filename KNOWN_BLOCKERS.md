@@ -29,8 +29,8 @@ Release blockers from the 2026-07-22 baseline audit:
 - Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006` and `importedProjectRowId()`; live Supabase RLS verification pending.
 - In-progress assessment sessions are fixed in repo with local/cloud persistence and recovery choices; M5.12 browser E2E and live Supabase verification pending.
 - Rich item type support is implemented in repo through walkthrough-only items and shared scoring contracts; production pool use remains blocked until source-grounded approved content, Admin publication, curated quiz placement, and Certification Run placement are complete.
-- `/admin` review studio is not implemented yet.
-- M5 final sign-off reports are currently FAIL until defects are fixed and retested.
+- `/admin` review studio is implemented in repo; live role-auth verification remains pending.
+- M5 final sign-off reports are PASS after local M5.12 validation on 2026-07-26; pushed GitHub Actions verification remains pending.
 
 ## Production question-bank blocker
 
