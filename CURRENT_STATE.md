@@ -7,11 +7,13 @@ The app currently exists as a frontend-first PWA in `BabsBBG/praxisgrid`.
 Harness state:
 
 - Product: PraxisGrid.
-- Active phase: M5.
-- Current permitted work: M5.0 through M5.12.
-- M6: NOT APPROVED.
-- The approved milestone sequence was restored on 2026-07-22. Previous source-pipeline contract and duplicate-gate work is preserved as foundation work under M5.4/M5.6/M5.7, not as completion of approved M5.1/M5.2.
-- M5 final sign-off is currently FAIL because baseline principal engineering and QA audits found open S1/S2 defects recorded in `docs/qa/M5_DEFECT_LEDGER.md`.
+- Active programme: M5 Production Perfection followed by Phase 6.
+- M5 status: REOPENED FOR PRODUCTION HARDENING.
+- M6 status: APPROVED.
+- M7 status: NOT APPROVED.
+- The user explicitly approved this programme on 2026-07-26 through the PraxisGrid Master Delivery Instruction.
+- The previous M5 sign-off is superseded by the M5/M6 baseline audit because production-critical items remain scaffold-only, fixture-only, or externally unverified.
+- Current M5/M6 production sign-off is FAIL until S1/S2 defects in `docs/qa/M5_M6_DEFECT_LEDGER.md` are fixed and live/browser verification gates pass.
 - M5.0 authorization hardening migration `0006_m5_authorization_hardening.sql` was added to separate review/publish authority, block reviewer publication, harden audit actors, and fix imported-project cloud row collisions. Live Supabase RLS application remains pending.
 - M5.1 Reliable Assessment Sessions are implemented in repo with local/cloud session persistence, recovery choices, timestamp expiry, direct question grid, mark/review/low-confidence filters, deliberate submission review, and confidence persistence. M5.12 E2E/live verification remains pending.
 - M5.2 Rich Assessment Item Types are implemented in repo with a discriminated item union, scoring helpers, walkthrough-only sample items, `/exam-walkthrough`, and CI validation. Full browser E2E verification remains pending.
@@ -27,7 +29,7 @@ Harness state:
 - M5.9 Curated Domain Quiz Structure is implemented in repo with five quiz tracks per domain, explicit timing/unlock rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0015`, tests, and CI validation.
 - M5.10 Finite Certification Runs are implemented in repo with Baseline, Applied, Pressure, Final, and Personalized run definitions, version/effective metadata, distribution rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0016`, tests, and CI validation.
 - M5.11 User Reporting and Content-Quality Feedback is implemented in repo with approved-item-only report creation, item/source/attempt/session context fields, no-auto-mutation guard, Assessment Center report action, Admin Review Studio queue summary, migration `0017`, tests, and CI validation.
-- M5.12 Completion and Validation is complete in repo with Principal Engineer, Security/Data/Governance QA, and Product/Regression/Accessibility QA marked PASS after the full local CI-equivalent suite passed on 2026-07-26. Pushed GitHub Actions verification remains pending until the final commits are pushed.
+- Previous M5.12 Completion and Validation passed the earlier static/local suite, but is now reopened because the new production-hardening baseline found live auth, RLS, admin, source-content, browser, accessibility, and production identity gaps.
 - M5 production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
 - M5 production deployment ID: `dpl_GQJ2jVsRXWAeMX4SWvQHcTHKt6wi`.
 - M5 production deployment URL: `https://azure-quest-a7y7zxukg-tonybabalola-1114s-projects.vercel.app`.
@@ -187,9 +189,9 @@ Required UI copy or equivalent:
 - Full replacement of the demo/seed question bank with approved source-grounded questions.
 - Route-level code splitting for bundle-size reduction.
 
-## Current approved milestone
+## Current approved programme
 
-M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approved.
+M5 Production Perfection followed by Phase 6 public beta delivery is approved by the user. M7 remains not approved.
 
 ## Current blockers
 

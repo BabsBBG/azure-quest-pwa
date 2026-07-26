@@ -2,7 +2,7 @@
 
 ## Current testing goal
 
-The current priority is M5 continuation stability: auth/data sync fallback, job readiness workflows, public GitHub import helpers, source-grounded approval gates, route integrity, question-bank honesty, and CI quality gates.
+The current priority is M5 production hardening followed by Phase 6 release validation: mandatory auth, onboarding, Learn/Practise/Prove IA, protected Admin, source-grounded content governance, repository isolation, privacy workflows, browser E2E, accessibility, visual review, production smoke, and live Supabase/RLS verification.
 
 ## M0 checks
 
@@ -55,19 +55,38 @@ Current CI:
 - node scripts/check-routes.mjs
 - npm run build
 
-## Future E2E checks
+## Required M5/M6 E2E and Production Checks
+
+Missing scripts to add during the programme:
+
+- `npm run typecheck`
+- `npm run test:integration`
+- `npm run test:e2e`
+- `npm run test:e2e:chromium`
+- `npm run test:e2e:webkit`
+- `npm run test:e2e:mobile`
+- `npm run test:accessibility`
+- `npm run test:visual`
+- `npm run test:production-smoke`
+- `npm run validate:routes`
+- `npm run validate:migrations`
+- `npm run validate:rls`
+- `npm run validate:assessment-shell`
+- `npm run validate:project-fixtures`
+- `npm run validate:repository-isolation`
+- `npm run validate:production-content`
+
+Required browser flows:
 
 Test flows:
 
-- Start quiz.
-- Complete quiz.
-- Finish Now.
-- Review answers.
-- Save attempt.
-- Retake same seed.
-- Start mock exam.
-- Open Job Prep.
-- Start interview session.
-- Complete interview session.
+- Unauthenticated root redirects to signup.
+- Signup, email verification state, sign-in, password recovery, logout, and data restoration.
+- Onboarding and active certification selection.
+- Learn, Practise, and Prove navigation on mobile and desktop.
+- Public repository submission and Project Intelligence results.
+- Interview Studio from a selected project.
+- Domain Quiz and Certification Run with rich item types, mark for review, refresh recovery, submission review, results, export, and report-a-question.
+- Admin denial and role-specific Admin journeys.
 
-Future E2E should also cover real Supabase sign up/sign in/sign out against a test project.
+Live Supabase checks must cover real sign up/sign in/sign out, migrations, RLS, role boundaries, user isolation, repository deletion, and account deletion against a test project before production sign-off.

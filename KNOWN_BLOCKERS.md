@@ -1,5 +1,23 @@
 # KNOWN_BLOCKERS.md
 
+## M5/M6 production-hardening blockers
+
+The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6. The current production baseline is blocked by:
+
+- Public `/admin` route is not runtime auth/role gated.
+- Public app still supports logged-out demo practice.
+- Vercel production env check reported no `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`.
+- Supabase CLI is not installed locally, so live migration/RLS validation is blocked from this checkout.
+- Live Supabase test identities and role bootstrap are not configured/verified.
+- Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
+- GitHub import abuse controls are in-memory/IP-based instead of durable authenticated-user controls.
+- Secondary assessment-like surfaces need the shared demo-bank trust notice and answer-reveal alignment.
+- Admin Review Studio is static and not connected to protected live queues/mutations.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, migration, RLS, production-content, repository-isolation, and assessment-shell gates are missing.
+- Current production Vercel identity remains `azure-quest-pwa`; canonical PraxisGrid URL migration remains pending.
+
+Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
+
 ## M5 restored harness blockers
 
 The approved M5 sequence is now:

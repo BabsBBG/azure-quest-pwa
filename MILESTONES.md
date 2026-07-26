@@ -4,24 +4,38 @@
 
 Product: PraxisGrid
 
-Active phase: M5
+Active programme: M5 Production Perfection followed by Phase 6
 
-Current permitted work: M5.0 through M5.12
+Current permitted work: Reopened M5 production hardening and Phase 6.0 through Phase 6.12
 
-M6: NOT APPROVED
+M5 status: REOPENED FOR PRODUCTION HARDENING
+
+M6 status: APPROVED
+
+M7 status: NOT APPROVED
 
 ## Current Status
 
-M5 is in progress. The previous repository state mislabelled source-pipeline contract work as M5.1 and duplicate-gate work as M5.2. Those implementations are preserved as useful foundations, but the approved M5 sequence below is now the source of truth.
+M5 was previously marked complete after local/static validation, but the 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6.
+
+The previous repository state is preserved as a useful scaffold. It is not production-complete until live authentication, Supabase migration/RLS verification, Admin authorization, source-grounded content, browser/accessibility gates, production-content checks, and canonical PraxisGrid deployment gates pass.
 
 M5 cannot be marked complete until:
 
-- M5.0 through M5.12 are implemented.
+- S1/S2 defects in `docs/qa/M5_M6_DEFECT_LEDGER.md` are closed.
 - Principal engineering review passes.
 - Security/data/governance QA passes.
-- Product/regression/accessibility QA passes.
-- Required validation commands pass.
+- Product/UX/accessibility QA passes.
+- Required validation commands pass locally and in GitHub Actions.
+- Live Supabase auth, migrations, RLS, role boundaries, and user isolation pass.
+- Public production deployment uses a canonical PraxisGrid identity where access permits.
 - No unresolved S1/S2 defects remain.
+
+Phase 6 cannot be marked complete until:
+
+- Admin Control Centre operations work across M6.0 through M6.12.
+- Product analytics, AI usage/cost intelligence, feature flags, system health, privacy workflows, notifications, audit records, and production tests pass.
+- All four senior roles sign PASS.
 
 ## M5.0 Immediate Corrections, PraxisGrid Rebrand, And Governance Foundations
 
