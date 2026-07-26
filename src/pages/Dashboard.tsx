@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { StatCard } from "../components/game/StatCard";
-import { examBlueprints } from "../data/examBlueprints";
 import { curatedDomainQuizzes } from "../data/curatedDomainQuizzes";
+import { finiteCertificationRuns } from "../data/finiteCertificationRuns";
 import { readinessAll } from "../utils/readiness";
 
 export function Dashboard() {
@@ -77,7 +77,7 @@ export function Dashboard() {
 
       <section className="grid gap-4 sm:grid-cols-3"><Button asChild size="lg" variant="hero" className="h-20 justify-between"><Link to="/study"><span>Study Review</span><Brain /></Link></Button><Button asChild size="lg" variant="success" className="h-20 justify-between"><Link to="/flashcards"><span>Flashcards</span><Gauge /></Link></Button><Button asChild size="lg" variant="default" className="h-20 justify-between"><Link to="/history"><span>Activity History</span><History /></Link></Button></section>
 
-      <Card><CardHeader><CardTitle>Certification run menu</CardTitle><Trophy className="h-6 w-6 text-[var(--aq-blue-600)]" /></CardHeader><div className="grid gap-3 sm:grid-cols-2">{examBlueprints.map((exam) => <Link key={exam.id} to={`/arena?cert=${exam.cert}&mode=timed&count=${exam.targetQuestions}&minutes=${exam.minutes}&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}${exam.focusDomain ? `&domain=${encodeURIComponent(exam.focusDomain)}` : ""}`} className="aq-row-card p-4"><p className="font-semibold">{exam.title}</p><p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{exam.subtitle}</p><p className="text-sm font-semibold text-[var(--aq-muted)]">{exam.targetQuestions}Q / {exam.minutes}m / {exam.vibe}</p></Link>)}</div></Card>
+      <Card><CardHeader><CardTitle>Certification run menu</CardTitle><Trophy className="h-6 w-6 text-[var(--aq-blue-600)]" /></CardHeader><div className="grid gap-3 sm:grid-cols-2">{finiteCertificationRuns.map((exam) => <Link key={exam.id} to={exam.publicationStatus === "published" ? `/arena?cert=${exam.cert}&mode=timed&count=${exam.targetQuestions}&minutes=${exam.minutes}&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}` : `/cert/${exam.cert.toLowerCase()}/readiness`} className="aq-row-card p-4"><p className="font-semibold">{exam.title}</p><p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{exam.runType} / {exam.publicationStatus}</p><p className="text-sm font-semibold text-[var(--aq-muted)]">{exam.targetQuestions}Q / {exam.minutes}m / missing approved placements {exam.missingApprovedItems}</p></Link>)}</div></Card>
 
       <section className="grid gap-4 sm:grid-cols-2"><Card><CardHeader><div><CardTitle>Target areas</CardTitle><p className="text-sm font-semibold text-[var(--aq-muted)]">Review these first.</p></div><Brain className="h-7 w-7 text-[var(--aq-blue-600)]" /></CardHeader><CardContent>{weakTags.length ? <div className="grid gap-2">{weakTags.map(([tag, score]) => <div key={tag} className="aq-subtle-panel flex items-center justify-between p-3 font-semibold"><span>{tag}</span><span>{score}</span></div>)}</div> : <div className="aq-subtle-panel p-4 font-semibold">No target areas yet. Start a practice run to build your map.</div>}</CardContent></Card><Card><CardHeader><CardTitle>Latest run</CardTitle><Badge>{attempts[0]?.percentage ?? 0}%</Badge></CardHeader><p className="font-semibold text-[var(--aq-muted)]">{attempts[0] ? `${attempts[0].title} / ${attempts[0].score}/${attempts[0].total} / +${attempts[0].readinessDelta ?? 0} progress` : "No saved attempts yet."}</p></Card></section>
     </motion.div>

@@ -187,12 +187,13 @@ Implemented:
 
 ## M5.10 Finite Certification Runs
 
-Status: not complete.
+Status: complete in repo; publication blocked until approved item coverage is sufficient.
 
-Required:
+Implemented:
 
 - Versioned Baseline, Applied, Pressure, Final, and Personalized runs.
 - Explicit run definitions, distribution rules, publication state, effective dates, and Main Admin publication.
+- Missing approved placement tracking, Supabase publication guard, validation script, CI hook, and report.
 
 ## M5.11 User Reporting And Content-Quality Feedback
 

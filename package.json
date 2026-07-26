@@ -22,6 +22,7 @@
     "validate:source-impact": "node scripts/validate-source-impact.mjs",
     "validate:admin-review-studio": "node scripts/validate-admin-review-studio.mjs",
     "validate:curated-domain-quizzes": "node scripts/validate-curated-domain-quizzes.mjs",
+    "validate:finite-runs": "node scripts/validate-finite-certification-runs.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "check:routes": "node scripts/check-routes.mjs"

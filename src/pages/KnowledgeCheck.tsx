@@ -2,8 +2,8 @@ import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BarChart3, BrainCircuit, Clock, DatabaseZap, FileQuestion, FlaskConical, Play, RotateCcw } from "lucide-react";
 import { certFromSlug, isCertActivatable, metaFor, pathFor } from "../data/certPaths";
-import { examBlueprints } from "../data/examBlueprints";
 import { curatedQuizCoverageSummary, curatedQuizzesForCert } from "../data/curatedDomainQuizzes";
+import { finiteRunCoverageSummary, finiteRunsForCert } from "../data/finiteCertificationRuns";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -19,7 +19,8 @@ export function KnowledgeCheck() {
   const attempts = useAppStore((state) => state.attempts).filter((a) => a.cert === cert);
   const certQuizzes = curatedQuizzesForCert(cert);
   const curatedSummary = curatedQuizCoverageSummary(cert);
-  const certExams = examBlueprints.filter((e) => e.cert === cert);
+  const certExams = finiteRunsForCert(cert);
+  const finiteSummary = finiteRunCoverageSummary(cert);
   const approvedSourceQuestions = approvedSourceGroundedQuestions().filter((question) => question.cert === cert);
   const latestGenerationRun = generationRuns[0];
   const sourceSummary = sourceGroundingSummary();
@@ -138,6 +139,11 @@ export function KnowledgeCheck() {
       <Card>
         <CardHeader><CardTitle>Certification Runs</CardTitle><FileQuestion className="h-6 w-6" /></CardHeader>
         <div className="mb-3"><QuestionBankNotice compact /></div>
+        <div className="mb-3 grid gap-3 sm:grid-cols-3">
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Finite runs: {finiteSummary.total}</div>
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Published: {finiteSummary.published}</div>
+          <div className="aq-subtle-panel p-3 text-sm font-semibold">Missing approved placements: {finiteSummary.missingApprovedItems}</div>
+        </div>
         {!active ? <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">New {cert} certification runs are disabled while this certification retires. Historical scores are preserved.</p> : null}
         <div className="grid gap-3 sm:grid-cols-2">
           {certExams.map((exam) => {
@@ -146,11 +152,12 @@ export function KnowledgeCheck() {
               <div key={exam.id} className="aq-row-card p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <Badge className="mb-2 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">{exam.title}</Badge>
-                    <h3 className="text-base font-semibold">Weighted structure changes every launch</h3>
-                    <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">50 questions / 100 minutes / unanswered grade wrong</p>
+                    <div className="mb-2 flex flex-wrap gap-2"><Badge className="border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">{exam.runType}</Badge><Badge>{exam.publicationStatus}</Badge></div>
+                    <h3 className="text-base font-semibold">{exam.title}</h3>
+                    <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{exam.targetQuestions} questions / {exam.minutes} minutes / unanswered grade wrong</p>
+                    {exam.missingApprovedItems > 0 ? <p className="mt-2 text-xs font-bold text-amber-700 dark:text-amber-200">Blocked pending {exam.missingApprovedItems} approved source-grounded placements.</p> : null}
                   </div>
-                  <Button asChild size="sm" variant={active ? "hero" : "soft"} className="shrink-0"><Link to={active ? `/arena?cert=${cert}&mode=timed&count=50&minutes=100&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/readiness`}><Play className="h-4 w-4" /> {active ? "Start" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
+                  <Button asChild size="sm" variant={active && exam.publicationStatus === "published" ? "hero" : "soft"} className="shrink-0"><Link to={active && exam.publicationStatus === "published" ? `/arena?cert=${cert}&mode=timed&count=${exam.targetQuestions}&minutes=${exam.minutes}&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/readiness`}><Play className="h-4 w-4" /> {active && exam.publicationStatus === "published" ? "Start" : exam.publicationStatus === "blocked" ? "Blocked" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
                 </div>
                 <div className="mt-3"><Progress value={best?.percentage ?? 0} /><p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Best: {best ? `${best.percentage}%` : "Not attempted"}</p></div>
               </div>
