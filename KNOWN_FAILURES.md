@@ -23,7 +23,7 @@ Result:
 Resolved locally. `CI=true npm run test:e2e:webkit` passed 10/10 after the computed color pinning.
 
 Remaining issue:
-Push follow-up commit and verify PR CI turns green.
+Resolved in PR CI. GitHub Actions run `30214329194` passed after the follow-up fixes.
 
 ### M5/M6 CI mobile auth opacity contrast failure
 
@@ -46,7 +46,7 @@ Result:
 Resolved locally. `CI=true npm run test:accessibility` passed 36/36 after removing the auth intro fade and darkening the intro copy.
 
 Remaining issue:
-Push follow-up commit and verify PR CI turns green.
+Resolved in PR CI. GitHub Actions run `30214329194` passed after the follow-up fixes.
 
 ### M5/M6 CSS lookup command misses
 
