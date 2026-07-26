@@ -155,12 +155,13 @@ Implemented:
 
 ## M5.7A Source Dependency And Impact Graph
 
-Status: not complete.
+Status: complete in repo; live source-version processing pending in M5.12.
 
-Required:
+Implemented:
 
 - Dependency chain from source document through Knowledge Units, summaries, assessment items, Domain Quiz placements, and Certification Run placements.
 - Source version diffs, affected-content traversal, risk states, targeted replacement jobs, and Main Admin review.
+- Supabase diff/impact/replacement tables, validation script, CI hook, and report.
 
 ## M5.8 Separate PraxisGrid Admin Review Studio
 
