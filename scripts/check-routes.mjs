@@ -7,7 +7,14 @@ const requiredRoutes = [
   "/",
   "/quiz",
   "/exams",
+  "/auth",
+  "/auth/callback",
+  "/privacy",
+  "/terms",
+  "/status",
   "/learn",
+  "/practise",
+  "/prove",
   "/domain-quizzes",
   "/certification-runs",
   "/career-lab",
@@ -25,6 +32,8 @@ const requiredRoutes = [
 
 const routeFiles = [
   "src/pages/PathHome.tsx",
+  "src/pages/AuthPage.tsx",
+  "src/pages/PublicInfoPage.tsx",
   "src/pages/KnowledgeCheck.tsx",
   "src/pages/Readiness.tsx",
   "src/pages/JobReadiness.tsx",
@@ -38,9 +47,11 @@ const routeFiles = [
 
 const missingRoutes = requiredRoutes.filter((route) => !app.includes(`path="${route}"`));
 const missingFiles = routeFiles.filter((file) => !existsSync(file));
-const requiredNavLabels = ["Home", "Learn", "Domain Quizzes", "Career Lab", "Progress", "Account"];
+const requiredNavLabels = ["Learn", "Practise", "Prove"];
 const missingNavLabels = requiredNavLabels.filter((label) => !layout.includes(`label: "${label}"`));
-const staleNavLabels = ["Docs", "Videos", "Job Prep"].filter((label) => layout.includes(`label: "${label}"`));
+const staleNavLabels = ["Docs", "Videos", "Job Prep", "Domain Quizzes", "Career Lab", "Progress"].filter((label) => layout.includes(`label: "${label}"`));
+const adminRouteProtected = app.includes('path="/admin" element={<ProtectedAdminRoute />}');
+const adminRouteDirect = app.includes('path="/admin" element={<AdminReviewStudio />}');
 
 if (missingRoutes.length) {
   console.error(`Missing routes in App.tsx: ${missingRoutes.join(", ")}`);
@@ -59,6 +70,11 @@ if (missingNavLabels.length) {
 
 if (staleNavLabels.length) {
   console.error(`Stale nav labels still active in Layout.tsx: ${staleNavLabels.join(", ")}`);
+  process.exit(1);
+}
+
+if (!adminRouteProtected || adminRouteDirect) {
+  console.error("Admin route must render through ProtectedAdminRoute and must not mount AdminReviewStudio directly.");
   process.exit(1);
 }
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
+import type { UserRole } from "../types";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { upsertProfile } from "../lib/cloudSync";
 
@@ -8,11 +9,14 @@ interface AuthContextValue {
   loading: boolean;
   session: Session | null;
   user: User | null;
+  role: UserRole;
+  roleLoading: boolean;
   error: string | null;
   clearError: () => void;
   signUp: (args: { email: string; password: string; name?: string }) => Promise<void>;
   signIn: (args: { email: string; password: string }) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  resetPassword: (args: { email: string }) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (args: { name: string }) => Promise<void>;
 }
@@ -37,10 +41,33 @@ function syncProfile(session: Session | null) {
   }).catch(() => undefined);
 }
 
+async function readCurrentRole(user: User | null): Promise<UserRole> {
+  if (!supabase || !user) return "USER";
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
+  if (error || !data?.role) return "USER";
+  return data.role as UserRole;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [role, setRole] = useState<UserRole>("USER");
+  const [roleLoading, setRoleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function applySession(nextSession: Session | null) {
+    setSession(nextSession);
+    syncProfile(nextSession);
+    if (!nextSession?.user) {
+      setRole("USER");
+      setRoleLoading(false);
+      return;
+    }
+    setRoleLoading(true);
+    const nextRole = await readCurrentRole(nextSession.user);
+    setRole(nextRole);
+    setRoleLoading(false);
+  }
 
   useEffect(() => {
     if (!supabase) {
@@ -52,15 +79,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void supabase.auth.getSession().then(({ data, error: sessionError }) => {
       if (!active) return;
       if (sessionError) setError(authErrorMessage(sessionError));
-      setSession(data.session ?? null);
-      syncProfile(data.session ?? null);
-      setLoading(false);
+      void applySession(data.session ?? null).finally(() => setLoading(false));
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      syncProfile(nextSession);
-      setLoading(false);
+      void applySession(nextSession).finally(() => setLoading(false));
     });
 
     return () => {
@@ -74,6 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     session,
     user: session?.user ?? null,
+    role,
+    roleLoading,
     error,
     clearError: () => setError(null),
     signUp: async ({ email, password, name }) => {
@@ -119,6 +144,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (oauthError) setError(authErrorMessage(oauthError));
       setLoading(false);
     },
+    resetPassword: async ({ email }) => {
+      if (!supabase) {
+        setError("Account sign-in is not available in this environment.");
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/auth?mode=signin`;
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo
+      });
+      if (resetError) setError(authErrorMessage(resetError));
+      setLoading(false);
+    },
     signOut: async () => {
       if (!supabase) return;
       setLoading(true);
@@ -138,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setLoading(false);
     }
-  }), [error, loading, session]);
+  }), [error, loading, role, roleLoading, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
