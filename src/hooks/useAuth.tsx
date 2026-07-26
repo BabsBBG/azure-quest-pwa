@@ -12,6 +12,7 @@ interface AuthContextValue {
   clearError: () => void;
   signUp: (args: { email: string; password: string; name?: string }) => Promise<void>;
   signIn: (args: { email: string; password: string }) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (args: { name: string }) => Promise<void>;
 }
@@ -24,8 +25,8 @@ function authErrorMessage(error: unknown) {
 }
 
 function profileName(user?: User | null) {
-  const metadataName = user?.user_metadata?.full_name;
-  return typeof metadataName === "string" ? metadataName : null;
+  const metadataName = user?.user_metadata?.full_name ?? user?.user_metadata?.name;
+  return typeof metadataName === "string" && metadataName.trim().length > 0 ? metadataName : null;
 }
 
 function syncProfile(session: Session | null) {
@@ -101,6 +102,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) setError(authErrorMessage(signInError));
       else syncProfile(data.session ?? null);
+      setLoading(false);
+    },
+    signInWithGoogle: async () => {
+      if (!supabase) {
+        setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable Google sign-in.");
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/account`;
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: redirectTo ? { redirectTo } : undefined
+      });
+      if (oauthError) setError(authErrorMessage(oauthError));
       setLoading(false);
     },
     signOut: async () => {

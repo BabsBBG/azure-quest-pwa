@@ -78,6 +78,7 @@ M1.6 is complete only if:
 
 - Supabase email/password sign up exists.
 - Supabase email/password sign in exists.
+- Supabase Google SSO exists without frontend Google secrets.
 - Sign out exists.
 - Auth state persists across refresh through the Supabase client.
 - Logged-out users can still use local/demo practice.

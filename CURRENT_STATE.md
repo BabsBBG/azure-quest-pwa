@@ -72,7 +72,7 @@ It has:
 - Progress/readiness score concepts.
 - History concepts.
 - PWA setup.
-- Supabase Auth account foundation.
+- Supabase Auth account foundation with email/password and Google SSO through Supabase OAuth.
 
 ## What currently works
 
@@ -113,8 +113,8 @@ It has:
 - Playful labels such as Daily Boss, Swipe Cards, Cozy cyber cave, Explain Like I'm 5, and Next bite have been replaced with professional wording.
 - Three M1.5 follow-up subagents reviewed UI/UX, senior engineering risk, and QA/product quality; their release-blocking findings were fixed before deployment.
 - M1.5 production verification passed on the fresh deployment URL for Job Prep-era job surfaces and Study Mode; the production alias serves the new asset, but an already-open PWA tab may need refresh because of service worker caching.
-- M1.6 adds Supabase email/password account foundation using `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-- Account/Profile UI supports logged-out state, sign up, sign in, sign out, profile name update, loading states, and auth errors.
+- M1.6 adds Supabase email/password account foundation and Google SSO using `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`; Google OAuth secrets remain configured only in Supabase/Google provider settings.
+- Account/Profile UI supports logged-out state, Google SSO, sign up, sign in, sign out, profile name update, loading states, and auth errors.
 - Logged-out users can still use local demo practice and local attempt history.
 - Attempts, readiness, flashcards, and interview practice still write locally first through localForage/Zustand.
 - M2 Career Lab adds all seven tracks, a 30-minute interview studio, typed answers, coaching reveal, self-score rubric, and interview history.
@@ -190,6 +190,7 @@ M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approv
 - Approved M5.1 Reliable Assessment Sessions are fixed in repo; M5.12 browser E2E and live Supabase recovery verification remain pending.
 - Approved M5.2 Rich Assessment Item Types are fixed in repo through the Exam Walkthrough and shared rich item/scoring contracts; M5.12 browser E2E verification remains pending.
 - Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
+- Google SSO is implemented in repo, but live Supabase Google provider setup and redirect allow-list verification remain pending for each deployed environment.
 - `/admin` review studio is not implemented yet.
 - KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.

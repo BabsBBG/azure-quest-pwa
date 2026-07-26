@@ -173,3 +173,29 @@ Follow-up actions taken:
 - Added top-level `permissions: contents: read` to the CI workflow.
 - Removed the stale deploy-fork workflow that depended on a GitHub PAT.
 - Renamed remaining user-facing links from Knowledge/Interview readiness to Quiz/Job Prep where they crossed active M1.6 surfaces.
+
+## Google SSO Account Audit
+
+Google SSO audit requested on 2026-07-26 for the existing Supabase account foundation.
+
+Three subagents completed read-only audits:
+
+- UI/UX Revamp Lead: Galileo
+- Senior Software Engineer: Hubble
+- QA and Product Lead: Cicero
+
+Release-blocking or high-impact findings:
+
+- Google SSO must use Supabase OAuth only, with no Google SDK, frontend OAuth secret, or separate identity stack.
+- Google OAuth secrets belong in Supabase/Google provider settings, not `.env.example` or Vite variables.
+- The Account page should present Google as a neutral SSO option, preserve local/demo fallback, and avoid implying affiliation with Google or certification providers.
+- Google profile metadata should tolerate `name` as well as `full_name`.
+- Live provider and redirect allow-list verification remains required before production Google sign-in can be considered externally verified.
+
+Follow-up actions taken:
+
+- Added `signInWithGoogle` to the auth provider using `supabase.auth.signInWithOAuth({ provider: "google" })`.
+- Added a neutral "Continue with Google" action on the logged-out Account page while preserving disabled local-mode behavior.
+- Added provider-neutral sign-in copy near the auth actions.
+- Updated auth setup, security, acceptance, and current-state docs with Google SSO scope and secret-handling rules.
+- Added focused tests for the disabled local-mode Google button and Supabase OAuth call shape.

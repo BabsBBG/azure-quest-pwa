@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### Google SSO Vitest mock hoisting failure
+
+Date:
+2026-07-26
+
+Command:
+`npm test -- src/hooks/useAuth.test.tsx src/pages/Account.test.tsx`
+
+Error:
+Vitest failed `src/hooks/useAuth.test.tsx` before running tests because the mocked Supabase module referenced `signInWithOAuth` before initialization.
+
+Likely cause:
+`vi.mock` factories are hoisted, so the top-level mock function was unavailable when Vitest created the module mock.
+
+Fix attempted:
+Moved the OAuth spy into `vi.hoisted()` and referenced it through the hoisted mock object.
+
+Result:
+Resolved. `npm test -- src/hooks/useAuth.test.tsx src/pages/Account.test.tsx` passed after the hoisted mock fix.
+
+Remaining issue:
+None.
+
 ### M5.6 deterministic generator option literal widening
 
 Date:

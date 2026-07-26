@@ -14,7 +14,7 @@ describe("Account", () => {
 
     expect(await screen.findByText("Accounts are not configured locally")).toBeInTheDocument();
     expect(screen.getByText("Logged out")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
   });
 });
-

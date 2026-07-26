@@ -66,7 +66,7 @@ Current static content is local/demo content only.
 
 The current app has:
 
-- Supabase Auth client foundation for email/password accounts.
+- Supabase Auth client foundation for email/password accounts and Google SSO.
 - Supabase migrations for profiles, quiz attempts, interview sessions, question flags, imported projects, source docs, source chunks, generation runs, question candidates, and approved questions.
 - Owner-only RLS for learner data tables.
 - Public-read-only GitHub import with no write scopes or private repo access.
@@ -80,6 +80,8 @@ The current app does not yet have:
 - production-scale Microsoft Learn ingestion
 - full admin review UI
 - full replacement of the demo/seed question bank
+
+Google SSO still requires live Supabase provider configuration and redirect URL allow-list verification in each deployed environment before it can be considered production-verified.
 
 ## Icon licensing
 
