@@ -103,13 +103,14 @@ Implemented:
 
 ## M5.5 Official Learning Summaries
 
-Status: not complete.
+Status: complete in repo; live Supabase verification pending in M5.12.
 
-Required:
+Implemented:
 
 - Source-grounded draft learning workspaces for certification domains.
 - Domain overview, learning sequence, terminology, configuration steps, decision rules, mistakes, examples, source links, blueprint version, and review status.
 - Main Admin approval and immutable published versions.
+- Learner-facing approved summaries on certification learning pages, validator, CI hook, and report.
 
 ## M5.6 Controlled Question-Generation Factory
 

@@ -15,6 +15,7 @@
     "validate:source-grounding": "node scripts/validate-source-grounding.mjs",
     "validate:source-ingestion": "node scripts/validate-source-ingestion.mjs",
     "validate:knowledge-graph": "node scripts/validate-knowledge-graph.mjs",
+    "validate:learning-summaries": "node scripts/validate-learning-summaries.mjs",
     "validate:authorization": "node scripts/validate-authorization.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "check:routes": "node scripts/check-routes.mjs"

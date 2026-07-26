@@ -1,8 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ExternalLink, FileText, Film, GraduationCap, MonitorPlay, ShieldCheck } from "lucide-react";
+import { BookOpenCheck, ExternalLink, FileText, Film, GraduationCap, MonitorPlay, ShieldCheck } from "lucide-react";
 import { certFromSlug, metaFor, pathFor } from "../data/certPaths";
 import { docs } from "../data/docs";
+import { approvedLearningSummaries } from "../data/learningSummaries";
 import { videos } from "../data/videos";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -16,6 +17,7 @@ export function LearningContent() {
   const meta = metaFor(cert);
   const docInfo = docs[pathFor(cert) as keyof typeof docs];
   const certVideos = videos.filter((video) => video.exam === cert);
+  const summaries = approvedLearningSummaries(cert);
   const completed = useAppStore((state) => state.progress.completedResources ?? []);
   const toggleResource = useAppStore((state) => state.toggleResource);
   const resourceIds = [...docInfo.links.map((_, i) => `${cert}:doc:${i}`), ...certVideos.map((v) => `${cert}:video:${v.id}`)];
@@ -30,6 +32,39 @@ export function LearningContent() {
         <p className="mt-3 max-w-2xl text-lg font-semibold text-[var(--aq-muted)]">Dedicated video library plus official docs tracking, built for low-bandwidth study sessions.</p>
         <div className="aq-subtle-panel mt-5 p-4"><div className="mb-2 flex justify-between text-sm font-semibold"><span>Learning completion</span><span>{pct}%</span></div><Progress value={pct} /></div>
       </section>
+
+      <Card>
+        <CardHeader><CardTitle>Approved Learning Summaries</CardTitle><BookOpenCheck className="h-6 w-6" /></CardHeader>
+        <div className="grid gap-3">
+          {summaries.map((summary) => (
+            <div key={summary.versionId} className="aq-row-card p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:justify-between">
+                <div className="min-w-0">
+                  <div className="mb-2 flex flex-wrap gap-2"><Badge>{summary.domainTitle}</Badge><Badge>Blueprint {summary.blueprintVersion}</Badge><Badge>v{summary.versionNumber}</Badge></div>
+                  <h3 className="text-xl font-semibold">{summary.overview}</h3>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div className="aq-subtle-panel p-3">
+                      <p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Study Order</p>
+                      <ul className="mt-2 space-y-1 text-sm font-semibold text-[var(--aq-muted)]">{summary.learningSequence.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul>
+                    </div>
+                    <div className="aq-subtle-panel p-3">
+                      <p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Watch For</p>
+                      <ul className="mt-2 space-y-1 text-sm font-semibold text-[var(--aq-muted)]">{summary.commonMistakes.slice(0, 3).map((item) => <li key={item}>{item}</li>)}</ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col">
+                  {summary.sourceLinks.slice(0, 2).map((source) => (
+                    <Button key={`${summary.versionId}:${source.sourceTextHash}`} asChild variant="ghost" size="sm">
+                      <a href={source.sourceUrl} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /> Source</a>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle>Official Docs</CardTitle><FileText className="h-6 w-6" /></CardHeader>

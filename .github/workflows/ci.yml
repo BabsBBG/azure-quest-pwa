@@ -25,6 +25,7 @@ jobs:
       - run: npm run validate:source-grounding
       - run: npm run validate:source-ingestion
       - run: npm run validate:knowledge-graph
+      - run: npm run validate:learning-summaries
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
       - run: npm run validate:rich-items

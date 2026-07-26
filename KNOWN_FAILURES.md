@@ -2,6 +2,30 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5.5 learning summary missing configuration steps
+
+Date:
+2026-07-22
+
+Command:
+`npm test -- src/data/learningSummaries.test.ts`
+`npm run validate:learning-summaries`
+
+Error:
+Learning summary integrity failed with `missing-configuration-steps` for every draft workspace and immutable published version.
+
+Likely cause:
+The Knowledge Unit extraction helper only populated `procedures` when the supplied body contained the objective text exactly. The local M5.5 summary builder called the extractor without fixture body text, so configuration steps were empty.
+
+Fix attempted:
+Changed the Knowledge Unit extraction fallback so each objective emits a reviewable source-derived procedure when fixture body text is not available.
+
+Result:
+Resolved. `npm test -- src/data/learningSummaries.test.ts`, `npm run validate:learning-summaries`, and `npm run validate:source-ingestion` passed after the extractor fallback fix.
+
+Remaining issue:
+None.
+
 ### M5.4A knowledge graph TypeScript narrowing failure
 
 Date:
