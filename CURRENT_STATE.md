@@ -28,6 +28,10 @@ Harness state:
 - M5.10 Finite Certification Runs are implemented in repo with Baseline, Applied, Pressure, Final, and Personalized run definitions, version/effective metadata, distribution rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0016`, tests, and CI validation.
 - M5.11 User Reporting and Content-Quality Feedback is implemented in repo with approved-item-only report creation, item/source/attempt/session context fields, no-auto-mutation guard, Assessment Center report action, Admin Review Studio queue summary, migration `0017`, tests, and CI validation.
 - M5.12 Completion and Validation is complete in repo with Principal Engineer, Security/Data/Governance QA, and Product/Regression/Accessibility QA marked PASS after the full local CI-equivalent suite passed on 2026-07-26. Pushed GitHub Actions verification remains pending until the final commits are pushed.
+- M5 production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
+- M5 production deployment ID: `dpl_GQJ2jVsRXWAeMX4SWvQHcTHKt6wi`.
+- M5 production deployment URL: `https://azure-quest-a7y7zxukg-tonybabalola-1114s-projects.vercel.app`.
+- M5 pushed GitHub Actions CI run `30200017797` passed for commit `ef0f6485202a8b1d9d6f837502baf33a08d61d32`.
 
 M5.0 rebrand status:
 
