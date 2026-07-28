@@ -199,3 +199,72 @@ export async function fetchCloudLearningData() {
     activeInterviewSession: (activeInterviewResult.data?.[0]?.payload as ActiveInterviewSession | undefined) ?? null
   };
 }
+
+export async function exportCloudData() {
+  const userId = await currentUserId();
+  if (!userId || !supabase) return { ok: false, skipped: true, error: "Sign in is required to export cloud data." };
+
+  const [
+    profile,
+    attempts,
+    interviews,
+    flags,
+    importedProjects,
+    projectAnalyses,
+    assessmentSessions,
+    activeInterviewSessions
+  ] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    supabase.from("quiz_attempts").select("*").eq("user_id", userId),
+    supabase.from("interview_sessions").select("*").eq("user_id", userId),
+    supabase.from("question_flags").select("*").eq("user_id", userId),
+    supabase.from("imported_projects").select("*").eq("user_id", userId),
+    supabase.from("project_intelligence_analyses").select("*").eq("user_id", userId),
+    supabase.from("assessment_sessions").select("*").eq("user_id", userId),
+    supabase.from("active_interview_sessions").select("*").eq("user_id", userId)
+  ]);
+
+  const errors = [profile, attempts, interviews, flags, importedProjects, projectAnalyses, assessmentSessions, activeInterviewSessions]
+    .map((result) => result.error)
+    .filter(Boolean);
+  if (errors.length) return { ok: false, skipped: false, error: errors[0] };
+
+  return {
+    ok: true,
+    skipped: false,
+    data: {
+      exportedAt: new Date().toISOString(),
+      userId,
+      profile: profile.data,
+      quizAttempts: attempts.data ?? [],
+      interviewSessions: interviews.data ?? [],
+      questionFlags: flags.data ?? [],
+      importedProjects: importedProjects.data ?? [],
+      projectIntelligenceAnalyses: projectAnalyses.data ?? [],
+      assessmentSessions: assessmentSessions.data ?? [],
+      activeInterviewSessions: activeInterviewSessions.data ?? []
+    }
+  };
+}
+
+export async function deleteCloudLearningData() {
+  const userId = await currentUserId();
+  if (!userId || !supabase) return { ok: false, skipped: true, error: "Sign in is required to delete cloud data." };
+
+  const tables = [
+    "active_interview_sessions",
+    "assessment_sessions",
+    "project_intelligence_analyses",
+    "imported_projects",
+    "question_flags",
+    "interview_sessions",
+    "quiz_attempts"
+  ];
+
+  for (const table of tables) {
+    const { error } = await supabase.from(table).delete().eq("user_id", userId);
+    if (error) return { ok: false, skipped: false, error };
+  }
+
+  return { ok: true, skipped: false };
+}

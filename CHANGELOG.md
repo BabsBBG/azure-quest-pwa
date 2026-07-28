@@ -29,6 +29,7 @@
 - Switched the global product typography from monospace-first to a readable sans-serif stack, reserved monospace for code and technical metadata, and added typography validation.
 - Replaced the silent production-smoke workflow condition with an explicit smoke runner that reports PR skips, fails `main` without a configured production URL, and blocks fallback to the historical Azure Quest URL.
 - Added typed Project Intelligence analysis records with evidence sections, owner-scoped Supabase persistence, regenerate/delete UI actions, and validation for repository-isolated analysis workflows.
+- Added signed-in cloud privacy workflows for exporting account-owned cloud data and deleting cloud learning/repository-analysis records, with owner delete RLS policies and validation.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.
