@@ -25,6 +25,29 @@ Resolved locally. `npm run validate:admin-review-studio`, `npm run validate:auth
 Remaining issue:
 Push the validator fix and rerun PR CI.
 
+### M5/M6 auth-first validator stale literal redirect
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30373351670`, job `90322627904`, step `npm run validate:auth-first-ia`.
+
+Error:
+`Auth-first IA validation failed: App missing protected route snippet Navigate to="/auth?mode=signup"`
+
+Likely cause:
+The auth redirect continuity slice replaced the literal signup redirect with `authPath("signup", location)` so protected routes can preserve the original destination through sign-in and Google SSO. The validator still expected the older literal string.
+
+Fix attempted:
+Updated `scripts/validate-auth-first-ia.mjs` to require `authPath("signup", location)` instead of the old literal redirect.
+
+Result:
+Resolved locally. `npm run validate:auth-first-ia`, `npm run validate:auth-redirects`, and `npm run typecheck` passed after updating the stale auth-first validator.
+
+Remaining issue:
+Push the validator fix and rerun PR CI.
+
 ### M5/M6 authorization validator stale imported-project row pattern
 
 Date:

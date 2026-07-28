@@ -40,7 +40,7 @@ for (const snippet of forbiddenAccountCopy) {
 
 const requiredProtectedRoutes = [
   "ProtectedLearnerShell",
-  "Navigate to=\"/auth?mode=signup\"",
+  "authPath(\"signup\", location)",
   "path=\"/\" element={<PathHome />}"
 ];
 
