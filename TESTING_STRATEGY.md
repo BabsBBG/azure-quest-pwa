@@ -43,6 +43,7 @@ Current scripts:
 - `npm run test:production-smoke`
 - `npm run validate:routes`
 - `npm run validate:github-import-controls`
+- `npm run validate:active-interview-recovery`
 
 Current Vitest coverage:
 
@@ -67,6 +68,7 @@ Current CI:
 - node scripts/validate-source-grounding.mjs
 - node scripts/check-routes.mjs
 - npm run validate:github-import-controls
+- npm run validate:active-interview-recovery
 - npm run test:e2e:chromium
 - npm run test:e2e:webkit
 - npm run test:e2e:mobile
@@ -90,6 +92,7 @@ Added scripts:
 - `npm run test:production-smoke`
 - `npm run validate:routes`
 - `npm run validate:github-import-controls`
+- `npm run validate:active-interview-recovery`
 
 Missing scripts to add during the programme:
 

@@ -249,6 +249,26 @@ export interface InterviewSessionAttempt {
   answers: InterviewAnswerRecord[];
 }
 
+export interface ActiveInterviewSession {
+  id: string;
+  cert: Cert;
+  sessionId: string;
+  sessionTitle: string;
+  role: string;
+  track: JobTrack;
+  startedAt: string;
+  updatedAt: string;
+  targetMinutes: number;
+  elapsedSeconds: number;
+  currentIndex: number;
+  answers: Record<string, string>;
+  submitted: Record<string, boolean>;
+  checked: Record<string, string[]>;
+  selfScores: Record<string, number>;
+  selectedProjectIds: string[];
+  status: "ACTIVE" | "PAUSED";
+}
+
 export interface QuestionFlag {
   id: string;
   cert: Cert;

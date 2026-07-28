@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -30,7 +30,7 @@ import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import { canImportPublicRepo, importPublicGitHubProject } from "../lib/githubProjectImport";
 import { GITHUB_PROJECT_PROMPT } from "../lib/brand";
-import type { ImportedProject, InterviewAnswerRecord, InterviewSessionAttempt, JobTrack } from "../types";
+import type { ActiveInterviewSession, ImportedProject, InterviewAnswerRecord, InterviewSessionAttempt, JobTrack } from "../types";
 
 const ALL_TRACKS = jobTracks.map((track) => track.id);
 
@@ -54,6 +54,9 @@ export function JobReadiness() {
   const { cert: slug } = useParams();
   const cert = certFromSlug(slug);
   const recordInterviewSession = useAppStore((state) => state.recordInterviewSession);
+  const activeInterviewSession = useAppStore((state) => state.activeInterviewSession);
+  const saveActiveInterviewSession = useAppStore((state) => state.saveActiveInterviewSession);
+  const clearActiveInterviewSession = useAppStore((state) => state.clearActiveInterviewSession);
   const recordImportedProject = useAppStore((state) => state.recordImportedProject);
   const interviewHistory = useAppStore((state) => state.interviewSessions);
   const importedProjects = useAppStore((state) => state.importedProjects);
@@ -67,7 +70,9 @@ export function JobReadiness() {
   const [index, setIndex] = useState(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [startedAt, setStartedAt] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const elapsedSecondsRef = useRef(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<Record<string, boolean>>({});
   const [checked, setChecked] = useState<Record<string, string[]>>({});
@@ -95,9 +100,10 @@ export function JobReadiness() {
   const trackSummary = ALL_TRACKS.join(", ").replace(/, ([^,]*)$/, " and $1");
 
   useEffect(() => {
+    if (started) return;
     const next = interviewSessions.find((item) => item.track === track);
     if (next) setSessionId(next.id);
-  }, [track]);
+  }, [started, track]);
 
   useEffect(() => {
     if (!started || paused) return;
@@ -105,21 +111,107 @@ export function JobReadiness() {
     return () => window.clearInterval(timer);
   }, [paused, started]);
 
+  useEffect(() => {
+    elapsedSecondsRef.current = elapsedSeconds;
+  }, [elapsedSeconds]);
+
+  const buildActiveInterviewSession = useCallback((status: ActiveInterviewSession["status"] = paused ? "PAUSED" : "ACTIVE") => {
+    if (!activeSessionId || !session || !startedAt) return null;
+    return {
+      id: activeSessionId,
+      cert,
+      sessionId: session.id,
+      sessionTitle: session.title,
+      role: session.role,
+      track: session.track,
+      startedAt,
+      updatedAt: new Date().toISOString(),
+      targetMinutes: session.minutes,
+      elapsedSeconds: elapsedSecondsRef.current,
+      currentIndex: index,
+      answers,
+      submitted,
+      checked,
+      selfScores,
+      selectedProjectIds: selectedProjects,
+      status
+    };
+  }, [activeSessionId, answers, cert, checked, index, paused, selectedProjects, selfScores, session, startedAt, submitted]);
+
+  useEffect(() => {
+    if (!started || !activeSessionId) return;
+    const handle = window.setTimeout(() => {
+      const draft = buildActiveInterviewSession();
+      if (draft) void saveActiveInterviewSession(draft);
+    }, 600);
+    return () => window.clearTimeout(handle);
+  }, [activeSessionId, answers, buildActiveInterviewSession, checked, index, saveActiveInterviewSession, selectedProjects, selfScores, started, submitted]);
+
+  useEffect(() => {
+    if (!started || !activeSessionId || elapsedSeconds % 15 !== 0) return;
+    const draft = buildActiveInterviewSession();
+    if (draft) void saveActiveInterviewSession(draft);
+  }, [activeSessionId, buildActiveInterviewSession, elapsedSeconds, saveActiveInterviewSession, started]);
+
   function startSession(id = sessionId) {
     const nextSession = interviewSessions.find((item) => item.id === id) ?? session;
+    const nextStartedAt = new Date().toISOString();
+    const nextActiveSessionId = makeId();
     setSessionId(nextSession.id);
     setTrack(nextSession.track);
     setStarted(true);
     setPaused(false);
     setIndex(0);
     setCoachOpen(false);
-    setStartedAt(new Date().toISOString());
+    setStartedAt(nextStartedAt);
+    setActiveSessionId(nextActiveSessionId);
     setElapsedSeconds(0);
     setAnswers({});
     setSubmitted({});
     setChecked({});
     setSelfScores({});
     setCompletedSession(null);
+    void saveActiveInterviewSession({
+      id: nextActiveSessionId,
+      cert,
+      sessionId: nextSession.id,
+      sessionTitle: nextSession.title,
+      role: nextSession.role,
+      track: nextSession.track,
+      startedAt: nextStartedAt,
+      updatedAt: nextStartedAt,
+      targetMinutes: nextSession.minutes,
+      elapsedSeconds: 0,
+      currentIndex: 0,
+      answers: {},
+      submitted: {},
+      checked: {},
+      selfScores: {},
+      selectedProjectIds: selectedProjects,
+      status: "ACTIVE"
+    });
+  }
+
+  function resumeActiveSession(draft: ActiveInterviewSession) {
+    setTrack(draft.track);
+    setSessionId(draft.sessionId);
+    setStarted(true);
+    setPaused(draft.status === "PAUSED");
+    setIndex(draft.currentIndex);
+    setCoachOpen(false);
+    setStartedAt(draft.startedAt);
+    setActiveSessionId(draft.id);
+    setElapsedSeconds(draft.elapsedSeconds);
+    setAnswers(draft.answers);
+    setSubmitted(draft.submitted);
+    setChecked(draft.checked);
+    setSelfScores(draft.selfScores);
+    setSelectedProjects(draft.selectedProjectIds);
+    setCompletedSession(null);
+  }
+
+  async function discardActiveSession(id: string) {
+    await clearActiveInterviewSession(id);
   }
 
   function toggleRubric(questionId: string, item: string) {
@@ -134,8 +226,18 @@ export function JobReadiness() {
 
   function submitCurrentAnswer() {
     if (!activeQuestion || activeAnswer.trim().length < 20 || activeScore < 1) return;
-    setSubmitted((prev) => ({ ...prev, [activeQuestion.id]: true }));
+    const nextSubmitted = { ...submitted, [activeQuestion.id]: true };
+    setSubmitted(nextSubmitted);
     setCoachOpen(true);
+    const draft = buildActiveInterviewSession();
+    if (draft) void saveActiveInterviewSession({ ...draft, submitted: nextSubmitted });
+  }
+
+  function togglePause() {
+    const nextPaused = !paused;
+    setPaused(nextPaused);
+    const draft = buildActiveInterviewSession(nextPaused ? "PAUSED" : "ACTIVE");
+    if (draft) void saveActiveInterviewSession(draft);
   }
 
   async function finishSession() {
@@ -173,10 +275,12 @@ export function JobReadiness() {
       answers: answerRecords
     };
     await recordInterviewSession(attempt);
+    if (activeSessionId) await clearActiveInterviewSession(activeSessionId);
     setCompletedSession(attempt);
     setStarted(false);
     setPaused(false);
     setCoachOpen(false);
+    setActiveSessionId(null);
   }
 
   async function nextQuestion() {
@@ -237,7 +341,7 @@ export function JobReadiness() {
           <div>
             <Badge className="mb-2 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">Interview Studio</Badge>
             <CardTitle className="text-2xl">30-minute mock interview</CardTitle>
-            <p className="mt-1 font-bold text-slate-500 dark:text-slate-400">Write the answer you would say, self-score it, then reveal coaching. Local history saves when you complete the session.</p>
+            <p className="mt-1 font-bold text-slate-500 dark:text-slate-400">Write the answer you would say, self-score it, then reveal coaching. Work in progress recovers locally and syncs to cloud when signed in.</p>
           </div>
           <Clock className="h-6 w-6 text-sky-500" />
         </CardHeader>
@@ -251,6 +355,22 @@ export function JobReadiness() {
               </button>
             ))}
             <Button onClick={() => startSession()} size="lg" variant="hero" className="w-full"><Play className="h-4 w-4" /> Start 30-minute simulation</Button>
+            {activeInterviewSession && !started && !completedSession ? (
+              <div className="aq-subtle-panel p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <Badge className="border-[var(--aq-blue-600)] bg-[var(--aq-blue-50)] text-[var(--aq-blue-800)]">Recoverable session</Badge>
+                  <Badge>{activeInterviewSession.status.toLowerCase()}</Badge>
+                </div>
+                <h3 className="text-lg font-semibold">{activeInterviewSession.sessionTitle}</h3>
+                <p className="mt-1 text-xs font-bold text-[var(--aq-muted)]">
+                  Question {activeInterviewSession.currentIndex + 1} / {formatClock(activeInterviewSession.elapsedSeconds)} elapsed / updated {new Date(activeInterviewSession.updatedAt).toLocaleString()}
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Button onClick={() => resumeActiveSession(activeInterviewSession)} variant="hero" size="sm"><Play className="h-4 w-4" /> Resume</Button>
+                  <Button onClick={() => void discardActiveSession(activeInterviewSession.id)} variant="soft" size="sm"><RotateCcw className="h-4 w-4" /> Discard</Button>
+                </div>
+              </div>
+            ) : null}
             {recentSessions.length ? <InterviewHistory sessions={recentSessions} /> : null}
           </div>
 
@@ -295,7 +415,7 @@ export function JobReadiness() {
                   </div>
                 </div>
                 <div className="sticky bottom-24 z-10 grid gap-2 rounded-md border border-[var(--aq-border)] bg-white/95 p-2 shadow-sm backdrop-blur dark:bg-[#061227]/95 sm:static sm:grid-cols-3 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
-                  <Button onClick={() => setPaused((value) => !value)} variant="soft" size="lg"><PauseCircle className="h-4 w-4" /> {paused ? "Resume" : "Pause"}</Button>
+                  <Button onClick={togglePause} variant="soft" size="lg"><PauseCircle className="h-4 w-4" /> {paused ? "Resume" : "Pause"}</Button>
                   <Button onClick={submitCurrentAnswer} variant="soft" size="lg" disabled={activeAnswer.trim().length < 20 || activeScore < 1}><Sparkles className="h-4 w-4" /> {activeSubmitted ? "Answer saved" : "Submit answer"}</Button>
                   <Button onClick={() => void nextQuestion()} variant="hero" size="lg" disabled={!activeSubmitted}>{index + 1 >= sessionQuestions.length ? "Complete interview" : "Next question"} <ArrowRight className="h-4 w-4" /></Button>
                 </div>

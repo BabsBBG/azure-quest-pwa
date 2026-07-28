@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 active interview migration filename lookup miss
+
+Date:
+2026-07-28
+
+Command:
+`Get-Content .\supabase\migrations\0002_learning_records.sql`
+
+Error:
+The file did not exist.
+
+Likely cause:
+The learning-data migration is named `0002_learning_data.sql`, not `0002_learning_records.sql`.
+
+Fix attempted:
+Listed `supabase/migrations` and read `0002_learning_data.sql`.
+
+Result:
+Resolved. The correct migration file was inspected before adding the active interview migration.
+
+Remaining issue:
+None.
+
 ### M5/M6 GitHub import client duplicate data binding
 
 Date:
