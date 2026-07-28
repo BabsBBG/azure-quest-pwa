@@ -52,6 +52,7 @@ Current scripts:
 - `npm run validate:privacy-workflows`
 - `npm run validate:support-boundary`
 - `npm run validate:production-content`
+- `npm run validate:destructive-actions`
 - `npm run validate:typography`
 - `npm run validate:production-smoke-gate`
 
@@ -87,6 +88,7 @@ Current CI:
 - npm run validate:privacy-workflows
 - npm run validate:support-boundary
 - npm run validate:production-content
+- npm run validate:destructive-actions
 - npm run validate:typography
 - npm run test:e2e:chromium
 - npm run test:e2e:webkit
@@ -120,6 +122,7 @@ Added scripts:
 - `npm run validate:privacy-workflows`
 - `npm run validate:support-boundary`
 - `npm run validate:production-content`
+- `npm run validate:destructive-actions`
 - `npm run validate:typography`
 - `npm run validate:production-smoke-gate`
 
@@ -128,7 +131,6 @@ Missing scripts to add during the programme:
 - `npm run validate:migrations`
 - `npm run validate:rls`
 - `npm run validate:repository-isolation`
-- `npm run validate:production-content`
 
 Required browser flows:
 

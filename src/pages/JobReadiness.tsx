@@ -328,9 +328,17 @@ export function JobReadiness() {
   }
 
   async function removeProject(project: ImportedProject) {
-    await deleteImportedProject(project.id);
-    setSelectedProjects((prev) => prev.filter((id) => id !== project.id));
-    setImportMessage(`Deleted ${project.owner}/${project.repo} and its local/cloud analysis record.`);
+    const confirmed = window.confirm(`Delete ${project.owner}/${project.repo} and its Project Intelligence analysis from this account? This cannot be undone.`);
+    if (!confirmed) return;
+    setImportError(null);
+    setImportMessage(null);
+    try {
+      await deleteImportedProject(project.id);
+      setSelectedProjects((prev) => prev.filter((id) => id !== project.id));
+      setImportMessage(`Deleted ${project.owner}/${project.repo} and its repository analysis.`);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Repository analysis delete failed.");
+    }
   }
 
   return (

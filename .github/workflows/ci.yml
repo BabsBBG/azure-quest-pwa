@@ -50,6 +50,7 @@ jobs:
       - run: npm run validate:privacy-workflows
       - run: npm run validate:support-boundary
       - run: npm run validate:production-content
+      - run: npm run validate:destructive-actions
       - run: npm run validate:typography
       - run: npm run validate:production-smoke-gate
       - run: npm run validate:routes

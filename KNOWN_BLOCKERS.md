@@ -15,7 +15,7 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
-- Playwright, WebKit, mobile, accessibility, visual, production-smoke, migration, RLS, production-content, repository-isolation, and assessment-shell gates are missing.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, and destructive-action gates exist in repo and CI. Migration, live RLS, and live repository-isolation verification gates remain pending.
 - Current production Vercel identity remains `azure-quest-pwa`; canonical PraxisGrid URL migration remains pending.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.

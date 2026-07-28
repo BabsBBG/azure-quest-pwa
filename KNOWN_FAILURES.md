@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 destructive delete error narrowing
+
+Date:
+2026-07-28
+
+Command:
+`npm run typecheck`
+
+Error:
+`src/store/useAppStore.ts(393,67): error TS2339: Property 'error' does not exist on type 'never'.`
+
+Likely cause:
+The new repository analysis delete failure path checked `!result.ok && !result.skipped`, which left TypeScript with an overly narrow inferred union for the optional `error` field.
+
+Fix attempted:
+Added a small unknown-error formatter and guarded `result.error` with `"error" in result` before throwing a learner-visible delete failure.
+
+Result:
+Resolved. `npm run typecheck` passed after the guarded error formatter.
+
+Remaining issue:
+None for this TypeScript failure.
+
+### M5/M6 local WebKit slice timeout during destructive-action retest
+
+Date:
+2026-07-28
+
+Command:
+`npm run test:e2e:webkit`
+
+Error:
+The command exceeded the local 300-second tool timeout before returning Playwright output.
+
+Likely cause:
+Local WebKit/browser worker startup or teardown exceeded the command timeout during the full CI-equivalent retest. No leftover `node.exe` process remained after the timeout.
+
+Fix attempted:
+Rerun the same WebKit slice with a longer timeout before continuing validation.
+
+Result:
+Resolved. `npm run test:e2e:webkit` passed 10/10 when rerun with a longer local timeout.
+
+Remaining issue:
+None for the WebKit slice. The local WebKit gate is slow and may need a longer timeout than 300 seconds.
+
 ### M5/M6 admin validator stale role badge copy
 
 Date:

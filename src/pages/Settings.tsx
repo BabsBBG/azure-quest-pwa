@@ -63,6 +63,12 @@ export function Settings() {
     setCloudBusy(false);
   }
 
+  async function resetLocalDeviceData() {
+    const confirmed = window.confirm("Reset local PraxisGrid data on this device? This removes local progress, attempts, interview history, repository imports, and recovery state. Cloud data is not deleted.");
+    if (!confirmed) return;
+    await resetLocalData();
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <Button asChild variant="ghost" size="sm"><Link to="/"><ArrowLeft className="h-4 w-4" /> Home</Link></Button>
@@ -89,7 +95,7 @@ export function Settings() {
         </CardHeader>
         <div className="grid gap-3 sm:grid-cols-2">
           <Button onClick={() => void downloadExport()} variant="hero" size="lg"><Download className="h-5 w-5" /> Export progress</Button>
-          <Button onClick={() => void resetLocalData()} variant="danger" size="lg"><Trash2 className="h-5 w-5" /> Reset local data</Button>
+          <Button onClick={() => void resetLocalDeviceData()} variant="danger" size="lg"><Trash2 className="h-5 w-5" /> Reset local data</Button>
         </div>
         {exported ? <p className="aq-subtle-panel mt-3 p-3 font-semibold">Export downloaded</p> : null}
       </Card>

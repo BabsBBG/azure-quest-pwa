@@ -125,6 +125,12 @@ function mergeById<T extends { id: string }>(localItems: T[], cloudItems: T[], l
   return [...merged.values()].slice(0, limit);
 }
 
+function errorMessage(error: unknown, fallback: string) {
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
+  return fallback;
+}
+
 export function isTerminalAssessmentStatus(status: AssessmentSessionStatus) {
   return status === "SUBMITTED" || status === "EXPIRED" || status === "ABANDONED";
 }
@@ -387,7 +393,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const importedProjects = get().importedProjects.filter((project) => project.id !== projectId);
     set({ importedProjects });
     await localforage.setItem(STORAGE_KEYS.importedProjects, importedProjects);
-    if (current) void deleteCloudImportedProject(current).catch(() => undefined);
+    if (current) {
+      const result = await deleteCloudImportedProject(current);
+      if (!result.ok && !result.skipped) {
+        throw new Error(errorMessage("error" in result ? result.error : undefined, "Cloud repository analysis delete failed."));
+      }
+    }
   },
 
   setSettings: async (partial) => {
