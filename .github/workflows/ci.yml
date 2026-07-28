@@ -45,6 +45,7 @@ jobs:
       - run: npm run validate:auth-first-ia
       - run: npm run validate:assessment-shell
       - run: npm run validate:project-fixtures
+      - run: npm run validate:typography
       - run: npm run validate:routes
       - run: npm run test:e2e:chromium
       - run: npm run test:e2e:webkit

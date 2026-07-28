@@ -574,7 +574,7 @@ function ImportedProjectsPanel({ projects, onUpdateProject }: { projects: Import
             <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">
               <p className="text-xs font-semibold uppercase">Review before approval</p>
               {project.storyDraft.risks.map((item) => <p key={item} className="mt-2 text-sm font-semibold">* {item}</p>)}
-              <p className="mt-3 break-all text-xs font-bold opacity-80">Content hash: {project.contentHash}</p>
+              <p className="aq-technical mt-3 break-all text-xs font-bold opacity-80">Content hash: {project.contentHash}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Button onClick={() => onUpdateProject({ ...project, status: "reviewed" })} variant="soft" size="sm">Mark reviewed</Button>
@@ -637,7 +637,7 @@ function ProjectMapperCard({ project }: { project: ImportedProject }) {
       {tab === "pitch" ? <><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">30-second pitch</p><p className="mt-1 font-semibold">{project.storyDraft.pitch30}</p></div><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">2-minute version</p><p className="mt-1 text-sm font-semibold">{project.storyDraft.walkthrough2m}</p></div></> : null}
       {tab === "star" ? <div className="aq-subtle-panel p-4"><p className="text-sm font-semibold"><b>Situation:</b> {project.storyDraft.star.situation}</p><p className="mt-2 text-sm font-semibold"><b>Task:</b> {project.storyDraft.star.task}</p><p className="mt-2 text-sm font-semibold"><b>Action:</b> {project.storyDraft.star.action}</p><p className="mt-2 text-sm font-semibold"><b>Result:</b> {project.storyDraft.star.result}</p></div> : null}
       {tab === "architecture" ? <div className="grid gap-2">{project.storyDraft.architecture.map((item, index) => <div key={item} className="flex gap-3 rounded-md border border-[var(--aq-border)] bg-white p-3 text-sm font-semibold dark:bg-[#081d38]"><span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--aq-blue-700)] text-xs text-white">{index + 1}</span>{item}</div>)}</div> : null}
-      {tab === "resume" ? <div className="grid gap-2">{project.storyDraft.resumeBullets.map((bullet) => <p key={bullet} className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-3 text-sm font-semibold text-white">{bullet}</p>)}<p className="aq-subtle-panel p-3 text-sm font-semibold">Review status: {project.status}. Content hash: {project.contentHash}</p></div> : null}
+      {tab === "resume" ? <div className="grid gap-2">{project.storyDraft.resumeBullets.map((bullet) => <p key={bullet} className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-3 text-sm font-semibold text-white">{bullet}</p>)}<p className="aq-subtle-panel aq-technical p-3 text-sm font-semibold">Review status: {project.status}. Content hash: {project.contentHash}</p></div> : null}
     </div>
   </div>;
 }

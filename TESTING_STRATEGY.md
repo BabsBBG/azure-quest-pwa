@@ -47,6 +47,7 @@ Current scripts:
 - `npm run validate:auth-first-ia`
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
+- `npm run validate:typography`
 
 Current Vitest coverage:
 
@@ -75,6 +76,7 @@ Current CI:
 - npm run validate:auth-first-ia
 - npm run validate:assessment-shell
 - npm run validate:project-fixtures
+- npm run validate:typography
 - npm run test:e2e:chromium
 - npm run test:e2e:webkit
 - npm run test:e2e:mobile
@@ -102,6 +104,7 @@ Added scripts:
 - `npm run validate:auth-first-ia`
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
+- `npm run validate:typography`
 
 Missing scripts to add during the programme:
 
