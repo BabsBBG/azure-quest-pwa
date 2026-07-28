@@ -40,11 +40,16 @@ dist
 
 ## Current production deployment
 
-- Project: `azure-quest-pwa`
+- Project: `praxisgrid`
 - Scope: `tonybabalola-1114s-projects`
 - Production URL: `https://azure-quest-pwa.vercel.app`
 - Deployment URL: `https://azure-quest-azwmivyy6-tonybabalola-1114s-projects.vercel.app`
 - Deployment ID: `dpl_4RzMGkKVnHT2J1gynrZZhLJ3QoLS`
 - Status: READY
 
-Note: the Vercel project/domain still uses the historical `azure-quest-pwa` name. Product and repository rebrand to PraxisGrid is complete; Vercel project/domain rebrand remains a separate deployment task.
+## PraxisGrid project migration
+
+- 2026-07-28: Vercel project renamed from `azure-quest-pwa` to `praxisgrid`.
+- 2026-07-28: Vercel project settings aligned to Vite, `npm run build`, `dist`, and `npm install --legacy-peer-deps --no-audit --no-fund`.
+- The historical production alias `https://azure-quest-pwa.vercel.app` still returns the latest production deployment.
+- `https://praxisgrid.vercel.app` is not live yet; it requires a fresh production deployment or alias after the project rename.
