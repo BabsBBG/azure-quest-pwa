@@ -36,6 +36,7 @@
 - Blocked production quiz/run starts when approved source-grounded placements are incomplete, preventing demo questions from acting as a silent production fallback.
 - Added confirmation and visible failure handling for local data reset and Project Intelligence deletion, with destructive-action CI validation.
 - Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences plus CI validation.
+- Added umbrella migration, RLS, and repository-isolation validators to CI for production governance gates.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

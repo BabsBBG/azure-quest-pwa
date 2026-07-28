@@ -6,16 +6,13 @@ Date: 2026-07-26
 
 ## Baseline Result
 
-Static validators pass, but production security and data governance remain unverified.
+Static validators pass, and umbrella migration/RLS/repository-isolation gates now exist in repo. Production security and data governance remain unverified until live Supabase probes pass.
 
 ## Blocking Issues
 
 - Live Supabase migration application is not verified.
 - Live RLS probes for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, USER_A, and USER_B are not available.
-- `/admin` is publicly routable without runtime role gating.
-- GitHub import controls are not durable or authenticated-user scoped.
-- Cloud export/delete workflows are missing.
-- Support Admin boundaries are not consistently reflected in RLS for support-facing queues.
+- Live two-user Project Intelligence repository-isolation probes are not available.
 - Vercel has no configured Supabase environment variables in the baseline check.
 
 ## External Blockers

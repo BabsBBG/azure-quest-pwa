@@ -217,4 +217,5 @@ Follow-up actions taken:
 - Added `validate:destructive-actions` and wired it into CI.
 - Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences stored in auth metadata.
 - Added `validate:onboarding` and wired it into CI.
+- Added umbrella `validate:migrations`, `validate:rls`, and `validate:repository-isolation` gates while keeping live Supabase probes marked as pending.
 - Updated the M5/M6 defect ledger, current state, changelog, and testing strategy to track this as fixed in repo with browser/live verification still pending.

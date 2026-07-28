@@ -16,6 +16,7 @@ const required = [
   [api, "risksAndImprovements"],
   [cloudSync, "project_intelligence_analyses"],
   [cloudSync, "importedProjectAnalysisRowId(userId, project)"],
+  [cloudSync, "return `${userId}:${project.analysis.id}`"],
   [cloudSync, "deleteImportedProject"],
   [store, "deleteImportedProject: (projectId: string) => Promise<void>"],
   [careerLab, "Project Intelligence overview"],
@@ -25,6 +26,8 @@ const required = [
   [migration, "Imported projects are deletable by owner"],
   [migration, "alter table public.project_intelligence_analyses enable row level security"],
   [migration, "auth.uid() = user_id"],
+  [migration, "project_intelligence_user_project_idx"],
+  [migration, "project_intelligence_user_hash_idx"],
   [migration, "on delete cascade"]
 ];
 
@@ -60,4 +63,4 @@ for (const snippet of forbidden) {
   }
 }
 
-console.log("Project Intelligence validation passed: analyses are typed, persisted, user-owned, reviewable, regenerable, and deletable.");
+console.log("Project Intelligence validation passed: analyses are typed, persisted, user-scoped, user-owned, reviewable, regenerable, and deletable.");

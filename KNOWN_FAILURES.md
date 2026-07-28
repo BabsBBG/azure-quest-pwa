@@ -71,6 +71,98 @@ Resolved. `npm run validate:onboarding` passed after updating the validator.
 Remaining issue:
 None.
 
+### M5/M6 umbrella RLS validator omitted base report migration
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: content_quality_reports does not enable row level security.`
+
+Likely cause:
+The new umbrella RLS validator checked content-quality report tables but did not include `supabase/migrations/0017_content_quality_reports.sql`, where those tables enable RLS.
+
+Fix attempted:
+Added the base content-quality migration to the validator read set.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
+### M5/M6 repository-isolation umbrella expected explicit user-scoped wording
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:repository-isolation`
+
+Error:
+`Repository isolation validation failed: Project Intelligence validator must enforce user-scoped analysis rows.`
+
+Likely cause:
+`validate-project-intelligence` enforced `importedProjectAnalysisRowId(userId, project)` but did not also require the exact user-scoped row return or print `user-scoped`, so the new umbrella validator could not verify that contract transitively.
+
+Fix attempted:
+Added the explicit user-scoped analysis-row return requirement and updated the validator success text.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun repository-isolation validation.
+
+### M5/M6 umbrella RLS validator support guard name mismatch
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: missing guard_support_admin_report_write`
+
+Likely cause:
+The new umbrella RLS validator expected a shorthand guard name, but the migration uses concrete trigger names `guard_support_admin_report_update` and `guard_support_admin_report_event_write`.
+
+Fix attempted:
+Updated `scripts/validate-rls.mjs` to require the actual support guard trigger names.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
+### M5/M6 umbrella RLS validator flagged historical audit policy
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: content quality report events must not have a mutable for-all policy.`
+
+Likely cause:
+The validator scanned all migrations as one string and found the historical `for all` policy in `0017_content_quality_reports.sql`, even though `0025_rpc_and_audit_hardening.sql` drops and replaces that policy.
+
+Fix attempted:
+Changed the validator to require the hardening migration to drop the mutable policy and avoid recreating it.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
 ### M5/M6 admin validator stale role badge copy
 
 Date:

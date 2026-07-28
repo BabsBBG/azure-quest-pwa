@@ -50,6 +50,9 @@ Current scripts:
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`
+- `npm run validate:migrations`
+- `npm run validate:rls`
+- `npm run validate:repository-isolation`
 - `npm run validate:privacy-workflows`
 - `npm run validate:support-boundary`
 - `npm run validate:production-content`
@@ -87,6 +90,9 @@ Current CI:
 - npm run validate:assessment-shell
 - npm run validate:project-fixtures
 - npm run validate:project-intelligence
+- npm run validate:migrations
+- npm run validate:rls
+- npm run validate:repository-isolation
 - npm run validate:privacy-workflows
 - npm run validate:support-boundary
 - npm run validate:production-content
@@ -122,6 +128,9 @@ Added scripts:
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`
+- `npm run validate:migrations`
+- `npm run validate:rls`
+- `npm run validate:repository-isolation`
 - `npm run validate:privacy-workflows`
 - `npm run validate:support-boundary`
 - `npm run validate:production-content`
@@ -129,11 +138,11 @@ Added scripts:
 - `npm run validate:typography`
 - `npm run validate:production-smoke-gate`
 
-Missing scripts to add during the programme:
+Missing live verification to add during the programme:
 
-- `npm run validate:migrations`
-- `npm run validate:rls`
-- `npm run validate:repository-isolation`
+- Live Supabase migration application probe.
+- Live RLS role matrix probe for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, USER_A, and USER_B.
+- Live two-user repository-isolation probe.
 
 Required browser flows:
 
