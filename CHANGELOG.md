@@ -25,6 +25,7 @@
 - Hardened GitHub import quota claims with an atomic Supabase RPC and changed content-quality report RLS to require authenticated users.
 - Rebuilt Home around exactly Learn, Practise, and Prove, removed stale logged-out demo wording from Account, and added an auth-first IA validator.
 - Moved `/arena` into an authenticated assessment route outside the learner layout and replaced completed-run results with an analytical report plus JSON, CSV, and print exports.
+- Removed Career Lab fixture project cards from production UI, added a no-projects-connected state, isolated the synthetic Northstar Inventory API fixture for tests, and added project-fixture validation.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

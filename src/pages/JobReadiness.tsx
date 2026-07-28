@@ -22,7 +22,7 @@ import {
   Trophy
 } from "lucide-react";
 import { certFromSlug, pathFor } from "../data/certPaths";
-import { interviewQuestions, interviewSessions, jobTracks, projectStories, type InterviewQuestion } from "../data/jobReadiness";
+import { interviewQuestions, interviewSessions, jobTracks, type InterviewQuestion } from "../data/jobReadiness";
 import { useAppStore } from "../store/useAppStore";
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -86,15 +86,15 @@ export function JobReadiness() {
   const progress = sessionQuestions.length ? ((index + 1) / sessionQuestions.length) * 100 : 0;
   const targetSeconds = (session?.minutes ?? 30) * 60;
   const remainingSeconds = targetSeconds - elapsedSeconds;
-  const [selectedProjects, setSelectedProjects] = useState<string[]>(["identity-review-lab", "cloud-monitoring-lab"]);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [mapperTrack, setMapperTrack] = useState<JobTrack>("Cloud Security");
   const [githubUrl, setGithubUrl] = useState("");
   const [importingProject, setImportingProject] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
-  const mappedProjects = projectStories.filter((project) => selectedProjects.includes(project.id));
+  const mappedProjects = importedProjects.filter((project) => selectedProjects.includes(project.id));
   const mapperQuestions = interviewQuestions
-    .filter((question) => question.track === mapperTrack || question.bestProjects.some((id) => selectedProjects.includes(id)))
+    .filter((question) => question.track === mapperTrack)
     .slice(0, 8);
   const recentSessions = interviewHistory.filter((item) => item.cert === cert).slice(0, 4);
   const trackSummary = ALL_TRACKS.join(", ").replace(/, ([^,]*)$/, " and $1");
@@ -440,23 +440,31 @@ export function JobReadiness() {
           <div>
             <Badge className="mb-2 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">Project-to-Interview Mapper</Badge>
             <CardTitle className="text-2xl">{GITHUB_PROJECT_PROMPT}</CardTitle>
-            <p className="mt-1 font-bold text-slate-500 dark:text-slate-400">Fictional fixtures below are for walkthrough practice only. Imported public GitHub projects are the personalized evidence path.</p>
+            <p className="mt-1 font-bold text-slate-500 dark:text-slate-400">No projects are connected by default. Add a public GitHub repository to generate private Project Intelligence and role-specific interview preparation.</p>
           </div>
           <Network className="h-6 w-6" />
         </CardHeader>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {projectStories.map((project) => {
+        {importedProjects.length ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {importedProjects.map((project) => {
             const on = selectedProjects.includes(project.id);
-            return <button key={project.id} aria-pressed={on} onClick={() => setSelectedProjects((prev) => on ? prev.filter((id) => id !== project.id) : [...prev, project.id])} className={`rounded-md border p-4 text-left transition ${on ? "border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white shadow-sm" : "aq-row-card"}`}><Badge className={on ? "bg-white/15 text-white dark:bg-white/15 dark:text-white" : ""}>{project.shortName}</Badge><p className="mt-2 text-sm font-semibold">{project.headline}</p></button>;
+            return <button key={project.id} aria-pressed={on} onClick={() => setSelectedProjects((prev) => on ? prev.filter((id) => id !== project.id) : [...prev, project.id])} className={`rounded-md border p-4 text-left transition ${on ? "border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white shadow-sm" : "aq-row-card"}`}><Badge className={on ? "bg-white/15 text-white dark:bg-white/15 dark:text-white" : ""}>{project.status}</Badge><p className="mt-2 text-sm font-semibold">{project.owner}/{project.repo}</p><p className={`mt-1 text-xs font-bold ${on ? "text-white/75" : "text-[var(--aq-muted)]"}`}>{project.storyDraft.pitch30.slice(0, 140)}...</p></button>;
           })}
         </div>
+        ) : (
+          <div className="rounded-md border border-dashed border-[var(--aq-border)] p-5 text-center">
+            <Github className="mx-auto mb-3 h-9 w-9 text-slate-400" />
+            <h3 className="text-xl font-semibold">No projects connected</h3>
+            <p className="mx-auto mt-2 max-w-xl text-sm font-bold text-[var(--aq-muted)]">Add a GitHub repository to generate private Project Intelligence and role-specific interview preparation.</p>
+          </div>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
           {ALL_TRACKS.map((item) => <Button key={item} onClick={() => setMapperTrack(item)} variant={mapperTrack === item ? "default" : "soft"} size="sm">{item}</Button>)}
         </div>
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1fr]">
           <div className="space-y-4">
-            {mappedProjects.length ? mappedProjects.map((project) => <ProjectMapperCard key={project.id} projectId={project.id} />) : <p className="aq-subtle-panel p-4 font-semibold text-[var(--aq-muted)]">Select at least one project.</p>}
+            {mappedProjects.length ? mappedProjects.map((project) => <ProjectMapperCard key={project.id} project={project} />) : <p className="aq-subtle-panel p-4 font-semibold text-[var(--aq-muted)]">Select an imported project after adding a public GitHub repository.</p>}
           </div>
           <div className="space-y-3">
             <h3 className="text-xl font-semibold">Questions this project set can answer</h3>
@@ -612,27 +620,24 @@ function InterviewHistory({ sessions }: { sessions: InterviewSessionAttempt[] })
 }
 
 function CoachAnswer({ question }: { question: InterviewQuestion }) {
-  const project = projectStories.find((item) => item.id === question.bestProjects[0]);
   return <div className="aq-row-card space-y-3 p-4">
     <div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Say this</p><p className="mt-1 font-semibold leading-relaxed">{question.sayThis}</p></div>
     <div><p className="mb-2 text-xs font-semibold uppercase text-[var(--aq-muted)]">Answer structure</p><div className="grid gap-2">{question.answerStructure.map((item) => <div key={item} className="flex items-center gap-2 rounded-md border border-[var(--aq-border)] bg-white p-3 text-sm font-semibold dark:bg-[#081d38]"><CheckCircle2 className="h-4 w-4 text-[var(--aq-blue-600)]" /> {item}</div>)}</div></div>
     <div className="grid gap-3 sm:grid-cols-2"><div><p className="mb-2 text-xs font-semibold uppercase text-[var(--aq-muted)]">Follow-up traps</p>{question.followUps.map((item) => <p key={item} className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/50 dark:bg-amber-300/10 dark:text-amber-100">{item}</p>)}</div><div><p className="mb-2 text-xs font-semibold uppercase text-[var(--aq-muted)]">Avoid saying</p>{question.avoid.map((item) => <p key={item} className="mb-2 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-950 dark:border-rose-300/50 dark:bg-rose-300/10 dark:text-rose-100">{item}</p>)}</div></div>
-    {project ? <div className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-4 text-white"><p className="text-xs font-semibold uppercase opacity-80">Best project to mention</p><h3 className="mt-1 text-lg font-semibold">{project.title}</h3><p className="mt-2 text-sm font-semibold opacity-85">{project.thirtySecond}</p></div> : null}
+    <div className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-4 text-white"><p className="text-xs font-semibold uppercase opacity-80">Project evidence rule</p><p className="mt-2 text-sm font-semibold opacity-85">Connect this answer to an imported, reviewed repository story. Keep generated project claims in draft until you verify the evidence.</p></div>
   </div>;
 }
 
-function ProjectMapperCard({ projectId }: { projectId: string }) {
-  const project = projectStories.find((item) => item.id === projectId);
+function ProjectMapperCard({ project }: { project: ImportedProject }) {
   const [tab, setTab] = useState<"pitch" | "star" | "architecture" | "resume">("pitch");
-  if (!project) return null;
   return <div className="aq-row-card p-4">
-    <div className="flex flex-wrap items-center justify-between gap-2"><div><Badge>{project.shortName}</Badge><h3 className="mt-2 text-xl font-semibold">{project.title}</h3></div><Button asChild variant="soft" size="sm"><a href={project.sourceUrl} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /> Source</a></Button></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><div><Badge>{project.status}</Badge><h3 className="mt-2 text-xl font-semibold">{project.owner}/{project.repo}</h3></div><Button asChild variant="soft" size="sm"><a href={project.url} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /> Source</a></Button></div>
     <div className="mt-3 flex flex-wrap gap-2">{(["pitch", "star", "architecture", "resume"] as const).map((item) => <Button key={item} onClick={() => setTab(item)} variant={tab === item ? "default" : "soft"} size="sm">{item}</Button>)}</div>
     <div className="mt-4 space-y-3">
-      {tab === "pitch" ? <><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">30-second pitch</p><p className="mt-1 font-semibold">{project.thirtySecond}</p></div><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">2-minute version</p><p className="mt-1 text-sm font-semibold">{project.twoMinute}</p></div></> : null}
-      {tab === "star" ? <div className="aq-subtle-panel p-4"><p className="text-sm font-semibold"><b>Situation:</b> {project.star.situation}</p><p className="mt-2 text-sm font-semibold"><b>Task:</b> {project.star.task}</p><p className="mt-2 text-sm font-semibold"><b>Action:</b> {project.star.action}</p><p className="mt-2 text-sm font-semibold"><b>Result:</b> {project.star.result}</p></div> : null}
-      {tab === "architecture" ? <div className="grid gap-2">{project.architectureTalk.map((item, index) => <div key={item} className="flex gap-3 rounded-md border border-[var(--aq-border)] bg-white p-3 text-sm font-semibold dark:bg-[#081d38]"><span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--aq-blue-700)] text-xs text-white">{index + 1}</span>{item}</div>)}<div className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-4 text-white"><p className="text-xs font-semibold uppercase opacity-80">Deep dive points</p>{project.technicalDeepDive.map((item) => <p key={item} className="mt-2 text-sm font-semibold">* {item}</p>)}</div></div> : null}
-      {tab === "resume" ? <div className="grid gap-2">{project.resumeBullets.map((bullet) => <p key={bullet} className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-3 text-sm font-semibold text-white">{bullet}</p>)}<p className="aq-subtle-panel p-3 text-sm font-semibold">Metrics to mention: {project.metrics.join(" / ")}</p></div> : null}
+      {tab === "pitch" ? <><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">30-second pitch</p><p className="mt-1 font-semibold">{project.storyDraft.pitch30}</p></div><div className="aq-subtle-panel p-4"><p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">2-minute version</p><p className="mt-1 text-sm font-semibold">{project.storyDraft.walkthrough2m}</p></div></> : null}
+      {tab === "star" ? <div className="aq-subtle-panel p-4"><p className="text-sm font-semibold"><b>Situation:</b> {project.storyDraft.star.situation}</p><p className="mt-2 text-sm font-semibold"><b>Task:</b> {project.storyDraft.star.task}</p><p className="mt-2 text-sm font-semibold"><b>Action:</b> {project.storyDraft.star.action}</p><p className="mt-2 text-sm font-semibold"><b>Result:</b> {project.storyDraft.star.result}</p></div> : null}
+      {tab === "architecture" ? <div className="grid gap-2">{project.storyDraft.architecture.map((item, index) => <div key={item} className="flex gap-3 rounded-md border border-[var(--aq-border)] bg-white p-3 text-sm font-semibold dark:bg-[#081d38]"><span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--aq-blue-700)] text-xs text-white">{index + 1}</span>{item}</div>)}</div> : null}
+      {tab === "resume" ? <div className="grid gap-2">{project.storyDraft.resumeBullets.map((bullet) => <p key={bullet} className="rounded-md border border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] p-3 text-sm font-semibold text-white">{bullet}</p>)}<p className="aq-subtle-panel p-3 text-sm font-semibold">Review status: {project.status}. Content hash: {project.contentHash}</p></div> : null}
     </div>
   </div>;
 }

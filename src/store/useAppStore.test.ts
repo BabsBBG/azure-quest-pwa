@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { chooseLatestActiveInterviewSession, chooseLatestRecoverableSession, isTerminalAssessmentStatus, normalizeAssessmentSession } from "./useAppStore";
 import type { ActiveInterviewSession, AssessmentSession } from "../types";
+import { northstarInventoryProject } from "../fixtures/northstarInventoryProject";
 
 const session = (patch: Partial<AssessmentSession> = {}): AssessmentSession => ({
   id: "session-1",
@@ -43,7 +44,7 @@ const activeInterview = (patch: Partial<ActiveInterviewSession> = {}): ActiveInt
   submitted: { q1: true },
   checked: { q1: ["Uses project evidence"] },
   selfScores: { q1: 4 },
-  selectedProjectIds: ["identity-review-lab"],
+  selectedProjectIds: [northstarInventoryProject.id],
   status: "ACTIVE",
   ...patch
 });
