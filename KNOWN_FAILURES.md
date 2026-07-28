@@ -48,6 +48,29 @@ Resolved. `npm run test:e2e:webkit` passed 10/10 when rerun with a longer local 
 Remaining issue:
 None for the WebKit slice. The local WebKit gate is slow and may need a longer timeout than 300 seconds.
 
+### M5/M6 onboarding validator dynamic heading mismatch
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:onboarding`
+
+Error:
+`Onboarding validation failed: page missing Set up your`
+
+Likely cause:
+The onboarding page heading became edit-aware with `{editing ? "Update" : "Set up"} your`, but the new validator still required the old literal phrase.
+
+Fix attempted:
+Updated `scripts/validate-onboarding.mjs` to require the edit-aware heading expression.
+
+Result:
+Resolved. `npm run validate:onboarding` passed after updating the validator.
+
+Remaining issue:
+None.
+
 ### M5/M6 admin validator stale role badge copy
 
 Date:

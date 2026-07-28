@@ -5,7 +5,7 @@
 The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6. The current production baseline is blocked by:
 
 - Public `/admin` route is runtime auth/role gated in repo; live role-browser and Supabase RLS verification remain pending.
-- Public learner routes are auth-gated in repo; production auth provider/env verification remains pending.
+- Public learner routes are auth-gated and onboarding-gated in repo; production auth provider/env and live onboarding verification remain pending.
 - Vercel production env check reported no `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`.
 - Supabase CLI is not installed locally, so live migration/RLS validation is blocked from this checkout.
 - Live Supabase test identities and role bootstrap are not configured/verified.

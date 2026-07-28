@@ -25,6 +25,7 @@ import { CaseFiles } from "./pages/CaseFiles";
 import { KqlGym } from "./pages/KqlGym";
 import { Readiness } from "./pages/Readiness";
 import { Account } from "./pages/Account";
+import { Onboarding } from "./pages/Onboarding";
 import { AdminReviewStudio } from "./pages/AdminReviewStudio";
 import { AuthPage } from "./pages/AuthPage";
 import { PublicInfoPage } from "./pages/PublicInfoPage";
@@ -33,6 +34,11 @@ import { PRODUCT_INITIALS, PRODUCT_NAME } from "./lib/brand";
 function authPath(mode: "signin" | "signup", location: ReturnType<typeof useLocation>) {
   const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
   return `/auth?mode=${mode}&from=${from}`;
+}
+
+function onboardingPath(location: ReturnType<typeof useLocation>) {
+  const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+  return `/onboarding?from=${from}`;
 }
 
 function AuthLoadingScreen() {
@@ -52,6 +58,7 @@ function ProtectedLearnerShell({ children }: { children: ReactNode }) {
 
   if (auth.loading) return <AuthLoadingScreen />;
   if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
+  if (!auth.onboardingComplete && location.pathname !== "/onboarding") return <Navigate to={onboardingPath(location)} replace state={{ from: location.pathname }} />;
 
   return <Layout>{children}</Layout>;
 }
@@ -87,6 +94,7 @@ function ProtectedAssessmentRoute() {
 
   if (auth.loading) return <AuthLoadingScreen />;
   if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
+  if (!auth.onboardingComplete) return <Navigate to={onboardingPath(location)} replace state={{ from: location.pathname }} />;
 
   return <PracticeArena />;
 }
@@ -135,6 +143,7 @@ export default function App() {
             <Route path="/career-lab" element={<Navigate to="/cert/sc-300/job" replace />} />
             <Route path="/progress" element={<Navigate to="/cert/sc-300/readiness" replace />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/cert/:cert" element={<CertHome />} />
             <Route path="/cert/:cert/knowledge" element={<KnowledgeCheck />} />
             <Route path="/cert/:cert/readiness" element={<Readiness />} />

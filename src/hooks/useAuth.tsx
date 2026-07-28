@@ -9,6 +9,7 @@ interface AuthContextValue {
   loading: boolean;
   session: Session | null;
   user: User | null;
+  onboardingComplete: boolean;
   role: UserRole;
   roleLoading: boolean;
   error: string | null;
@@ -19,6 +20,7 @@ interface AuthContextValue {
   resetPassword: (args: { email: string }) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (args: { name: string }) => Promise<void>;
+  completeOnboarding: (args: { primaryCert: string; goal: string; experience: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -31,6 +33,10 @@ function authErrorMessage(error: unknown) {
 function profileName(user?: User | null) {
   const metadataName = user?.user_metadata?.full_name ?? user?.user_metadata?.name;
   return typeof metadataName === "string" && metadataName.trim().length > 0 ? metadataName : null;
+}
+
+function hasCompletedOnboarding(user?: User | null) {
+  return user?.user_metadata?.praxisgrid_onboarded === true;
 }
 
 function syncProfile(session: Session | null) {
@@ -97,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     session,
     user: session?.user ?? null,
+    onboardingComplete: hasCompletedOnboarding(session?.user),
     role,
     roleLoading,
     error,
@@ -173,7 +180,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: updateError } = await supabase.auth.updateUser({ data: { full_name: name } });
       if (updateError) setError(authErrorMessage(updateError));
       else if (data.user) {
+        if (session) setSession({ ...session, user: data.user });
         await upsertProfile({ email: data.user.email, fullName: name }).catch(() => undefined);
+      }
+      setLoading(false);
+    },
+    completeOnboarding: async ({ primaryCert, goal, experience }) => {
+      if (!supabase || !session?.user) {
+        setError("Sign in is required to complete onboarding.");
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      const { data, error: updateError } = await supabase.auth.updateUser({
+        data: {
+          ...session.user.user_metadata,
+          praxisgrid_onboarded: true,
+          praxisgrid_primary_cert: primaryCert,
+          praxisgrid_goal: goal,
+          praxisgrid_experience: experience
+        }
+      });
+      if (updateError) setError(authErrorMessage(updateError));
+      else if (data.user) {
+        setSession({ ...session, user: data.user });
+        await upsertProfile({ email: data.user.email, fullName: profileName(data.user) }).catch(() => undefined);
       }
       setLoading(false);
     }

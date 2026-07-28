@@ -21,6 +21,7 @@ const requiredRoutes = [
   "/progress",
   "/admin",
   "/account",
+  "/onboarding",
   "/cert/:cert/knowledge",
   "/cert/:cert/readiness",
   "/cert/:cert/job",
@@ -42,7 +43,8 @@ const routeFiles = [
   "src/pages/PastExams.tsx",
   "src/pages/Settings.tsx",
   "src/pages/AdminReviewStudio.tsx",
-  "src/pages/Account.tsx"
+  "src/pages/Account.tsx",
+  "src/pages/Onboarding.tsx"
 ];
 
 const missingRoutes = requiredRoutes.filter((route) => !app.includes(`path="${route}"`));

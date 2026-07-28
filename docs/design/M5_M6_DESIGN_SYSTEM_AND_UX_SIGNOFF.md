@@ -8,7 +8,7 @@ Date: 2026-07-26
 
 - Learner IA: implemented but superseded by the required Learn, Practise, Prove model.
 - Home: implemented but rejected for the new three-card production dashboard requirement.
-- Account/auth: implemented with email/password and Google SSO, but missing mandatory-auth shell, password recovery, email-verification states, and onboarding.
+- Account/auth: implemented with email/password, Google SSO, mandatory-auth shell, password recovery, email-verification notice states, and signed-in learner onboarding. Live provider/onboarding verification remains pending.
 - Assessment runtime: implemented but not yet a dedicated full-screen Assessment Shell.
 - Results: implemented but not yet the required analytical-report layout with export options.
 - Career Lab/Prove: useful scaffold, but not yet repository-owned Project Intelligence with recoverable Interview Studio sessions.

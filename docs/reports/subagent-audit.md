@@ -215,4 +215,6 @@ Follow-up actions taken:
 
 - Added confirmation and visible failure handling for local reset and repository analysis deletion.
 - Added `validate:destructive-actions` and wired it into CI.
+- Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences stored in auth metadata.
+- Added `validate:onboarding` and wired it into CI.
 - Updated the M5/M6 defect ledger, current state, changelog, and testing strategy to track this as fixed in repo with browser/live verification still pending.

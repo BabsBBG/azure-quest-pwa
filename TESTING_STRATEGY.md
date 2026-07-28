@@ -46,6 +46,7 @@ Current scripts:
 - `npm run validate:active-interview-recovery`
 - `npm run validate:auth-first-ia`
 - `npm run validate:auth-redirects`
+- `npm run validate:onboarding`
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`
@@ -82,6 +83,7 @@ Current CI:
 - npm run validate:active-interview-recovery
 - npm run validate:auth-first-ia
 - npm run validate:auth-redirects
+- npm run validate:onboarding
 - npm run validate:assessment-shell
 - npm run validate:project-fixtures
 - npm run validate:project-intelligence
@@ -116,6 +118,7 @@ Added scripts:
 - `npm run validate:active-interview-recovery`
 - `npm run validate:auth-first-ia`
 - `npm run validate:auth-redirects`
+- `npm run validate:onboarding`
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`

@@ -40,6 +40,7 @@
     "validate:active-interview-recovery": "node scripts/validate-active-interview-recovery.mjs",
     "validate:auth-first-ia": "node scripts/validate-auth-first-ia.mjs",
     "validate:auth-redirects": "node scripts/validate-auth-redirects.mjs",
+    "validate:onboarding": "node scripts/validate-onboarding.mjs",
     "validate:assessment-shell": "node scripts/validate-assessment-shell.mjs",
     "validate:project-fixtures": "node scripts/validate-project-fixtures.mjs",
     "validate:project-intelligence": "node scripts/validate-project-intelligence.mjs",

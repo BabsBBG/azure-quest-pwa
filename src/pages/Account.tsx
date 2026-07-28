@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { KeyRound, LogIn, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -66,7 +67,10 @@ export function Account() {
               <Button type="submit" variant="hero" disabled={auth.loading} className="self-end">{auth.loading ? "Saving..." : "Save profile"}</Button>
             </form>
             {auth.error ? <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-900">{auth.error}</p> : null}
-            <Button onClick={() => void auth.signOut()} variant="soft" disabled={auth.loading} className="mt-4"><LogOut className="h-4 w-4" /> Sign out</Button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild variant="soft"><Link to="/onboarding?edit=true&from=/account"><ShieldCheck className="h-4 w-4" /> Update onboarding</Link></Button>
+              <Button onClick={() => void auth.signOut()} variant="soft" disabled={auth.loading}><LogOut className="h-4 w-4" /> Sign out</Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
