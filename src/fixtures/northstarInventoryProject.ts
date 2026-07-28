@@ -26,5 +26,28 @@ export const northstarInventoryProject: ImportedProject = {
     architecture: ["REST API layer", "Relational persistence", "Container configuration", "CI checks", "Basic monitoring"],
     resumeBullets: ["Used a synthetic API fixture to validate private Project Intelligence flows without exposing personal project data."],
     risks: ["This is a test fixture only.", "Do not seed this into production.", "Do not present this as a real user project."]
+  },
+  analysis: {
+    id: "analysis-northstar-inventory-api",
+    generatedAt: "2026-07-28T00:00:00.000Z",
+    contentHash: "northstar-inventory-api-fixture-hash",
+    status: "draft",
+    overview: {
+      projectType: "Fictional API fixture",
+      detectedFrameworks: ["REST", "SQL", "Docker"],
+      keyEntryPoints: ["README.md"],
+      persistence: "Relational persistence is part of the synthetic fixture.",
+      apis: "REST endpoints are part of the synthetic fixture.",
+      integrations: "No external integration is seeded.",
+      authentication: "Authentication is not claimed.",
+      tests: "CI checks are represented for tests only.",
+      deployment: "Container configuration is represented for tests only.",
+      ciCd: "CI checks are represented for tests only.",
+      observability: "Basic monitoring is represented for tests only."
+    },
+    architectureMap: [{ label: "Synthetic REST API layer", files: ["README.md"], confidence: "confirmed" }],
+    strengths: [{ label: "Safe synthetic evidence for tests", files: ["README.md"], confidence: "confirmed" }],
+    risksAndImprovements: [{ label: "Never seed this fixture into production", files: ["README.md"], confidence: "recommendation" }],
+    interviewQuestions: ["How would you explain the boundaries of this synthetic API fixture?"]
   }
 };

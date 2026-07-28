@@ -28,6 +28,7 @@
 - Removed Career Lab fixture project cards from production UI, added a no-projects-connected state, isolated the synthetic Northstar Inventory API fixture for tests, and added project-fixture validation.
 - Switched the global product typography from monospace-first to a readable sans-serif stack, reserved monospace for code and technical metadata, and added typography validation.
 - Replaced the silent production-smoke workflow condition with an explicit smoke runner that reports PR skips, fails `main` without a configured production URL, and blocks fallback to the historical Azure Quest URL.
+- Added typed Project Intelligence analysis records with evidence sections, owner-scoped Supabase persistence, regenerate/delete UI actions, and validation for repository-isolated analysis workflows.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

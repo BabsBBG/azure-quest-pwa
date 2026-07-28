@@ -19,6 +19,7 @@ import {
   Sparkles,
   Star,
   TimerReset,
+  Trash2,
   Trophy
 } from "lucide-react";
 import { certFromSlug, pathFor } from "../data/certPaths";
@@ -58,6 +59,7 @@ export function JobReadiness() {
   const saveActiveInterviewSession = useAppStore((state) => state.saveActiveInterviewSession);
   const clearActiveInterviewSession = useAppStore((state) => state.clearActiveInterviewSession);
   const recordImportedProject = useAppStore((state) => state.recordImportedProject);
+  const deleteImportedProject = useAppStore((state) => state.deleteImportedProject);
   const interviewHistory = useAppStore((state) => state.interviewSessions);
   const importedProjects = useAppStore((state) => state.importedProjects);
   const [track, setTrack] = useState<JobTrack>("IAM");
@@ -310,6 +312,27 @@ export function JobReadiness() {
     }
   }
 
+  async function regenerateProject(project: ImportedProject) {
+    setImportingProject(true);
+    setImportError(null);
+    setImportMessage(null);
+    try {
+      const next = await importPublicGitHubProject(project.url);
+      await recordImportedProject(next);
+      setImportMessage(`Regenerated Project Intelligence for ${next.owner}/${next.repo}.`);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Unable to regenerate Project Intelligence.");
+    } finally {
+      setImportingProject(false);
+    }
+  }
+
+  async function removeProject(project: ImportedProject) {
+    await deleteImportedProject(project.id);
+    setSelectedProjects((prev) => prev.filter((id) => id !== project.id));
+    setImportMessage(`Deleted ${project.owner}/${project.repo} and its local/cloud analysis record.`);
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       <section className="aq-hero overflow-hidden p-5 sm:p-6">
@@ -509,7 +532,7 @@ export function JobReadiness() {
               <p>Review rule: keep status as draft until you verify the README and code support every claim.</p>
             </div>
           </div>
-          <ImportedProjectsPanel projects={importedProjects} onUpdateProject={(project) => void recordImportedProject(project)} />
+          <ImportedProjectsPanel projects={importedProjects} onUpdateProject={(project) => void recordImportedProject(project)} onRegenerateProject={(project) => void regenerateProject(project)} onDeleteProject={(project) => void removeProject(project)} />
         </div>
       </Card>
 
@@ -522,7 +545,7 @@ export function JobReadiness() {
   );
 }
 
-function ImportedProjectsPanel({ projects, onUpdateProject }: { projects: ImportedProject[]; onUpdateProject: (project: ImportedProject) => void }) {
+function ImportedProjectsPanel({ projects, onUpdateProject, onRegenerateProject, onDeleteProject }: { projects: ImportedProject[]; onUpdateProject: (project: ImportedProject) => void; onRegenerateProject: (project: ImportedProject) => void; onDeleteProject: (project: ImportedProject) => void }) {
   if (!projects.length) {
     return (
       <div className="grid min-h-72 place-items-center rounded-md border border-dashed border-[var(--aq-border)] p-6 text-center">
@@ -558,6 +581,29 @@ function ImportedProjectsPanel({ projects, onUpdateProject }: { projects: Import
               <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">30-second pitch draft</p>
               <p className="mt-1 text-sm font-semibold">{project.storyDraft.pitch30}</p>
             </div>
+            <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
+              <div className="aq-subtle-panel p-4">
+                <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Project Intelligence overview</p>
+                <p className="mt-2 text-sm font-semibold">Type: {project.analysis.overview.projectType}</p>
+                <p className="mt-2 text-sm font-semibold">Frameworks: {project.analysis.overview.detectedFrameworks.length ? project.analysis.overview.detectedFrameworks.join(", ") : "None confirmed"}</p>
+                <p className="mt-2 text-sm font-semibold">Tests: {project.analysis.overview.tests}</p>
+                <p className="mt-2 text-sm font-semibold">Deployment: {project.analysis.overview.deployment}</p>
+              </div>
+              <div className="aq-subtle-panel p-4">
+                <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Evidence-backed architecture map</p>
+                {project.analysis.architectureMap.map((item) => <p key={item.label} className="mt-2 text-sm font-semibold">{item.confidence}: {item.label} <span className="aq-technical text-xs text-[var(--aq-muted)]">({item.files.join(", ")})</span></p>)}
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="aq-subtle-panel p-4">
+                <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Strengths</p>
+                {project.analysis.strengths.map((item) => <p key={item.label} className="mt-2 text-sm font-semibold">{item.confidence}: {item.label}</p>)}
+              </div>
+              <div className="aq-subtle-panel p-4">
+                <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Risks and improvements</p>
+                {project.analysis.risksAndImprovements.map((item) => <p key={item.label} className="mt-2 text-sm font-semibold">{item.confidence}: {item.label}</p>)}
+              </div>
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="aq-subtle-panel p-4">
                 <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">STAR draft</p>
@@ -576,9 +622,17 @@ function ImportedProjectsPanel({ projects, onUpdateProject }: { projects: Import
               {project.storyDraft.risks.map((item) => <p key={item} className="mt-2 text-sm font-semibold">* {item}</p>)}
               <p className="aq-technical mt-3 break-all text-xs font-bold opacity-80">Content hash: {project.contentHash}</p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Button onClick={() => onUpdateProject({ ...project, status: "reviewed" })} variant="soft" size="sm">Mark reviewed</Button>
-              <Button onClick={() => onUpdateProject({ ...project, status: "approved" })} variant="hero" size="sm">Approve story</Button>
+            <div className="aq-subtle-panel p-4">
+              <p className="text-xs font-semibold uppercase text-[var(--aq-muted)]">Repository-grounded interview prompts</p>
+              <div className="mt-2 grid gap-2">
+                {project.analysis.interviewQuestions.map((question) => <p key={question} className="rounded-md border border-[var(--aq-border)] bg-white p-3 text-sm font-semibold dark:bg-[#081d38]">{question}</p>)}
+              </div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-4">
+              <Button onClick={() => onUpdateProject({ ...project, status: "reviewed", analysis: { ...project.analysis, status: "reviewed" } })} variant="soft" size="sm">Mark reviewed</Button>
+              <Button onClick={() => onUpdateProject({ ...project, status: "approved", analysis: { ...project.analysis, status: "approved" } })} variant="hero" size="sm">Approve story</Button>
+              <Button onClick={() => onRegenerateProject(project)} variant="soft" size="sm"><RotateCcw className="h-4 w-4" /> Regenerate</Button>
+              <Button onClick={() => onDeleteProject(project)} variant="ghost" size="sm"><Trash2 className="h-4 w-4" /> Delete</Button>
             </div>
           </div>
         </details>

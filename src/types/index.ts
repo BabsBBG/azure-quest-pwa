@@ -293,6 +293,36 @@ export interface ProjectStoryDraft {
   risks: string[];
 }
 
+export interface ProjectIntelligenceEvidence {
+  label: string;
+  files: string[];
+  confidence: "confirmed" | "inferred" | "recommendation";
+}
+
+export interface ProjectIntelligenceAnalysis {
+  id: string;
+  generatedAt: string;
+  contentHash: string;
+  overview: {
+    projectType: string;
+    detectedFrameworks: string[];
+    keyEntryPoints: string[];
+    persistence: string;
+    apis: string;
+    integrations: string;
+    authentication: string;
+    tests: string;
+    deployment: string;
+    ciCd: string;
+    observability: string;
+  };
+  architectureMap: ProjectIntelligenceEvidence[];
+  strengths: ProjectIntelligenceEvidence[];
+  risksAndImprovements: ProjectIntelligenceEvidence[];
+  interviewQuestions: string[];
+  status: "draft" | "reviewed" | "approved";
+}
+
 export interface ImportedProject {
   id: string;
   owner: string;
@@ -308,6 +338,7 @@ export interface ImportedProject {
   importedAt: string;
   status: "draft" | "reviewed" | "approved";
   storyDraft: ProjectStoryDraft;
+  analysis: ProjectIntelligenceAnalysis;
 }
 
 export type SourceReviewStatus = "draft" | "critic-approved" | "approved" | "rejected";

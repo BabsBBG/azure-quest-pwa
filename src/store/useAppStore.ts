@@ -4,7 +4,7 @@ import questionBank from "../data/questions.json";
 import type { ActiveInterviewSession, AssessmentSession, AssessmentSessionStatus, Cert, ExamAttempt, FlashcardProgress, ImportedProject, InterviewSessionAttempt, Question, QuestionFlag, SettingsState, UserProgress } from "../types";
 import { levelFromXp } from "../utils/quizEngine";
 import { todayKey } from "../lib/utils";
-import { clearActiveInterviewSession as deleteCloudActiveInterviewSession, fetchCloudLearningData, syncActiveInterviewSession, syncAssessmentSession, syncExamAttempt, syncImportedProject, syncInterviewSession, syncQuestionFlag } from "../lib/cloudSync";
+import { clearActiveInterviewSession as deleteCloudActiveInterviewSession, deleteImportedProject as deleteCloudImportedProject, fetchCloudLearningData, syncActiveInterviewSession, syncAssessmentSession, syncExamAttempt, syncImportedProject, syncInterviewSession, syncQuestionFlag } from "../lib/cloudSync";
 
 function dayDiff(from?: string, to = todayKey()) {
   if (!from) return undefined;
@@ -84,6 +84,7 @@ interface AppStore {
   clearActiveInterviewSession: (sessionId?: string) => Promise<void>;
   recordQuestionFlag: (flag: QuestionFlag) => Promise<void>;
   recordImportedProject: (project: ImportedProject) => Promise<void>;
+  deleteImportedProject: (projectId: string) => Promise<void>;
   setSettings: (settings: Partial<SettingsState>) => Promise<void>;
   recordFlashcard: (cardId: string, rating: "easy" | "hard") => Promise<void>;
   toggleResource: (resourceId: string) => Promise<void>;
@@ -379,6 +380,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set({ importedProjects });
     await localforage.setItem(STORAGE_KEYS.importedProjects, importedProjects);
     void syncImportedProject(project).catch(() => undefined);
+  },
+
+  deleteImportedProject: async (projectId) => {
+    const current = get().importedProjects.find((project) => project.id === projectId);
+    const importedProjects = get().importedProjects.filter((project) => project.id !== projectId);
+    set({ importedProjects });
+    await localforage.setItem(STORAGE_KEYS.importedProjects, importedProjects);
+    if (current) void deleteCloudImportedProject(current).catch(() => undefined);
   },
 
   setSettings: async (partial) => {

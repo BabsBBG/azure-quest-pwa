@@ -153,6 +153,72 @@ function makeStoryDraft({ owner, repo, readme, primaryLanguage, languages }) {
   };
 }
 
+function detectProjectIntelligence({ contentHash, readme, primaryLanguage, languages, repoMeta }) {
+  const lower = readme.toLowerCase();
+  const detectedFrameworks = [
+    lower.includes("react") ? "React" : null,
+    lower.includes("vite") ? "Vite" : null,
+    lower.includes("next") ? "Next.js" : null,
+    lower.includes("express") ? "Express" : null,
+    lower.includes("fastapi") ? "FastAPI" : null,
+    lower.includes("supabase") ? "Supabase" : null,
+    lower.includes("postgres") || lower.includes("postgresql") ? "Postgres" : null,
+    lower.includes("docker") ? "Docker" : null,
+    lower.includes("github actions") ? "GitHub Actions" : null
+  ].filter(Boolean);
+  const languageLine = [primaryLanguage, ...languages.filter((item) => item !== primaryLanguage)].filter(Boolean).slice(0, 5);
+  const files = ["README.md"];
+  const hasTests = /\b(test|tests|vitest|jest|playwright|pytest)\b/.test(lower);
+  const hasApi = /\b(api|endpoint|route|controller|server)\b/.test(lower);
+  const hasAuth = /\b(auth|oauth|login|sign in|jwt|session)\b/.test(lower);
+  const hasCi = /\b(ci|github actions|workflow|pipeline)\b/.test(lower);
+  const hasDeploy = /\b(vercel|netlify|docker|deploy|hosting|cloud)\b/.test(lower);
+  const hasObservability = /\b(log|logging|monitoring|metrics|telemetry|observability)\b/.test(lower);
+
+  return {
+    id: `analysis-${contentHash.slice(0, 24)}`,
+    generatedAt: new Date().toISOString(),
+    contentHash,
+    overview: {
+      projectType: hasApi ? "Application or service with API-facing behaviour" : "Repository with documentation-backed implementation evidence",
+      detectedFrameworks,
+      keyEntryPoints: files,
+      persistence: lower.includes("database") || lower.includes("postgres") || lower.includes("sql") ? "Persistence is mentioned in repository evidence." : "No persistence layer is confirmed from retrieved evidence.",
+      apis: hasApi ? "API behaviour is mentioned in retrieved evidence." : "No API boundary is confirmed from retrieved evidence.",
+      integrations: detectedFrameworks.length ? `Detected stack signals: ${detectedFrameworks.join(", ")}.` : "No external integration is confirmed from retrieved evidence.",
+      authentication: hasAuth ? "Authentication is mentioned in retrieved evidence." : "Authentication is not confirmed from retrieved evidence.",
+      tests: hasTests ? "Testing signals are present in retrieved evidence." : "Testing is not confirmed from retrieved evidence.",
+      deployment: hasDeploy ? "Deployment or hosting signals are present in retrieved evidence." : "Deployment is not confirmed from retrieved evidence.",
+      ciCd: hasCi ? "CI/CD signals are present in retrieved evidence." : "CI/CD is not confirmed from retrieved evidence.",
+      observability: hasObservability ? "Observability signals are present in retrieved evidence." : "Observability is not confirmed from retrieved evidence."
+    },
+    architectureMap: [
+      { label: "Repository overview and stated purpose", files, confidence: "confirmed" },
+      { label: `Implementation stack: ${languageLine.join(", ") || "not confidently detected"}`, files, confidence: languageLine.length ? "confirmed" : "inferred" },
+      { label: hasApi ? "API boundary appears in repository evidence" : "Inspect source tree before claiming API ownership", files, confidence: hasApi ? "confirmed" : "recommendation" },
+      { label: hasDeploy ? "Deployment path appears in repository evidence" : "Add deployment evidence before presenting operations maturity", files, confidence: hasDeploy ? "confirmed" : "recommendation" }
+    ],
+    strengths: [
+      { label: "Public evidence can be reviewed without requesting private GitHub scopes", files, confidence: "confirmed" },
+      { label: detectedFrameworks.length ? "Stack signals are explicit enough for an interview walkthrough" : "Repository needs clearer stack documentation", files, confidence: detectedFrameworks.length ? "confirmed" : "recommendation" },
+      { label: hasTests ? "Testing evidence is visible" : "Add visible test evidence or avoid claiming test maturity", files, confidence: hasTests ? "confirmed" : "recommendation" }
+    ],
+    risksAndImprovements: [
+      { label: "Generated project story must be reviewed before use as final evidence", files, confidence: "recommendation" },
+      { label: hasAuth ? "Explain authentication boundaries precisely and cite the relevant files" : "Do not claim authentication design until source evidence is reviewed", files, confidence: hasAuth ? "recommendation" : "confirmed" },
+      { label: hasObservability ? "Prepare an operations answer using the monitoring evidence" : "Add logging or monitoring evidence before claiming observability", files, confidence: hasObservability ? "recommendation" : "confirmed" }
+    ],
+    interviewQuestions: [
+      "What problem does this repository solve, and where is that visible in the evidence?",
+      "Which implementation choices are confirmed by files rather than inferred?",
+      "What would you improve first if you had one day?",
+      "How would you test the riskiest path?",
+      "What security boundary should an interviewer ask you to defend?"
+    ],
+    status: "draft"
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -191,6 +257,7 @@ export default async function handler(req, res) {
     const primaryLanguage = repoMeta.language ?? languages[0] ?? null;
     const contentHash = hash(JSON.stringify({ readme, languageStats, defaultBranch: repoMeta.default_branch }));
     const importedAt = new Date().toISOString();
+    const analysis = detectProjectIntelligence({ contentHash, readme, primaryLanguage, languages, repoMeta });
     const result = {
       project: {
         id: contentHash.slice(0, 24),
@@ -206,7 +273,8 @@ export default async function handler(req, res) {
         contentHash,
         importedAt,
         status: "draft",
-        storyDraft: makeStoryDraft({ ...parsed, readme, primaryLanguage, languages })
+        storyDraft: makeStoryDraft({ ...parsed, readme, primaryLanguage, languages }),
+        analysis
       },
       controls: {
         permissionModel: "public-read-only",

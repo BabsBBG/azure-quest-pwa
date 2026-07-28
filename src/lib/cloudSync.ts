@@ -135,8 +135,9 @@ export async function syncImportedProject(project: ImportedProject) {
   const userId = await currentUserId();
   if (!userId || !supabase) return { ok: false, skipped: true };
 
+  const rowId = importedProjectRowId(userId, project);
   const { error } = await supabase.from("imported_projects").upsert({
-    id: importedProjectRowId(userId, project),
+    id: rowId,
     user_id: userId,
     owner: project.owner,
     repo: project.repo,
@@ -147,11 +148,33 @@ export async function syncImportedProject(project: ImportedProject) {
     payload: project
   });
 
-  return { ok: !error, skipped: false, error };
+  if (error) return { ok: false, skipped: false, error };
+
+  const { error: analysisError } = await supabase.from("project_intelligence_analyses").upsert({
+    id: project.analysis.id,
+    user_id: userId,
+    imported_project_id: rowId,
+    content_hash: project.contentHash,
+    status: project.analysis.status,
+    generated_at: project.analysis.generatedAt,
+    payload: project.analysis
+  });
+
+  return { ok: !analysisError, skipped: false, error: analysisError };
 }
 
 export function importedProjectRowId(userId: string, project: Pick<ImportedProject, "id" | "contentHash">) {
   return `${userId}:${project.contentHash || project.id}`;
+}
+
+export async function deleteImportedProject(project: ImportedProject) {
+  const userId = await currentUserId();
+  if (!userId || !supabase) return { ok: false, skipped: true };
+  const rowId = importedProjectRowId(userId, project);
+  const analysis = await supabase.from("project_intelligence_analyses").delete().eq("user_id", userId).eq("imported_project_id", rowId);
+  if (analysis.error) return { ok: false, skipped: false, error: analysis.error };
+  const imported = await supabase.from("imported_projects").delete().eq("user_id", userId).eq("id", rowId);
+  return { ok: !imported.error, skipped: false, error: imported.error };
 }
 
 export async function fetchCloudLearningData() {
