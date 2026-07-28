@@ -38,6 +38,7 @@
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "validate:github-import-controls": "node scripts/validate-github-import-controls.mjs",
     "validate:active-interview-recovery": "node scripts/validate-active-interview-recovery.mjs",
+    "validate:auth-first-ia": "node scripts/validate-auth-first-ia.mjs",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {
