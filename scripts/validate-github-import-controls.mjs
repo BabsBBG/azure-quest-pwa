@@ -3,9 +3,10 @@ import { readFileSync } from "node:fs";
 const api = readFileSync("api/github-project.js", "utf8");
 const client = readFileSync("src/lib/githubProjectImport.ts", "utf8");
 const migration = readFileSync("supabase/migrations/0018_github_import_controls.sql", "utf8");
+const atomicQuotaMigration = readFileSync("supabase/migrations/0020_atomic_github_import_quota.sql", "utf8");
 const envExample = readFileSync(".env.example", "utf8");
 
-const forbiddenApiSnippets = ["new Map()", "rateBuckets", "cache ="];
+const forbiddenApiSnippets = ["new Map()", "rateBuckets", "cache =", "recordImportEvent", "checkRateLimit"];
 for (const snippet of forbiddenApiSnippets) {
   if (api.includes(snippet)) {
     console.error(`GitHub import controls validation failed: API still contains in-memory control snippet ${snippet}`);
@@ -16,9 +17,9 @@ for (const snippet of forbiddenApiSnippets) {
 const requiredApiSnippets = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "authenticateUser",
-  "github_import_events",
   "github_import_cache",
-  "recordImportEvent",
+  "claimImportQuota",
+  "claim_github_import_quota",
   "remainingToday",
   "cacheTtlHours",
   "public-read-only",
@@ -58,6 +59,20 @@ const requiredMigrationSnippets = [
 for (const snippet of requiredMigrationSnippets) {
   if (!migration.includes(snippet)) {
     console.error(`GitHub import controls validation failed: migration missing ${snippet}`);
+    process.exit(1);
+  }
+}
+
+const requiredAtomicQuotaSnippets = [
+  "public.claim_github_import_quota",
+  "pg_advisory_xact_lock",
+  "github_import_events",
+  "Daily public repo import limit reached"
+];
+
+for (const snippet of requiredAtomicQuotaSnippets) {
+  if (!atomicQuotaMigration.includes(snippet)) {
+    console.error(`GitHub import controls validation failed: atomic quota migration missing ${snippet}`);
     process.exit(1);
   }
 }

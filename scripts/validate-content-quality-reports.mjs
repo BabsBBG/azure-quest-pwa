@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const migration = readFileSync("supabase/migrations/0017_content_quality_reports.sql", "utf8");
+const authHardeningMigration = readFileSync("supabase/migrations/0021_auth_required_content_quality_reports.sql", "utf8");
 const requiredMigrationSnippets = [
   "public.content_quality_reports",
   "public.content_quality_report_events",
@@ -21,6 +22,20 @@ const requiredMigrationSnippets = [
 for (const snippet of requiredMigrationSnippets) {
   if (!migration.includes(snippet)) {
     console.error(`Content quality report migration validation failed: missing ${snippet}`);
+    process.exit(1);
+  }
+}
+
+const requiredAuthHardeningSnippets = [
+  "drop policy if exists \"Users can create content quality reports\"",
+  "Authenticated users can create content quality reports",
+  "auth.uid() is not null",
+  "user_id = auth.uid()"
+];
+
+for (const snippet of requiredAuthHardeningSnippets) {
+  if (!authHardeningMigration.includes(snippet)) {
+    console.error(`Content quality report auth hardening validation failed: missing ${snippet}`);
     process.exit(1);
   }
 }

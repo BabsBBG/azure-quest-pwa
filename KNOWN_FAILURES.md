@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 GitHub import validator stale direct-events requirement
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:github-import-controls`
+
+Error:
+The validator failed with `API missing github_import_events`.
+
+Likely cause:
+The endpoint was correctly changed to claim quota through the new `claim_github_import_quota` RPC instead of touching `github_import_events` directly, but the validator still required the old direct table reference in `api/github-project.js`.
+
+Fix attempted:
+Removed the direct `github_import_events` API snippet requirement while keeping RPC and migration checks for `github_import_events`, `claim_github_import_quota`, and `pg_advisory_xact_lock`.
+
+Result:
+Resolved. `npm run validate:github-import-controls` passed after updating the validator for the RPC-based quota path.
+
+Remaining issue:
+None.
+
 ### M5/M6 active interview migration filename lookup miss
 
 Date:

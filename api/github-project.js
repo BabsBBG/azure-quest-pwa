@@ -49,40 +49,20 @@ async function authenticateUser(req, db) {
   return data.user;
 }
 
-async function checkRateLimit(db, userId) {
-  const importDay = new Date().toISOString().slice(0, 10);
-  const { count, error } = await db
-    .from("github_import_events")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("import_day", importDay);
-
-  if (error) {
-    const dbError = new Error("Unable to verify public repo import limit.");
-    dbError.statusCode = 503;
-    throw dbError;
-  }
-
-  if (count >= dailyLimit) {
-    const error = new Error(`Daily public repo import limit reached (${dailyLimit}).`);
-    error.statusCode = 429;
-    throw error;
-  }
-  return { importDay, remaining: Math.max(0, dailyLimit - Number(count ?? 0) - 1) };
-}
-
-async function recordImportEvent(db, { userId, importDay, repoKey, contentHash }) {
-  const { error } = await db.from("github_import_events").insert({
-    user_id: userId,
-    import_day: importDay,
-    repo_key: repoKey,
-    content_hash: contentHash
+async function claimImportQuota(db, { userId, repoKey, contentHash }) {
+  const { data, error } = await db.rpc("claim_github_import_quota", {
+    p_user_id: userId,
+    p_repo_key: repoKey,
+    p_content_hash: contentHash,
+    p_daily_limit: dailyLimit
   });
   if (error) {
-    const dbError = new Error("Unable to record public repo import usage.");
-    dbError.statusCode = 503;
+    const limitReached = String(error.message ?? "").includes("Daily public repo import limit reached");
+    const dbError = new Error(limitReached ? `Daily public repo import limit reached (${dailyLimit}).` : "Unable to claim public repo import quota.");
+    dbError.statusCode = limitReached ? 429 : 503;
     throw dbError;
   }
+  return data?.[0] ?? { remaining: 0 };
 }
 
 function isFreshCacheEntry(entry) {
@@ -183,18 +163,17 @@ export default async function handler(req, res) {
   try {
     const db = serverSupabase();
     const user = await authenticateUser(req, db);
-    const rate = await checkRateLimit(db, user.id);
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const parsed = parseRepoUrl(String(body?.url ?? ""));
 
     const repoKey = `${parsed.owner.toLowerCase()}/${parsed.repo.toLowerCase()}`;
     const cached = await readCachedImport(db, repoKey);
     if (cached) {
-      await recordImportEvent(db, { userId: user.id, importDay: rate.importDay, repoKey, contentHash: cached.project.contentHash });
+      const quota = await claimImportQuota(db, { userId: user.id, repoKey, contentHash: cached.project.contentHash });
       res.status(200).json({
         ...cached,
         cached: true,
-        controls: { ...cached.controls, dailyLimit, remainingToday: rate.remaining, cacheTtlHours }
+        controls: { ...cached.controls, dailyLimit, remainingToday: quota.remaining, cacheTtlHours }
       });
       return;
     }
@@ -232,17 +211,18 @@ export default async function handler(req, res) {
       controls: {
         permissionModel: "public-read-only",
         dailyLimit,
-        remainingToday: rate.remaining,
+        remainingToday: 0,
         cacheKey: contentHash,
         cacheTtlHours,
         storyGeneration: "server-side deterministic draft",
-        rateLimitStorage: "supabase-user-day",
+        rateLimitStorage: "supabase-user-day-rpc",
         cacheStorage: "supabase-repo-content-hash"
       }
     };
 
+    const quota = await claimImportQuota(db, { userId: user.id, repoKey, contentHash });
+    result.controls.remainingToday = quota.remaining;
     await writeCachedImport(db, { repoKey, parsed, result });
-    await recordImportEvent(db, { userId: user.id, importDay: rate.importDay, repoKey, contentHash });
     res.status(200).json(result);
   } catch (error) {
     const statusCode = error.statusCode && Number(error.statusCode) >= 400 ? Number(error.statusCode) : 400;
