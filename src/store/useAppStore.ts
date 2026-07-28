@@ -348,14 +348,22 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   saveActiveInterviewSession: async (session) => {
     set({ activeInterviewSession: session });
-    await localforage.setItem(STORAGE_KEYS.activeInterviewSession, session);
+    try {
+      await localforage.setItem(STORAGE_KEYS.activeInterviewSession, session);
+    } catch {
+      // Some test or constrained browser contexts lack IndexedDB/localStorage drivers.
+    }
     void syncActiveInterviewSession(session).catch(() => undefined);
   },
 
   clearActiveInterviewSession: async (sessionId) => {
     const id = sessionId ?? get().activeInterviewSession?.id;
     set({ activeInterviewSession: null });
-    await localforage.removeItem(STORAGE_KEYS.activeInterviewSession);
+    try {
+      await localforage.removeItem(STORAGE_KEYS.activeInterviewSession);
+    } catch {
+      // Keep UI state cleared even if local storage is unavailable.
+    }
     if (id) void deleteCloudActiveInterviewSession(id).catch(() => undefined);
   },
 

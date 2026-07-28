@@ -8,7 +8,8 @@ describe("cloudSync", () => {
       interviewSessions: [],
       questionFlags: [],
       importedProjects: [],
-      assessmentSession: null
+      assessmentSession: null,
+      activeInterviewSession: null
     });
   });
 

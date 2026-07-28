@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 CI cloud sync fallback shape mismatch
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30364156414`, job `90290975870`, step `npm test`.
+
+Error:
+`src/lib/cloudSync.test.ts` failed because `fetchCloudLearningData()` now returns `activeInterviewSession: null`, but the fallback-shape test still expected the older object without that field.
+
+Likely cause:
+The active Interview Studio recovery slice extended the cloud fallback contract, and the existing cloud sync unit test was not updated in the same commit.
+
+Fix attempted:
+Added `activeInterviewSession: null` to the expected fallback object.
+
+Result:
+Resolved locally. `npm test -- src/lib/cloudSync.test.ts` and full `npm test` passed after updating the fallback expectation and guarding active draft local storage writes.
+
+Remaining issue:
+PR CI rerun pending after push.
+
+### M5/M6 active interview autosave localForage test rejection
+
+Date:
+2026-07-28
+
+Command:
+`npm test`
+
+Error:
+All 26 test files and 72 tests passed, but Vitest failed the run because `JobReadiness.test.tsx` triggered six unhandled `No available storage method found` rejections from localForage.
+
+Likely cause:
+The new active Interview Studio autosave path writes to localForage after starting/typing in the Career Lab component test. The jsdom test environment has no available localForage storage driver.
+
+Fix attempted:
+Wrapped active interview local draft `setItem` and `removeItem` calls in storage-unavailable guards while preserving in-memory store updates and best-effort cloud sync.
+
+Result:
+Resolved. Full `npm test` passed after guarding active draft local storage writes.
+
+Remaining issue:
+PR CI rerun pending after push.
+
 ### M5/M6 GitHub import validator stale direct-events requirement
 
 Date:
