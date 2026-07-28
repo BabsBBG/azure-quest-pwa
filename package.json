@@ -17,7 +17,7 @@
     "test:e2e:mobile": "playwright test --project=mobile-390 --project=mobile-320",
     "test:accessibility": "playwright test --grep @accessibility",
     "test:visual": "playwright test --grep @visual",
-    "test:production-smoke": "playwright test --config=playwright.production.config.ts",
+    "test:production-smoke": "node scripts/run-production-smoke.mjs",
     "validate:harness": "node scripts/validate-harness.mjs",
     "validate:routes": "node scripts/check-routes.mjs",
     "validate:questions": "node scripts/validate-question-bank.mjs",
@@ -42,6 +42,7 @@
     "validate:assessment-shell": "node scripts/validate-assessment-shell.mjs",
     "validate:project-fixtures": "node scripts/validate-project-fixtures.mjs",
     "validate:typography": "node scripts/validate-typography.mjs",
+    "validate:production-smoke-gate": "node scripts/validate-production-smoke-gate.mjs",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {

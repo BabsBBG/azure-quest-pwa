@@ -48,6 +48,7 @@ Current scripts:
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:typography`
+- `npm run validate:production-smoke-gate`
 
 Current Vitest coverage:
 
@@ -83,7 +84,7 @@ Current CI:
 - npm run test:accessibility
 - npm run test:visual
 - npm run build
-- npm run test:production-smoke on `main` when GitHub Actions variable `PRODUCTION_BASE_URL` is configured
+- npm run test:production-smoke always runs the smoke gate; pull requests explicitly report `SKIPPED_MISSING_BASE_URL` when no production URL is configured, while `main` fails if `PRODUCTION_BASE_URL` is missing.
 
 ## Required M5/M6 E2E and Production Checks
 
@@ -105,6 +106,7 @@ Added scripts:
 - `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:typography`
+- `npm run validate:production-smoke-gate`
 
 Missing scripts to add during the programme:
 

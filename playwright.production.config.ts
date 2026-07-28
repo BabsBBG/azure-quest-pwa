@@ -6,7 +6,7 @@ export default defineConfig({
   webServer: undefined,
   use: {
     ...baseConfig.use,
-    baseURL: process.env.PRODUCTION_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? "https://azure-quest-pwa.vercel.app"
+    baseURL: process.env.PRODUCTION_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL
   },
   projects: [
     { name: "production-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } } },
