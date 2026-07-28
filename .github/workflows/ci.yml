@@ -43,6 +43,7 @@ jobs:
       - run: npm run validate:github-import-controls
       - run: npm run validate:active-interview-recovery
       - run: npm run validate:auth-first-ia
+      - run: npm run validate:assessment-shell
       - run: npm run validate:routes
       - run: npm run test:e2e:chromium
       - run: npm run test:e2e:webkit

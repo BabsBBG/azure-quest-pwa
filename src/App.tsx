@@ -76,6 +76,16 @@ function ProtectedAdminRoute() {
   return <AdminReviewStudio />;
 }
 
+function ProtectedAssessmentRoute() {
+  const auth = useAuth();
+  const location = useLocation();
+
+  if (auth.loading) return <AuthLoadingScreen />;
+  if (!auth.user) return <Navigate to="/auth?mode=signup" replace state={{ from: location.pathname }} />;
+
+  return <PracticeArena />;
+}
+
 export default function App() {
   const hydrated = useHydrateApp();
   const settings = useAppStore((state) => state.settings);
@@ -105,6 +115,7 @@ export default function App() {
           <Route path="/terms" element={<PublicInfoPage kind="terms" />} />
           <Route path="/status" element={<PublicInfoPage kind="status" />} />
           <Route path="/admin" element={<ProtectedAdminRoute />} />
+          <Route path="/arena" element={<ProtectedAssessmentRoute />} />
           <Route path="*" element={<ProtectedLearnerShell>
           <Routes>
             <Route path="/" element={<PathHome />} />
@@ -124,7 +135,6 @@ export default function App() {
             <Route path="/cert/:cert/readiness" element={<Readiness />} />
             <Route path="/cert/:cert/job" element={<JobReadiness />} />
             <Route path="/study" element={<StudyMode />} />
-            <Route path="/arena" element={<PracticeArena />} />
             <Route path="/exam-walkthrough" element={<ExamWalkthrough />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/history" element={<PastExams />} />

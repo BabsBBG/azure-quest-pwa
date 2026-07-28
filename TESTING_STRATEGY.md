@@ -45,6 +45,7 @@ Current scripts:
 - `npm run validate:github-import-controls`
 - `npm run validate:active-interview-recovery`
 - `npm run validate:auth-first-ia`
+- `npm run validate:assessment-shell`
 
 Current Vitest coverage:
 
@@ -71,6 +72,7 @@ Current CI:
 - npm run validate:github-import-controls
 - npm run validate:active-interview-recovery
 - npm run validate:auth-first-ia
+- npm run validate:assessment-shell
 - npm run test:e2e:chromium
 - npm run test:e2e:webkit
 - npm run test:e2e:mobile
@@ -96,12 +98,12 @@ Added scripts:
 - `npm run validate:github-import-controls`
 - `npm run validate:active-interview-recovery`
 - `npm run validate:auth-first-ia`
+- `npm run validate:assessment-shell`
 
 Missing scripts to add during the programme:
 
 - `npm run validate:migrations`
 - `npm run validate:rls`
-- `npm run validate:assessment-shell`
 - `npm run validate:project-fixtures`
 - `npm run validate:repository-isolation`
 - `npm run validate:production-content`
