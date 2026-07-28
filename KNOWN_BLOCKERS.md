@@ -10,6 +10,7 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Supabase CLI is not installed locally, so live migration/RLS validation is blocked from this checkout.
 - Live Supabase test identities and role bootstrap are not configured/verified.
 - Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
+- Production quiz/run CTAs are blocked when approved coverage is incomplete in repo, but live source ingestion, review, publication, and production serving remain pending.
 - GitHub import abuse controls are durable and authenticated in repo; live Supabase RPC/quota denial verification remains pending.
 - Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.

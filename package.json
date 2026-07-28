@@ -45,6 +45,7 @@
     "validate:project-intelligence": "node scripts/validate-project-intelligence.mjs",
     "validate:privacy-workflows": "node scripts/validate-privacy-workflows.mjs",
     "validate:support-boundary": "node scripts/validate-support-boundary.mjs",
+    "validate:production-content": "node scripts/validate-production-content.mjs",
     "validate:typography": "node scripts/validate-typography.mjs",
     "validate:production-smoke-gate": "node scripts/validate-production-smoke-gate.mjs",
     "check:routes": "node scripts/check-routes.mjs"

@@ -117,6 +117,7 @@ export function KnowledgeCheck() {
       <Card>
         <CardHeader><CardTitle>Quick Quizzes</CardTitle><BrainCircuit className="h-6 w-6" /></CardHeader>
         <div className="mb-3"><QuestionBankNotice compact /></div>
+        <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">Production quizzes start only after enough approved source-grounded item placements exist. Blocked quizzes are not filled with demo questions.</p>
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <div className="aq-subtle-panel p-3 text-sm font-semibold">Curated structures: {curatedSummary.total}</div>
           <div className="aq-subtle-panel p-3 text-sm font-semibold">Published: {curatedSummary.published}</div>
@@ -133,7 +134,13 @@ export function KnowledgeCheck() {
                   <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{quiz.targetQuestions}Q / {quiz.minutes}m / {quiz.unlockRule}</p>
                   {quiz.missingApprovedItems > 0 ? <p className="mt-2 text-xs font-bold text-amber-700 dark:text-amber-200">Blocked pending {quiz.missingApprovedItems} approved source-grounded item placements.</p> : null}
                 </div>
-                  <Button asChild size="sm" variant={active && quiz.publicationStatus === "published" ? "hero" : "soft"} className="shrink-0"><Link to={active && quiz.publicationStatus === "published" ? `/arena?cert=${cert}&mode=quiz&count=${quiz.targetQuestions}&minutes=${quiz.minutes}&quizId=${quiz.id}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}&examTitle=${encodeURIComponent(`${cert} ${quiz.title}`)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/knowledge`}><Play className="h-4 w-4" /> {active && quiz.publicationStatus === "published" ? "Start" : quiz.publicationStatus === "blocked" ? "Blocked" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
+                  {active && quiz.publicationStatus === "published" ? (
+                    <Button asChild size="sm" variant="hero" className="shrink-0"><Link to={`/arena?cert=${cert}&mode=quiz&count=${quiz.targetQuestions}&minutes=${quiz.minutes}&quizId=${quiz.id}&domain=${encodeURIComponent(quiz.domain)}&tags=${encodeURIComponent(quiz.focusTags.join(","))}&examTitle=${encodeURIComponent(`${cert} ${quiz.title}`)}`}><Play className="h-4 w-4" /> Start</Link></Button>
+                  ) : active && quiz.publicationStatus === "blocked" ? (
+                    <Button type="button" size="sm" variant="soft" disabled className="shrink-0"><Play className="h-4 w-4" /> Not ready</Button>
+                  ) : (
+                    <Button asChild size="sm" variant="soft" className="shrink-0"><Link to={`/cert/${pathFor(meta.replacementCert ?? "SC-500")}/knowledge`}>Use {meta.replacementCert ?? "active path"}</Link></Button>
+                  )}
               </div>
             </div>
           ))}
@@ -143,6 +150,7 @@ export function KnowledgeCheck() {
       <Card>
         <CardHeader><CardTitle>Certification Runs</CardTitle><FileQuestion className="h-6 w-6" /></CardHeader>
         <div className="mb-3"><QuestionBankNotice compact /></div>
+        <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/10 dark:text-amber-100">Production certification runs are unavailable until approved source-grounded coverage satisfies the run definition. Demo questions are never used as a silent fallback.</p>
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <div className="aq-subtle-panel p-3 text-sm font-semibold">Finite runs: {finiteSummary.total}</div>
           <div className="aq-subtle-panel p-3 text-sm font-semibold">Published: {finiteSummary.published}</div>
@@ -161,7 +169,13 @@ export function KnowledgeCheck() {
                     <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{exam.targetQuestions} questions / {exam.minutes} minutes / unanswered grade wrong</p>
                     {exam.missingApprovedItems > 0 ? <p className="mt-2 text-xs font-bold text-amber-700 dark:text-amber-200">Blocked pending {exam.missingApprovedItems} approved source-grounded placements.</p> : null}
                   </div>
-                  <Button asChild size="sm" variant={active && exam.publicationStatus === "published" ? "hero" : "soft"} className="shrink-0"><Link to={active && exam.publicationStatus === "published" ? `/arena?cert=${cert}&mode=timed&count=${exam.targetQuestions}&minutes=${exam.minutes}&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}` : `/cert/${pathFor(meta.replacementCert ?? "SC-500")}/readiness`}><Play className="h-4 w-4" /> {active && exam.publicationStatus === "published" ? "Start" : exam.publicationStatus === "blocked" ? "Blocked" : `Use ${meta.replacementCert ?? "active path"}`}</Link></Button>
+                  {active && exam.publicationStatus === "published" ? (
+                    <Button asChild size="sm" variant="hero" className="shrink-0"><Link to={`/arena?cert=${cert}&mode=timed&count=${exam.targetQuestions}&minutes=${exam.minutes}&examId=${exam.id}&examTitle=${encodeURIComponent(exam.title)}`}><Play className="h-4 w-4" /> Start</Link></Button>
+                  ) : active && exam.publicationStatus === "blocked" ? (
+                    <Button type="button" size="sm" variant="soft" disabled className="shrink-0"><Play className="h-4 w-4" /> Not ready</Button>
+                  ) : (
+                    <Button asChild size="sm" variant="soft" className="shrink-0"><Link to={`/cert/${pathFor(meta.replacementCert ?? "SC-500")}/readiness`}>Use {meta.replacementCert ?? "active path"}</Link></Button>
+                  )}
                 </div>
                 <div className="mt-3"><Progress value={best?.percentage ?? 0} /><p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Best: {best ? `${best.percentage}%` : "Not attempted"}</p></div>
               </div>
