@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 admin validator stale role badge copy
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30372718004`, job `90320460139`, step `npm run validate:admin-review-studio`.
+
+Error:
+`Admin Review Studio validation failed: missing Main Admin protected`
+
+Likely cause:
+The support-boundary slice changed Admin Review Studio from a static `Main Admin protected` badge to role-aware copy that shows the current role plus `Main Admin publishes` and support-only inspect affordances. The validator still expected the old static badge text.
+
+Fix attempted:
+Updated `scripts/validate-admin-review-studio.mjs` to require the new role-aware governance copy and support inspect affordance instead of the old badge text.
+
+Result:
+Resolved locally. `npm run validate:admin-review-studio`, `npm run validate:auth-redirects`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed after updating the stale validator and adding auth redirect preservation.
+
+Remaining issue:
+Push the validator fix and rerun PR CI.
+
 ### M5/M6 authorization validator stale imported-project row pattern
 
 Date:

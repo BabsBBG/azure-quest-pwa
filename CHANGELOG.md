@@ -32,6 +32,7 @@
 - Added signed-in cloud privacy workflows for exporting account-owned cloud data and deleting cloud learning/repository-analysis records, with owner delete RLS policies and validation.
 - Added support-admin read-only report queue boundaries with explicit RLS helpers, mutation guard triggers, role-filtered Admin affordances, and CI validation.
 - Hardened Project Intelligence analysis row isolation, GitHub import quota RPC execute scope, and content-quality report audit-event immutability.
+- Preserved protected-route intent through email sign-in and Google SSO with safe internal auth redirects and CI validation.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

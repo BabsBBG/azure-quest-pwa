@@ -15,7 +15,7 @@ interface AuthContextValue {
   clearError: () => void;
   signUp: (args: { email: string; password: string; name?: string }) => Promise<void>;
   signIn: (args: { email: string; password: string }) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (args?: { redirectTo?: string }) => Promise<void>;
   resetPassword: (args: { email: string }) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (args: { name: string }) => Promise<void>;
@@ -129,14 +129,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       else syncProfile(data.session ?? null);
       setLoading(false);
     },
-    signInWithGoogle: async () => {
+    signInWithGoogle: async (args) => {
       if (!supabase) {
         setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable Google sign-in.");
         return;
       }
       setLoading(true);
       setError(null);
-      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/account`;
+      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}${args?.redirectTo ?? "/account"}`;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: redirectTo ? { redirectTo } : undefined

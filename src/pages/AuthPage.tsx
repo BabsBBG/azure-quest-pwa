@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { KeyRound, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -13,14 +13,22 @@ function modeFromQuery(value: string | null): AuthMode {
   return "signin";
 }
 
+function safeReturnPath(value: unknown) {
+  if (typeof value !== "string") return "/";
+  if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/auth")) return "/";
+  return value;
+}
+
 export function AuthPage() {
   const auth = useAuth();
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const mode = modeFromQuery(params.get("mode"));
+  const returnTo = safeReturnPath(params.get("from") ?? (location.state as { from?: string } | null)?.from);
 
   const title = useMemo(() => {
     if (mode === "signup") return "Create your PraxisGrid account";
@@ -28,12 +36,12 @@ export function AuthPage() {
     return "Sign in to PraxisGrid";
   }, [mode]);
 
-  if (auth.user) return <Navigate to="/" replace />;
+  if (auth.user) return <Navigate to={returnTo} replace />;
 
   function setMode(nextMode: AuthMode) {
     auth.clearError();
     setNotice(null);
-    setParams({ mode: nextMode });
+    setParams(returnTo === "/" ? { mode: nextMode } : { mode: nextMode, from: returnTo });
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -77,12 +85,12 @@ export function AuthPage() {
             <div>
               <Badge className="mb-2">{mode === "signup" ? "Signup" : mode === "reset" ? "Recovery" : "Signin"}</Badge>
               <h2 className="text-xl font-bold leading-tight text-slate-950">{title}</h2>
-              <p className="mt-2 text-sm font-semibold text-slate-700">Google and email sign-in use Supabase. Your account controls access to Learn, Practise, and Prove.</p>
+            <p className="mt-2 text-sm font-semibold text-slate-700">Your account controls access to Learn, Practise, and Prove.</p>
             </div>
             <Mail className="h-7 w-7 text-[var(--aq-blue-700)]" />
           </header>
           <div>
-            <Button type="button" variant="soft" disabled={auth.loading || !auth.configured} onClick={() => void auth.signInWithGoogle()} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)]">
+            <Button type="button" variant="soft" disabled={auth.loading || !auth.configured} onClick={() => void auth.signInWithGoogle({ redirectTo: returnTo })} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)]">
               <KeyRound className="h-4 w-4" />
               Continue with Google
             </Button>

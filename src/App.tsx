@@ -30,6 +30,11 @@ import { AuthPage } from "./pages/AuthPage";
 import { PublicInfoPage } from "./pages/PublicInfoPage";
 import { PRODUCT_INITIALS, PRODUCT_NAME } from "./lib/brand";
 
+function authPath(mode: "signin" | "signup", location: ReturnType<typeof useLocation>) {
+  const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+  return `/auth?mode=${mode}&from=${from}`;
+}
+
 function AuthLoadingScreen() {
   return (
     <main className="grid min-h-screen place-items-center bg-slate-950 text-white">
@@ -46,7 +51,7 @@ function ProtectedLearnerShell({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (auth.loading) return <AuthLoadingScreen />;
-  if (!auth.user) return <Navigate to="/auth?mode=signup" replace state={{ from: location.pathname }} />;
+  if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
 
   return <Layout>{children}</Layout>;
 }
@@ -70,7 +75,7 @@ function ProtectedAdminRoute() {
   const adminRoles = new Set(["MAIN_ADMIN", "CONTENT_REVIEWER", "SUPPORT_ADMIN"]);
 
   if (auth.loading || auth.roleLoading) return <AuthLoadingScreen />;
-  if (!auth.user) return <Navigate to="/auth?mode=signin" replace state={{ from: location.pathname }} />;
+  if (!auth.user) return <Navigate to={authPath("signin", location)} replace state={{ from: location.pathname }} />;
   if (!adminRoles.has(auth.role)) return <AdminAccessDenied />;
 
   return <AdminReviewStudio />;
@@ -81,7 +86,7 @@ function ProtectedAssessmentRoute() {
   const location = useLocation();
 
   if (auth.loading) return <AuthLoadingScreen />;
-  if (!auth.user) return <Navigate to="/auth?mode=signup" replace state={{ from: location.pathname }} />;
+  if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
 
   return <PracticeArena />;
 }
