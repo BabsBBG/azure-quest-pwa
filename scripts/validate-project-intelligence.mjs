@@ -15,6 +15,7 @@ const required = [
   [api, "architectureMap"],
   [api, "risksAndImprovements"],
   [cloudSync, "project_intelligence_analyses"],
+  [cloudSync, "importedProjectAnalysisRowId(userId, project)"],
   [cloudSync, "deleteImportedProject"],
   [store, "deleteImportedProject: (projectId: string) => Promise<void>"],
   [careerLab, "Project Intelligence overview"],

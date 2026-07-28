@@ -179,13 +179,14 @@ Implemented:
 
 ## M5.8 Separate PraxisGrid Admin Review Studio
 
-Status: complete in repo; live role-auth verification pending in M5.12.
+Status: complete in repo; live role-auth/RLS verification pending in M5.12.
 
 Implemented:
 
 - Distinct `/admin` back-office interface, separate from learner layout.
 - Persistent sidebar, utility bar, dense tables, filters, queues, split-pane review, sticky actions, audit timelines, revision history, warning banners, keyboard-friendly workflows, and responsive fallback.
 - Role-protected Main Admin, Content Reviewer, Support Admin, and User access boundaries.
+- Support Admin report queues are read-only in repo through explicit support RLS helpers, mutation guard triggers, and role-filtered Admin affordances.
 - Admin scaffold connected to content orchestration, critic reports, source impact, summaries, route/CI validation, and report.
 
 ## M5.9 Curated Domain Quiz Structure
@@ -234,7 +235,6 @@ Completed:
 
 ## Not Approved
 
-- M6.
 - GitHub write permissions.
 - Private repository import.
 - Client-side LLM calls or frontend LLM API keys.

@@ -4,6 +4,7 @@ const api = readFileSync("api/github-project.js", "utf8");
 const client = readFileSync("src/lib/githubProjectImport.ts", "utf8");
 const migration = readFileSync("supabase/migrations/0018_github_import_controls.sql", "utf8");
 const atomicQuotaMigration = readFileSync("supabase/migrations/0020_atomic_github_import_quota.sql", "utf8");
+const rpcHardeningMigration = readFileSync("supabase/migrations/0025_rpc_and_audit_hardening.sql", "utf8");
 const envExample = readFileSync(".env.example", "utf8");
 
 const forbiddenApiSnippets = ["new Map()", "rateBuckets", "cache =", "recordImportEvent", "checkRateLimit"];
@@ -73,6 +74,20 @@ const requiredAtomicQuotaSnippets = [
 for (const snippet of requiredAtomicQuotaSnippets) {
   if (!atomicQuotaMigration.includes(snippet)) {
     console.error(`GitHub import controls validation failed: atomic quota migration missing ${snippet}`);
+    process.exit(1);
+  }
+}
+
+const requiredRpcHardeningSnippets = [
+  "Users cannot claim GitHub import quota for another account",
+  "revoke execute on function public.claim_github_import_quota(uuid, text, text, integer) from anon",
+  "revoke execute on function public.claim_github_import_quota(uuid, text, text, integer) from authenticated",
+  "grant execute on function public.claim_github_import_quota(uuid, text, text, integer) to service_role"
+];
+
+for (const snippet of requiredRpcHardeningSnippets) {
+  if (!rpcHardeningMigration.includes(snippet)) {
+    console.error(`GitHub import controls validation failed: RPC hardening migration missing ${snippet}`);
     process.exit(1);
   }
 }

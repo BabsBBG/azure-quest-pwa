@@ -30,6 +30,8 @@
 - Replaced the silent production-smoke workflow condition with an explicit smoke runner that reports PR skips, fails `main` without a configured production URL, and blocks fallback to the historical Azure Quest URL.
 - Added typed Project Intelligence analysis records with evidence sections, owner-scoped Supabase persistence, regenerate/delete UI actions, and validation for repository-isolated analysis workflows.
 - Added signed-in cloud privacy workflows for exporting account-owned cloud data and deleting cloud learning/repository-analysis records, with owner delete RLS policies and validation.
+- Added support-admin read-only report queue boundaries with explicit RLS helpers, mutation guard triggers, role-filtered Admin affordances, and CI validation.
+- Hardened Project Intelligence analysis row isolation, GitHub import quota RPC execute scope, and content-quality report audit-event immutability.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

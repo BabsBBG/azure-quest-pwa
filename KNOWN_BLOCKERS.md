@@ -4,15 +4,16 @@
 
 The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6. The current production baseline is blocked by:
 
-- Public `/admin` route is not runtime auth/role gated.
-- Public app still supports logged-out demo practice.
+- Public `/admin` route is runtime auth/role gated in repo; live role-browser and Supabase RLS verification remain pending.
+- Public learner routes are auth-gated in repo; production auth provider/env verification remains pending.
 - Vercel production env check reported no `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`.
 - Supabase CLI is not installed locally, so live migration/RLS validation is blocked from this checkout.
 - Live Supabase test identities and role bootstrap are not configured/verified.
 - Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
-- GitHub import abuse controls are in-memory/IP-based instead of durable authenticated-user controls.
-- Secondary assessment-like surfaces need the shared demo-bank trust notice and answer-reveal alignment.
-- Admin Review Studio is static and not connected to protected live queues/mutations.
+- GitHub import abuse controls are durable and authenticated in repo; live Supabase RPC/quota denial verification remains pending.
+- Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
+- Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
+- Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
 - Playwright, WebKit, mobile, accessibility, visual, production-smoke, migration, RLS, production-content, repository-isolation, and assessment-shell gates are missing.
 - Current production Vercel identity remains `azure-quest-pwa`; canonical PraxisGrid URL migration remains pending.
 

@@ -9,6 +9,7 @@ import { createSourceVersionDiff, createTargetedReplacementJob, impactRecordsFor
 import { critiqueSourceGroundedQuestion } from "../utils/questionCritic";
 import { PRODUCT_NAME, PROVIDER_NEUTRAL_DISCLAIMER } from "../lib/brand";
 import { contentQualityReportSummary, sampleContentQualityReports } from "../data/contentQualityReports";
+import { useAuth } from "../hooks/useAuth";
 
 const workflow = runContentOrchestrationWorkflow(createContentOrchestrationWorkflow({ idempotencyKey: "admin-review-studio" }));
 const sourceDiff = createSourceVersionDiff({
@@ -32,6 +33,29 @@ const queueRows = [
 ];
 
 export function AdminReviewStudio() {
+  const { role } = useAuth();
+  const isMainAdmin = role === "MAIN_ADMIN";
+  const isReviewer = role === "CONTENT_REVIEWER" || isMainAdmin;
+  const isSupport = role === "SUPPORT_ADMIN";
+  const visibleQueues = queueRows.filter((row) => {
+    if (isMainAdmin) return true;
+    if (isReviewer) return row.role === "CONTENT_REVIEWER";
+    if (isSupport) return row.role === "SUPPORT_ADMIN";
+    return false;
+  });
+  const reviewRows = [
+    { item: reviewedCandidate.id, queue: "Critic", status: criticReport.status, role: "Content Reviewer" },
+    { item: sourceDiff.id, queue: "Source Impact", status: replacementJob.status, role: "Main Admin" },
+    { item: workflow.id, queue: "Orchestration", status: workflow.status, role: "Main Admin" },
+    { item: approvedLearningSummaries()[0]?.versionId ?? "summary", queue: "Summaries", status: "approved", role: "Content Reviewer" },
+    { item: "learner-report-queue", queue: "Quality Reports", status: reportSummary.open ? "open" : "clear", role: "Support Admin" }
+  ].filter((row) => {
+    if (isMainAdmin) return true;
+    if (isReviewer) return row.role === "Content Reviewer";
+    if (isSupport) return row.role === "Support Admin";
+    return false;
+  });
+
   return (
     <div className="min-h-screen bg-[#f4f8fc] text-slate-950 dark:bg-[#061227] dark:text-white">
       <div className="grid min-h-screen lg:grid-cols-[248px_1fr]">
@@ -61,13 +85,14 @@ export function AdminReviewStudio() {
           <header className="sticky top-0 z-20 border-b border-[var(--aq-border)] bg-white/95 px-4 py-3 backdrop-blur dark:bg-[#081d38]/95">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="flex flex-wrap gap-2"><Badge>Main Admin protected</Badge><Badge>Reviewer queue</Badge><Badge>Support read-only</Badge></div>
+                <div className="flex flex-wrap gap-2"><Badge>{role}</Badge><Badge>Main Admin publishes</Badge><Badge>Support read-only</Badge></div>
                 <h2 className="mt-2 text-2xl font-extrabold">Review Studio</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="soft" size="sm"><Filter className="h-4 w-4" /> Filters</Button>
                 <Button variant="soft" size="sm"><SplitSquareHorizontal className="h-4 w-4" /> Split Pane</Button>
-                <Button variant="hero" size="sm"><CheckCircle2 className="h-4 w-4" /> Review Selected</Button>
+                {isReviewer ? <Button variant="hero" size="sm"><CheckCircle2 className="h-4 w-4" /> Review Selected</Button> : null}
+                {isSupport ? <Button variant="soft" size="sm"><FileSearch className="h-4 w-4" /> Inspect Reports</Button> : null}
               </div>
             </div>
           </header>
@@ -84,7 +109,7 @@ export function AdminReviewStudio() {
             </section>
 
             <section id="review-queues" className="grid gap-3 md:grid-cols-4">
-              {queueRows.map((row) => (
+              {visibleQueues.map((row) => (
                 <div key={row.id} className="rounded-md border border-[var(--aq-border)] bg-white p-4 shadow-sm dark:bg-[#081d38]">
                   <div className="flex items-center justify-between gap-2"><Badge>{row.role}</Badge><Activity className="h-4 w-4 text-[var(--aq-blue-700)]" /></div>
                   <p className="mt-3 text-sm font-bold text-[var(--aq-muted)]">{row.label}</p>
@@ -105,12 +130,7 @@ export function AdminReviewStudio() {
                       <tr><th className="px-4 py-3">Item</th><th className="px-4 py-3">Queue</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Role</th></tr>
                     </thead>
                     <tbody>
-                      {[
-                        { item: reviewedCandidate.id, queue: "Critic", status: criticReport.status, role: "Content Reviewer" },
-                        { item: sourceDiff.id, queue: "Source Impact", status: replacementJob.status, role: "Main Admin" },
-                        { item: workflow.id, queue: "Orchestration", status: workflow.status, role: "Main Admin" },
-                        { item: approvedLearningSummaries()[0]?.versionId ?? "summary", queue: "Summaries", status: "approved", role: "Content Reviewer" }
-                      ].map((row) => (
+                      {reviewRows.map((row) => (
                         <tr key={`${row.queue}:${row.item}`} className="border-b border-[var(--aq-border)] last:border-0">
                           <td className="max-w-[260px] truncate px-4 py-3 font-bold">{row.item}</td>
                           <td className="px-4 py-3 font-semibold text-[var(--aq-muted)]">{row.queue}</td>
@@ -137,10 +157,16 @@ export function AdminReviewStudio() {
                     <p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Critic Findings</p>
                     <div className="mt-2 space-y-2">{criticReport.findings.length ? criticReport.findings.map((finding) => <p key={`${finding.checkId}:${finding.message}`} className="text-sm font-semibold">{finding.checkId}: {finding.message}</p>) : <p className="text-sm font-semibold">No hard findings.</p>}</div>
                   </div>
-                  <div className="sticky bottom-4 flex flex-wrap gap-2 rounded-md border border-[var(--aq-border)] bg-white p-3 shadow-sm dark:bg-[#081d38]">
-                    <Button size="sm" variant="soft"><AlertTriangle className="h-4 w-4" /> Return</Button>
-                    <Button size="sm" variant="hero"><CheckCircle2 className="h-4 w-4" /> Approve</Button>
-                  </div>
+                  {isReviewer ? (
+                    <div className="sticky bottom-4 flex flex-wrap gap-2 rounded-md border border-[var(--aq-border)] bg-white p-3 shadow-sm dark:bg-[#081d38]">
+                      <Button size="sm" variant="soft"><AlertTriangle className="h-4 w-4" /> Return</Button>
+                      {isMainAdmin ? <Button size="sm" variant="hero"><CheckCircle2 className="h-4 w-4" /> Approve</Button> : null}
+                    </div>
+                  ) : (
+                    <div className="sticky bottom-4 rounded-md border border-[var(--aq-border)] bg-[var(--aq-blue-50)] p-3 text-sm font-semibold text-[var(--aq-blue-900)]">
+                      Support Admin can inspect learner reports and related audit history. Content review, approval, publication, and overrides remain unavailable.
+                    </div>
+                  )}
                 </div>
               </aside>
             </section>

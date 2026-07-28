@@ -49,6 +49,7 @@ Current scripts:
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`
 - `npm run validate:privacy-workflows`
+- `npm run validate:support-boundary`
 - `npm run validate:typography`
 - `npm run validate:production-smoke-gate`
 
@@ -81,6 +82,7 @@ Current CI:
 - npm run validate:project-fixtures
 - npm run validate:project-intelligence
 - npm run validate:privacy-workflows
+- npm run validate:support-boundary
 - npm run validate:typography
 - npm run test:e2e:chromium
 - npm run test:e2e:webkit
@@ -111,6 +113,7 @@ Added scripts:
 - `npm run validate:project-fixtures`
 - `npm run validate:project-intelligence`
 - `npm run validate:privacy-workflows`
+- `npm run validate:support-boundary`
 - `npm run validate:typography`
 - `npm run validate:production-smoke-gate`
 

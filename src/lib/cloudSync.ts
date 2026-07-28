@@ -136,6 +136,7 @@ export async function syncImportedProject(project: ImportedProject) {
   if (!userId || !supabase) return { ok: false, skipped: true };
 
   const rowId = importedProjectRowId(userId, project);
+  const analysisRowId = importedProjectAnalysisRowId(userId, project);
   const { error } = await supabase.from("imported_projects").upsert({
     id: rowId,
     user_id: userId,
@@ -151,7 +152,7 @@ export async function syncImportedProject(project: ImportedProject) {
   if (error) return { ok: false, skipped: false, error };
 
   const { error: analysisError } = await supabase.from("project_intelligence_analyses").upsert({
-    id: project.analysis.id,
+    id: analysisRowId,
     user_id: userId,
     imported_project_id: rowId,
     content_hash: project.contentHash,
@@ -167,11 +168,16 @@ export function importedProjectRowId(userId: string, project: Pick<ImportedProje
   return `${userId}:${project.contentHash || project.id}`;
 }
 
+export function importedProjectAnalysisRowId(userId: string, project: ImportedProject) {
+  return `${userId}:${project.analysis.id}`;
+}
+
 export async function deleteImportedProject(project: ImportedProject) {
   const userId = await currentUserId();
   if (!userId || !supabase) return { ok: false, skipped: true };
   const rowId = importedProjectRowId(userId, project);
-  const analysis = await supabase.from("project_intelligence_analyses").delete().eq("user_id", userId).eq("imported_project_id", rowId);
+  const analysisRowId = importedProjectAnalysisRowId(userId, project);
+  const analysis = await supabase.from("project_intelligence_analyses").delete().eq("user_id", userId).eq("id", analysisRowId).eq("imported_project_id", rowId);
   if (analysis.error) return { ok: false, skipped: false, error: analysis.error };
   const imported = await supabase.from("imported_projects").delete().eq("user_id", userId).eq("id", rowId);
   return { ok: !imported.error, skipped: false, error: imported.error };
