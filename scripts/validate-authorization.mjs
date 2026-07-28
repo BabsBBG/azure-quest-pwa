@@ -26,7 +26,10 @@ for (const [label, pattern] of requiredMigrationPatterns) {
   }
 }
 
-if (!/id:\s*importedProjectRowId\(userId,\s*project\)/.test(cloudSync)) {
+if (
+  !/id:\s*importedProjectRowId\(userId,\s*project\)/.test(cloudSync)
+  && !/const rowId = importedProjectRowId\(userId,\s*project\)[\s\S]*id:\s*rowId/.test(cloudSync)
+) {
   console.error("Authorization validation failed: imported project cloud rows must be user-scoped.");
   process.exit(1);
 }

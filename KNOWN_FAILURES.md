@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 authorization validator stale imported-project row pattern
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30369719901`, job `90310088692`, step `npm run validate:authorization`.
+
+Error:
+`Authorization validation failed: imported project cloud rows must be user-scoped.`
+
+Likely cause:
+The Project Intelligence slice refactored `syncImportedProject` to compute `const rowId = importedProjectRowId(userId, project)` once and reuse it for both imported-project and analysis persistence. The validator still only accepted the older inline `id: importedProjectRowId(userId, project)` pattern.
+
+Fix attempted:
+Updated `scripts/validate-authorization.mjs` to accept either the old inline expression or the new local `rowId` pattern while still requiring `importedProjectRowId(userId, project)`.
+
+Result:
+Resolved locally. `npm run validate:authorization`, `npm run validate:project-intelligence`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed after updating the validator.
+
+Remaining issue:
+Push and rerun PR CI.
+
 ### M5/M6 CI cloud sync fallback shape mismatch
 
 Date:
