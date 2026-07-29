@@ -5,17 +5,18 @@
 The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6. The current production baseline is blocked by:
 
 - Public `/admin` route is runtime auth/role gated in repo; live role-browser and Supabase RLS verification remain pending.
-- Public learner routes are auth-gated and onboarding-gated in repo; production auth provider/env and live onboarding verification remain pending.
-- Vercel production env check reported no `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`.
-- Supabase CLI is not installed locally, so live migration/RLS validation is blocked from this checkout.
-- Live Supabase test identities and role bootstrap are not configured/verified.
+- Public learner routes are auth-gated and onboarding-gated in repo; live auth browser and onboarding verification remain pending.
+- Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for `praxisgrid-production`; production redeploy and authenticated smoke verification remain pending.
+- Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0025` are applied with matching local/remote history.
+- Live Supabase test identities and real owner role bootstrap are not configured/verified because `PRAXISGRID_OWNER_EMAIL` is not present in the environment.
+- Google SSO cannot be enabled live until real Google OAuth client ID and client secret values are supplied outside source control.
 - Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
 - Production quiz/run CTAs are blocked when approved coverage is incomplete in repo, but live source ingestion, review, publication, and production serving remain pending.
 - GitHub import abuse controls are durable and authenticated in repo; live Supabase RPC/quota denial verification remains pending.
 - Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
-- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration, live RLS, and live two-user repository-isolation probes remain pending.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application is complete, while live RLS and live two-user repository-isolation probes remain pending.
 - Connected Vercel project identity is now `praxisgrid`, and a fresh production deployment is READY. The canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves public production.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
@@ -114,14 +115,16 @@ Any feature that calls an LLM, imports GitHub repositories, generates questions,
 
 ## Supabase application blocker
 
-M3 migrations exist for profiles, quiz attempts, interview sessions, question flags, imported projects, and source-pipeline tables.
+Migrations `0001` through `0025` are applied to `praxisgrid-production`, and Vercel Production has the browser-safe Supabase project URL and publishable key.
 
-Still blocked until applied in the target Supabase project:
+Still blocked until live authenticated QA identities and the real owner are bootstrapped:
 
 - production cloud sync verification
 - cross-device attempt history verification
 - cross-device interview history verification
 - production imported project sync verification
+- live two-user RLS isolation verification
+- live role-boundary verification
 
 ## GitHub blocker
 

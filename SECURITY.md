@@ -75,13 +75,25 @@ The current app has:
 
 The current app does not yet have:
 
-- production-verified Supabase migration application in the target project
 - server-side LLM calls
 - production-scale Microsoft Learn ingestion
 - full admin review UI
 - full replacement of the demo/seed question bank
 
-Google SSO still requires live Supabase provider configuration and redirect URL allow-list verification in each deployed environment before it can be considered production-verified.
+Live Supabase production status on 2026-07-29:
+
+- `praxisgrid-production` exists in `eu-west-1`.
+- Migrations `0001` through `0025` are applied, and local/remote migration history matches.
+- Supabase Auth Site URL and redirects are configured for the working public fallback `https://azure-quest-pwa.vercel.app`.
+- Vercel Production has the browser-safe Supabase project URL and publishable key.
+
+Still pending before security sign-off:
+
+- Real owner `MAIN_ADMIN` bootstrap after `PRAXISGRID_OWNER_EMAIL` is supplied.
+- Live two-user RLS isolation tests.
+- Live role-boundary tests for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN.
+- Live audit-integrity tests.
+- Google SSO provider configuration and verification after Google OAuth credentials are supplied.
 
 ## Icon licensing
 

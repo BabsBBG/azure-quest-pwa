@@ -2,6 +2,121 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### Live Supabase CLI non-interactive login block
+
+Date:
+2026-07-29
+
+Command:
+`npx --yes supabase@latest login`
+
+Error:
+The first login attempts failed because the CLI detected a non-TTY/agent JSON environment and refused to prompt.
+
+Likely cause:
+The Codex shell exported CI/agent-style environment markers, causing Supabase CLI to require a token unless agent detection was disabled.
+
+Fix attempted:
+Reran the login with text output, `--agent no`, and `--no-browser`, then completed the Supabase dashboard verification-code flow.
+
+Result:
+Resolved. Supabase CLI authenticated successfully and was used to create/link `praxisgrid-production`.
+
+Remaining issue:
+None for CLI authentication.
+
+### Live Supabase create rejected explicit free-plan size
+
+Date:
+2026-07-29
+
+Command:
+`supabase projects create praxisgrid-production --size micro`
+
+Error:
+Supabase returned `Instance size cannot be specified for free plan organizations.`
+
+Likely cause:
+Free-plan organisations choose the allowed instance size automatically.
+
+Fix attempted:
+Reran project creation without `--size`.
+
+Result:
+Resolved. Project `praxisgrid-production` was created in `eu-west-1`.
+
+Remaining issue:
+None.
+
+### Supabase CLI key listing exposed legacy keys in local output
+
+Date:
+2026-07-29
+
+Command:
+`supabase projects api-keys --project-ref ... --output json`
+
+Error:
+The command output included legacy key material in the local command output.
+
+Likely cause:
+The current Supabase CLI reveals legacy anon/service-role values in this output mode while masking newer secret keys.
+
+Fix attempted:
+Do not commit, document, or configure the exposed service-role value. Configure Vercel with the Supabase publishable browser key only.
+
+Result:
+Partially mitigated. No key value was committed or added to browser env.
+
+Remaining issue:
+Legacy service-role use is not accepted for production sign-off from this run. Prefer the new Supabase secret key system for server-side QA, and rotate/revoke legacy credentials through the Supabase dashboard if required.
+
+### Supabase generated config briefly weakened auth confirmation defaults
+
+Date:
+2026-07-29
+
+Command:
+`supabase config push --project-ref ozfexprlomzlhkcyagfd`
+
+Error:
+The first generated local config diff would have disabled email confirmations and lowered OTP settings.
+
+Likely cause:
+`supabase init` generated local development defaults that did not match the hosted production auth defaults.
+
+Fix attempted:
+Updated `supabase/config.toml` to keep email confirmations enabled, OTP length at 8, and email frequency at one minute, then pushed the corrected config.
+
+Result:
+Resolved. Production auth config was corrected immediately.
+
+Remaining issue:
+Live signup/sign-in/password-reset browser verification remains pending.
+
+### Preferred PraxisGrid Vercel alias unavailable
+
+Date:
+2026-07-29
+
+Command:
+`vercel domains inspect praxisgrid.vercel.app`
+
+Error:
+Vercel reported the connected account does not have access to `praxisgrid.vercel.app`.
+
+Likely cause:
+The preferred alias is not assigned to the connected Vercel project/account.
+
+Fix attempted:
+Use the working public fallback `https://azure-quest-pwa.vercel.app` for Supabase Site URL and production smoke until a PraxisGrid canonical alias is assigned.
+
+Result:
+Partially resolved. Auth redirects now target the working public fallback while preserving PraxisGrid redirect entries for future alias activation.
+
+Remaining issue:
+Assign a canonical PraxisGrid domain or alias in Vercel.
+
 ### M5/M6 accessibility gate local timeout during assessment-shell retest
 
 Date:
