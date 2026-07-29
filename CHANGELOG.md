@@ -41,6 +41,7 @@
 - Added dev-only signed-in Playwright browser gates for onboarding and Admin role boundaries, with a validator preventing the E2E auth harness from running in production smoke.
 - Added Flashcards seed-bank trust copy and signed-in browser coverage for secondary practice notices plus Assessment Shell review/results exports.
 - Fixed Assessment Shell final submit so the submission review panel closes and the analytical results screen renders.
+- Created Supabase production project `praxisgrid-production` in `eu-west-1`, linked the repository, applied migrations `0001` through `0025` after a hosted staging dry run, configured Supabase Auth redirects for the working production fallback, and added Vercel Production Supabase env vars.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

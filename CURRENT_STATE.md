@@ -64,6 +64,13 @@ Harness state:
 - Google SSO production deployment ID: `dpl_3p6upUV5Ve7Bxw6VBdBjvyY7Jyzk`.
 - Google SSO production deployment URL: `https://azure-quest-nenrffh2z-tonybabalola-1114s-projects.vercel.app`.
 - Google SSO pushed GitHub Actions CI run `30203475880` passed for commit `6f2cf10`.
+- Live Supabase activation began on 2026-07-29 on branch `codex/live-supabase-activation`.
+- Supabase organisation `BabsBBG's Org` was selected and production project `praxisgrid-production` was created in `eu-west-1` with ref `ozf...agfd`.
+- Repository migrations `0001` through `0025` were dry-run and applied successfully to an empty hosted staging fallback, then dry-run and applied successfully to `praxisgrid-production`; production local/remote migration history now matches.
+- Supabase Auth Site URL is configured to the working public fallback `https://azure-quest-pwa.vercel.app`; PraxisGrid and fallback auth/account redirects are allow-listed.
+- Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for the live Supabase project. The browser key is the Supabase publishable key, not a service-role key.
+- Fresh production deployment `dpl_72KcnyvFKWKA2FxoPPbBVcR54xrz` is READY at `https://praxisgrid-kjc9kwys4-tonybabalola-1114s-projects.vercel.app` and aliased to `https://azure-quest-pwa.vercel.app`; public production smoke passed 20/20 with 10 expected signed-in skips.
+- Live owner bootstrap, Google SSO, two-user RLS isolation, role-boundary, audit-integrity, and production authenticated browser verification remain blocked until `PRAXISGRID_OWNER_EMAIL` and Google OAuth credentials are supplied where required.
 
 M5.0 rebrand status:
 

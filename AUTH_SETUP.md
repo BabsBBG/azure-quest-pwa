@@ -8,10 +8,10 @@ Create `.env.local` with:
 
 ```bash
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_ANON_KEY=your-supabase-publishable-or-anon-key
 ```
 
-Only use the public Supabase anon key in the frontend. Do not commit service-role keys or database passwords.
+Only use the public Supabase anon or publishable key in the frontend. Do not commit service-role keys, Supabase secret keys, access tokens, or database passwords.
 
 Google OAuth client IDs and client secrets are configured in the Supabase Auth provider dashboard only. Do not add Google OAuth secrets to Vite environment variables, `.env.example`, source code, or documentation examples.
 
@@ -40,17 +40,22 @@ In Supabase Auth URL settings, allow-list the app redirect URLs for each environ
 
 - Local Vite: `http://localhost:5173/account` or the active local dev port.
 - Production: `https://azure-quest-pwa.vercel.app/account` until the production domain is rebranded.
+- Future PraxisGrid alias: `https://praxisgrid.vercel.app/account` after the alias is assigned to the connected Vercel project.
 
 Supabase handles the OAuth exchange and returns the browser to `/account`. The frontend uses `detectSessionInUrl` and never handles Google client secrets directly.
 
 ## Database migrations
 
-Apply migrations from `supabase/migrations` in order:
+Production status on 2026-07-29:
 
-- `0001_profiles.sql`
-- `0002_learning_data.sql`
-- `0003_project_source_pipeline.sql`
-- `0004_praxisgrid_roles_rebrand.sql`
+- Supabase organisation: `BabsBBG's Org`.
+- Production project: `praxisgrid-production`.
+- Region: `eu-west-1`.
+- Project ref: `ozf...agfd`.
+- Migrations `0001` through `0025` are applied and local/remote migration history matches.
+- Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values.
+- Google OAuth remains disabled/unverified until real Google OAuth provider credentials are supplied.
+- Real owner bootstrap remains pending until `PRAXISGRID_OWNER_EMAIL` is supplied outside source control.
 
 ## Not included
 
