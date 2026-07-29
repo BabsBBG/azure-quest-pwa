@@ -2,6 +2,741 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 parallel Playwright server contention during signed-in retest
+
+Date:
+2026-07-29
+
+Command:
+Parallel run of `npm run test:accessibility` and `npm run test:visual`.
+
+Error:
+`npm run test:accessibility` failed with multiple `page.goto: Could not connect to server` and `net::ERR_CONNECTION_REFUSED` errors after the first Chromium checks passed.
+
+Likely cause:
+Two Playwright commands were run concurrently against the same local dev-server port. The visual slice passed, but the accessibility slice lost the shared local server mid-run.
+
+Fix attempted:
+Stop using parallel Playwright commands for slices that start the local server, clear generated Playwright artifacts, and rerun accessibility by itself.
+
+Result:
+Resolved. `npm run test:accessibility` passed 36/36 when rerun by itself after clearing generated Playwright artifacts.
+
+Remaining issue:
+None for this local command contention. Keep Playwright slices that start the dev server serialized.
+
+### M5/M6 signed-in E2E spec lint parser miss
+
+Date:
+2026-07-29
+
+Command:
+`npm run lint`
+
+Error:
+`tests/e2e/signed-in-flows.spec.ts` failed with `Parsing error: Unexpected token Page`.
+
+Likely cause:
+The ESLint flat config applied the TypeScript parser to `src`, scripts, and root config files, but not `tests/**/*.ts`. The new Playwright spec used a valid TypeScript type-only import and was parsed by the default JavaScript parser.
+
+Fix attempted:
+Added `tests/**/*.ts` to the TypeScript parser file globs in `eslint.config.js`.
+
+Result:
+Resolved. `npm run lint` passed after adding `tests/**/*.ts` to the TypeScript parser globs.
+
+Remaining issue:
+None for this lint parser miss.
+
+### M5/M6 production smoke timeout against fresh PraxisGrid deployment
+
+Date:
+2026-07-29
+
+Command:
+`PRODUCTION_BASE_URL=https://praxisgrid-om99h3h2u-tonybabalola-1114s-projects.vercel.app npm run test:production-smoke`
+
+Error:
+The first command exceeded the local 300-second tool timeout before returning Playwright output. A longer rerun against the unique deployment URL failed because Vercel deployment protection redirected Playwright to Vercel login instead of PraxisGrid.
+
+Likely cause:
+The unique deployment URL `https://praxisgrid-om99h3h2u-tonybabalola-1114s-projects.vercel.app` is protected in the connected Vercel account. The public production alias `https://azure-quest-pwa.vercel.app` serves the same latest deployment without the Vercel login interstitial.
+
+Fix attempted:
+Cleared generated Playwright artifacts, identified the protected-target redirect, and reran production smoke against the public production alias.
+
+Result:
+Resolved for public production smoke. `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke` passed 20/20 on 2026-07-29.
+
+Remaining issue:
+Do not use protected unique Vercel deployment URLs as public smoke targets unless deployment protection is disabled. The canonical `https://praxisgrid.vercel.app` domain remains unavailable.
+
+### M5/M6 destructive delete error narrowing
+
+Date:
+2026-07-28
+
+Command:
+`npm run typecheck`
+
+Error:
+`src/store/useAppStore.ts(393,67): error TS2339: Property 'error' does not exist on type 'never'.`
+
+Likely cause:
+The new repository analysis delete failure path checked `!result.ok && !result.skipped`, which left TypeScript with an overly narrow inferred union for the optional `error` field.
+
+Fix attempted:
+Added a small unknown-error formatter and guarded `result.error` with `"error" in result` before throwing a learner-visible delete failure.
+
+Result:
+Resolved. `npm run typecheck` passed after the guarded error formatter.
+
+Remaining issue:
+None for this TypeScript failure.
+
+### M5/M6 local WebKit slice timeout during destructive-action retest
+
+Date:
+2026-07-28
+
+Command:
+`npm run test:e2e:webkit`
+
+Error:
+The command exceeded the local 300-second tool timeout before returning Playwright output.
+
+Likely cause:
+Local WebKit/browser worker startup or teardown exceeded the command timeout during the full CI-equivalent retest. No leftover `node.exe` process remained after the timeout.
+
+Fix attempted:
+Rerun the same WebKit slice with a longer timeout before continuing validation.
+
+Result:
+Resolved. `npm run test:e2e:webkit` passed 10/10 when rerun with a longer local timeout.
+
+Remaining issue:
+None for the WebKit slice. The local WebKit gate is slow and may need a longer timeout than 300 seconds.
+
+### M5/M6 onboarding validator dynamic heading mismatch
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:onboarding`
+
+Error:
+`Onboarding validation failed: page missing Set up your`
+
+Likely cause:
+The onboarding page heading became edit-aware with `{editing ? "Update" : "Set up"} your`, but the new validator still required the old literal phrase.
+
+Fix attempted:
+Updated `scripts/validate-onboarding.mjs` to require the edit-aware heading expression.
+
+Result:
+Resolved. `npm run validate:onboarding` passed after updating the validator.
+
+Remaining issue:
+None.
+
+### M5/M6 umbrella RLS validator omitted base report migration
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: content_quality_reports does not enable row level security.`
+
+Likely cause:
+The new umbrella RLS validator checked content-quality report tables but did not include `supabase/migrations/0017_content_quality_reports.sql`, where those tables enable RLS.
+
+Fix attempted:
+Added the base content-quality migration to the validator read set.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
+### M5/M6 repository-isolation umbrella expected explicit user-scoped wording
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:repository-isolation`
+
+Error:
+`Repository isolation validation failed: Project Intelligence validator must enforce user-scoped analysis rows.`
+
+Likely cause:
+`validate-project-intelligence` enforced `importedProjectAnalysisRowId(userId, project)` but did not also require the exact user-scoped row return or print `user-scoped`, so the new umbrella validator could not verify that contract transitively.
+
+Fix attempted:
+Added the explicit user-scoped analysis-row return requirement and updated the validator success text.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun repository-isolation validation.
+
+### M5/M6 umbrella RLS validator support guard name mismatch
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: missing guard_support_admin_report_write`
+
+Likely cause:
+The new umbrella RLS validator expected a shorthand guard name, but the migration uses concrete trigger names `guard_support_admin_report_update` and `guard_support_admin_report_event_write`.
+
+Fix attempted:
+Updated `scripts/validate-rls.mjs` to require the actual support guard trigger names.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
+### M5/M6 umbrella RLS validator flagged historical audit policy
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:rls`
+
+Error:
+`RLS validation failed: content quality report events must not have a mutable for-all policy.`
+
+Likely cause:
+The validator scanned all migrations as one string and found the historical `for all` policy in `0017_content_quality_reports.sql`, even though `0025_rpc_and_audit_hardening.sql` drops and replaces that policy.
+
+Fix attempted:
+Changed the validator to require the hardening migration to drop the mutable policy and avoid recreating it.
+
+Result:
+Retest pending.
+
+Remaining issue:
+Rerun RLS validation.
+
+### M5/M6 admin validator stale role badge copy
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30372718004`, job `90320460139`, step `npm run validate:admin-review-studio`.
+
+Error:
+`Admin Review Studio validation failed: missing Main Admin protected`
+
+Likely cause:
+The support-boundary slice changed Admin Review Studio from a static `Main Admin protected` badge to role-aware copy that shows the current role plus `Main Admin publishes` and support-only inspect affordances. The validator still expected the old static badge text.
+
+Fix attempted:
+Updated `scripts/validate-admin-review-studio.mjs` to require the new role-aware governance copy and support inspect affordance instead of the old badge text.
+
+Result:
+Resolved locally. `npm run validate:admin-review-studio`, `npm run validate:auth-redirects`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed after updating the stale validator and adding auth redirect preservation.
+
+Remaining issue:
+Push the validator fix and rerun PR CI.
+
+### M5/M6 auth-first validator stale literal redirect
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30373351670`, job `90322627904`, step `npm run validate:auth-first-ia`.
+
+Error:
+`Auth-first IA validation failed: App missing protected route snippet Navigate to="/auth?mode=signup"`
+
+Likely cause:
+The auth redirect continuity slice replaced the literal signup redirect with `authPath("signup", location)` so protected routes can preserve the original destination through sign-in and Google SSO. The validator still expected the older literal string.
+
+Fix attempted:
+Updated `scripts/validate-auth-first-ia.mjs` to require `authPath("signup", location)` instead of the old literal redirect.
+
+Result:
+Resolved locally. `npm run validate:auth-first-ia`, `npm run validate:auth-redirects`, and `npm run typecheck` passed after updating the stale auth-first validator.
+
+Remaining issue:
+Push the validator fix and rerun PR CI.
+
+### M5/M6 authorization validator stale imported-project row pattern
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30369719901`, job `90310088692`, step `npm run validate:authorization`.
+
+Error:
+`Authorization validation failed: imported project cloud rows must be user-scoped.`
+
+Likely cause:
+The Project Intelligence slice refactored `syncImportedProject` to compute `const rowId = importedProjectRowId(userId, project)` once and reuse it for both imported-project and analysis persistence. The validator still only accepted the older inline `id: importedProjectRowId(userId, project)` pattern.
+
+Fix attempted:
+Updated `scripts/validate-authorization.mjs` to accept either the old inline expression or the new local `rowId` pattern while still requiring `importedProjectRowId(userId, project)`.
+
+Result:
+Resolved locally. `npm run validate:authorization`, `npm run validate:project-intelligence`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed after updating the validator.
+
+Remaining issue:
+Push and rerun PR CI.
+
+### M5/M6 CI cloud sync fallback shape mismatch
+
+Date:
+2026-07-28
+
+Command:
+GitHub Actions run `30364156414`, job `90290975870`, step `npm test`.
+
+Error:
+`src/lib/cloudSync.test.ts` failed because `fetchCloudLearningData()` now returns `activeInterviewSession: null`, but the fallback-shape test still expected the older object without that field.
+
+Likely cause:
+The active Interview Studio recovery slice extended the cloud fallback contract, and the existing cloud sync unit test was not updated in the same commit.
+
+Fix attempted:
+Added `activeInterviewSession: null` to the expected fallback object.
+
+Result:
+Resolved locally. `npm test -- src/lib/cloudSync.test.ts` and full `npm test` passed after updating the fallback expectation and guarding active draft local storage writes.
+
+Remaining issue:
+PR CI rerun pending after push.
+
+### M5/M6 active interview autosave localForage test rejection
+
+Date:
+2026-07-28
+
+Command:
+`npm test`
+
+Error:
+All 26 test files and 72 tests passed, but Vitest failed the run because `JobReadiness.test.tsx` triggered six unhandled `No available storage method found` rejections from localForage.
+
+Likely cause:
+The new active Interview Studio autosave path writes to localForage after starting/typing in the Career Lab component test. The jsdom test environment has no available localForage storage driver.
+
+Fix attempted:
+Wrapped active interview local draft `setItem` and `removeItem` calls in storage-unavailable guards while preserving in-memory store updates and best-effort cloud sync.
+
+Result:
+Resolved. Full `npm test` passed after guarding active draft local storage writes.
+
+Remaining issue:
+PR CI rerun pending after push.
+
+### M5/M6 GitHub import validator stale direct-events requirement
+
+Date:
+2026-07-28
+
+Command:
+`npm run validate:github-import-controls`
+
+Error:
+The validator failed with `API missing github_import_events`.
+
+Likely cause:
+The endpoint was correctly changed to claim quota through the new `claim_github_import_quota` RPC instead of touching `github_import_events` directly, but the validator still required the old direct table reference in `api/github-project.js`.
+
+Fix attempted:
+Removed the direct `github_import_events` API snippet requirement while keeping RPC and migration checks for `github_import_events`, `claim_github_import_quota`, and `pg_advisory_xact_lock`.
+
+Result:
+Resolved. `npm run validate:github-import-controls` passed after updating the validator for the RPC-based quota path.
+
+Remaining issue:
+None.
+
+### M5/M6 active interview migration filename lookup miss
+
+Date:
+2026-07-28
+
+Command:
+`Get-Content .\supabase\migrations\0002_learning_records.sql`
+
+Error:
+The file did not exist.
+
+Likely cause:
+The learning-data migration is named `0002_learning_data.sql`, not `0002_learning_records.sql`.
+
+Fix attempted:
+Listed `supabase/migrations` and read `0002_learning_data.sql`.
+
+Result:
+Resolved. The correct migration file was inspected before adding the active interview migration.
+
+Remaining issue:
+None.
+
+### M5/M6 GitHub import client duplicate data binding
+
+Date:
+2026-07-26
+
+Command:
+`npm test -- src/lib/githubProjectImport.test.ts`
+
+Error:
+The focused Vitest run failed during transform because `src/lib/githubProjectImport.ts` declared `data` for both the Supabase session response and the API JSON response.
+
+Likely cause:
+The auth-token fetch was added above existing response parsing without renaming the local binding.
+
+Fix attempted:
+Renamed the Supabase session binding to `sessionData`.
+
+Result:
+Resolved. Focused GitHub import tests, typecheck, and lint passed after renaming the binding.
+
+Remaining issue:
+None.
+
+### M5/M6 CI WebKit auth signup contrast failure
+
+Date:
+2026-07-26
+
+Command:
+GitHub Actions `npm run test:e2e:webkit` in run `30213592120`.
+
+Error:
+WebKit failed the `/auth?mode=signup` axe check with near-white foreground computed on a light `bg-slate-50` background.
+
+Likely cause:
+Under parallel GitHub Actions WebKit execution, the public auth page could retain the dark root text token while the light background utility was already active, producing unstable computed contrast.
+
+Fix attempted:
+Pinned public auth/legal shells to explicit light foreground/background/color-scheme inline styles and pinned auth intro text/badge computed colors.
+
+Result:
+Resolved locally. `CI=true npm run test:e2e:webkit` passed 10/10 after the computed color pinning.
+
+Remaining issue:
+Resolved in PR CI. GitHub Actions run `30214329194` passed after the follow-up fixes.
+
+### M5/M6 CI mobile auth opacity contrast failure
+
+Date:
+2026-07-26
+
+Command:
+GitHub Actions `npm run test:accessibility` in run `30213916042`.
+
+Error:
+The mobile-320 `/auth?mode=signin` and `/auth?mode=reset` axe checks failed because the PraxisGrid badge and intro text were computed with blended/partially transparent colors against the light page background.
+
+Likely cause:
+The public auth page intro used a Framer Motion fade-in. Fast CI accessibility scans can sample during opacity animation, making otherwise valid colors fail contrast.
+
+Fix attempted:
+Removed the intro fade animation from `AuthPage` and darkened the small intro copy to stable slate-800 computed colors.
+
+Result:
+Resolved locally. `CI=true npm run test:accessibility` passed 36/36 after removing the auth intro fade and darkening the intro copy.
+
+Remaining issue:
+Resolved in PR CI. GitHub Actions run `30214329194` passed after the follow-up fixes.
+
+### M5/M6 CSS lookup command misses
+
+Date:
+2026-07-26
+
+Command:
+`rg -n "f6f8|f8fafc|color|--aq-ink|body|h1|\\.dark|color-scheme|@media" src index.html *.css`
+
+Error:
+The search partially ran but returned exit code 1 because PowerShell passed `*.css` in a way that produced a filename error.
+
+Likely cause:
+The workspace has CSS under `src/styles.css`; the extra root glob was unnecessary in PowerShell.
+
+Fix attempted:
+Read `src/styles.css` directly.
+
+Result:
+Resolved.
+
+Remaining issue:
+None.
+
+Command:
+`Get-Content -Path .\src\index.css`
+
+Error:
+The file does not exist.
+
+Likely cause:
+The repo uses `src/styles.css`.
+
+Fix attempted:
+Read `src/styles.css`.
+
+Result:
+Resolved.
+
+Remaining issue:
+None.
+
+### M5/M6 PowerShell git staging separator failure
+
+Date:
+2026-07-26
+
+Command:
+`git add ... && git status --short`
+
+Error:
+PowerShell rejected `&&` with `The token '&&' is not a valid statement separator in this version`.
+
+Likely cause:
+The shell version for this workspace does not support `&&` command chaining.
+
+Fix attempted:
+Run `git add` and `git status --short` as separate PowerShell commands.
+
+Result:
+Resolved. The separate `git add` command staged the intended files, and `git status --short` confirmed the staged set.
+
+Remaining issue:
+None.
+
+### M5/M6 Vitest imported Playwright specs
+
+Date:
+2026-07-26
+
+Command:
+`npm test`
+
+Error:
+Vitest tried to import `tests/e2e/accessibility.spec.ts` and `tests/e2e/auth-routing.spec.ts`, then failed because Playwright's `test()` API cannot be called inside the Vitest runner.
+
+Likely cause:
+Adding Playwright specs under `tests/e2e` without excluding that folder from Vitest's default file discovery.
+
+Fix attempted:
+Updated `vitest.config.ts` to exclude `tests/e2e/**` while preserving the existing jsdom test environment.
+
+Result:
+Resolved. `npm test` passed after excluding `tests/e2e/**` from Vitest.
+
+Remaining issue:
+None.
+
+### M5/M6 admin validator expected unprotected route
+
+Date:
+2026-07-26
+
+Command:
+`npm run validate:admin-review-studio`
+
+Error:
+The validator failed with `/admin must be routed outside the learner Layout` and then with `missing ProtectedAdminRoute`.
+
+Likely cause:
+The validator used a broad `App.tsx` string-position check built for the old direct `/admin` route. After the auth hardening fix, `/admin` is intentionally routed through `ProtectedAdminRoute`, and `<Layout>` appears inside the `ProtectedLearnerShell` helper.
+
+Fix attempted:
+Updated `scripts/validate-admin-review-studio.mjs` to require `/admin` to use `ProtectedAdminRoute`, verify it is declared before the wildcard learner shell route, and check learner layout containment directly.
+
+Result:
+Resolved. `npm run validate:admin-review-studio` passed after the validator update.
+
+Remaining issue:
+None.
+
+### PowerShell Playwright grep token failure
+
+Date:
+2026-07-26
+
+Command:
+`npx playwright test --project=desktop-1440 --grep @accessibility`
+
+Error:
+PowerShell treated `@accessibility` as a variable/splat token and failed with `The variable '$accessibility' cannot be retrieved because it has not been set`.
+
+Likely cause:
+The grep pattern was not quoted in PowerShell.
+
+Fix attempted:
+Rerun with `--grep "@accessibility"`.
+
+Result:
+Resolved. The quoted command ran correctly and exposed the real desktop accessibility contrast failures below.
+
+Remaining issue:
+None for command syntax.
+
+### M5/M6 full E2E desktop auth contrast failure
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e`
+
+Error:
+Full Playwright E2E passed 59 of 60 tests, but the `desktop-1440` accessibility check for `/auth?mode=signin` failed with serious color-contrast violations.
+
+Likely cause:
+The public auth shell inherited a dark background from persisted app theme state while some left-panel text computed as dark foreground during the full cross-project run.
+
+Fix attempted:
+Made public auth/legal/status shells deliberately light and stable instead of inheriting app dark-mode surfaces.
+
+Result:
+Resolved. Public auth/legal/status routes now use stable light wrappers and explicit accessible text/background colors. Targeted desktop accessibility passed 6/6, full accessibility passed 36/36, and tablet/desktop project slices passed 20/20.
+
+Remaining issue:
+The combined `npm run test:e2e` command exceeded the local 240-second shell timeout before returning output. Equivalent project slices passed: Chromium 10/10, WebKit 10/10, mobile 20/20, tablet+desktop 20/20, accessibility 36/36, visual 6/6.
+
+### M5/M6 combined Playwright matrix local timeout
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e`
+
+Error:
+The full six-project Playwright matrix exceeded the local 240-second command timeout before returning test output.
+
+Likely cause:
+The local matrix runs all browser, mobile, tablet, desktop, accessibility, routing, and visual-tagged checks serially with one worker to avoid dev-server/artifact contention.
+
+Fix attempted:
+Stopped the timed-out Playwright/Vite processes, cleared stale artifacts, and reran the same coverage as project/tag slices with longer per-command timeouts.
+
+Result:
+Resolved for coverage. Passing slices: `npm run test:e2e:chromium` 10/10, `npm run test:e2e:webkit` 10/10, `npm run test:e2e:mobile` 20/20, `npm run test:accessibility` 36/36, `npm run test:visual` 6/6, and `npx playwright test --project=tablet --project=desktop-1440` 20/20.
+
+Remaining issue:
+The single aggregate command should be run in CI or a longer local shell window if an all-in-one transcript is required.
+
+### M5/M6 parallel Playwright matrix timeout
+
+Date:
+2026-07-26
+
+Command:
+Parallel run of:
+`npm run test:e2e:webkit`
+`npm run test:e2e:mobile`
+`npm run test:accessibility`
+`npm run test:visual`
+
+Error:
+The WebKit, mobile, and accessibility commands timed out after the tool timeout. The visual command failed with Playwright test timeouts and artifact `ENOENT` errors while multiple Playwright processes were running concurrently against the same local server/artifact output.
+
+Likely cause:
+Several Playwright commands launched simultaneously, contending for the same Vite dev server, browser resources, and `test-results` artifact paths.
+
+Fix attempted:
+Increased Playwright test timeout to 60 seconds and limited local workers to one while keeping CI at two workers.
+
+Result:
+Resolved. Sequential reruns passed: WebKit E2E, mobile E2E, accessibility, and visual checks all completed successfully after the timeout/worker adjustment.
+
+Remaining issue:
+None.
+
+### M5/M6 typecheck script invalid noEmit with project references
+
+Date:
+2026-07-26
+
+Command:
+`npm run typecheck`
+
+Error:
+TypeScript reported `Referenced project ... tsconfig.node.json may not disable emit` when running `tsc -b --noEmit`.
+
+Likely cause:
+The repo uses TypeScript project references, and the referenced Node config disables emit. Combining `--build` and `--noEmit` was incompatible with the existing configuration.
+
+Fix attempted:
+Changed `typecheck` to `tsc -b`, matching the existing production build typecheck behavior.
+
+Result:
+Resolved. `npm run typecheck` passed after changing the script to `tsc -b`.
+
+Remaining issue:
+None.
+
+### M5/M6 accessibility gate contrast failure
+
+Date:
+2026-07-26
+
+Command:
+`npm run test:e2e:chromium`
+
+Error:
+Chromium Playwright E2E passed routing tests but failed axe checks on public auth/legal routes for serious color-contrast and link-in-text-block violations.
+
+Likely cause:
+Azure-blue links/buttons used `text-[var(--aq-blue-700)]` on dark cards, and legal inline links relied on color without underline.
+
+Fix attempted:
+Added higher-contrast dark-mode link color and underline/offset styling to auth mode controls, legal links, and public-info return links.
+
+Result:
+Resolved. `npm run test:e2e:chromium` passed after the contrast and link styling fixes.
+
+Remaining issue:
+None.
+
+### KQL feedback regression test localForage failure
+
+Date:
+2026-07-26
+
+Command:
+`npm test -- src/pages/KqlGym.test.tsx src/components/QuestionBankNotice.test.tsx`
+
+Error:
+The new KQL regression test failed after clicking `Finish now` with `No available storage method found`.
+
+Likely cause:
+The component called the real Zustand `recordAttempt` action, which writes through localForage; the Vitest/jsdom environment for this focused test did not provide a usable storage backend.
+
+Fix attempted:
+Mocked `recordAttempt` through `useAppStore.setState()` inside the KQL test so the test verifies feedback timing without invoking localForage.
+
+Result:
+Resolved. `npm test -- src/pages/KqlGym.test.tsx src/components/QuestionBankNotice.test.tsx` passed after mocking the store persistence action.
+
+Remaining issue:
+None.
+
 ### Google SSO Vercel log scan fetch failure
 
 Date:

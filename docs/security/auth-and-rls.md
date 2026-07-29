@@ -4,4 +4,4 @@ PraxisGrid uses Supabase Auth for email/password accounts and Google SSO. The br
 
 Google SSO is brokered through Supabase OAuth. Google client IDs and client secrets belong in the Supabase provider configuration and Google Cloud OAuth settings, not in `.env.example`, Vite env vars, or committed docs.
 
-Users must only access their own profiles, attempts, interview sessions, imported projects, and question flags. Current migrations define owner-only RLS for learner data and role-gated access for review/admin tables; live Supabase RLS application remains a deployment verification item.
+Users must only access their own profiles, attempts, interview sessions, imported projects, Project Intelligence analyses, and question flags. Current migrations define owner-only RLS for learner data and role-gated access for review/admin tables. Static gates cover migration order, RLS policy presence, and repository-isolation contracts; live Supabase RLS application remains a deployment verification item.

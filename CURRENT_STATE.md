@@ -7,11 +7,38 @@ The app currently exists as a frontend-first PWA in `BabsBBG/praxisgrid`.
 Harness state:
 
 - Product: PraxisGrid.
-- Active phase: M5.
-- Current permitted work: M5.0 through M5.12.
-- M6: NOT APPROVED.
-- The approved milestone sequence was restored on 2026-07-22. Previous source-pipeline contract and duplicate-gate work is preserved as foundation work under M5.4/M5.6/M5.7, not as completion of approved M5.1/M5.2.
-- M5 final sign-off is currently FAIL because baseline principal engineering and QA audits found open S1/S2 defects recorded in `docs/qa/M5_DEFECT_LEDGER.md`.
+- Active programme: M5 Production Perfection followed by Phase 6.
+- M5 status: REOPENED FOR PRODUCTION HARDENING.
+- M6 status: APPROVED.
+- M7 status: NOT APPROVED.
+- The user explicitly approved this programme on 2026-07-26 through the PraxisGrid Master Delivery Instruction.
+- The previous M5 sign-off is superseded by the M5/M6 baseline audit because production-critical items remain scaffold-only, fixture-only, or externally unverified.
+- Current M5/M6 production sign-off is FAIL until S1/S2 defects in `docs/qa/M5_M6_DEFECT_LEDGER.md` are fixed and live/browser verification gates pass.
+- M5/M6 production-hardening branch `codex/m5-m6-production-hardening` has started.
+- First hardening slice adds `/auth`, public legal/status routes, protected learner routing, protected Admin routing, server-backed user role loading, and Learn/Practise/Prove primary navigation. Local focused auth tests, route check, lint, and build passed after this slice.
+- Second hardening slice aligns secondary practice trust behavior: KQL Gym, Case Files, and Scenario Player show the shared demo/seed notice before practice; KQL explanations/correctness are hidden until run completion; focused KQL/notice tests passed.
+- Third hardening slice adds Playwright browser gates for auth routing, public legal/status routes, axe accessibility, mobile/tablet/desktop viewports, WebKit, Chromium, visual-tagged auth layout, production-smoke configuration, and CI commands. Local slices passed: Chromium 10/10, WebKit 10/10, mobile 20/20, accessibility 36/36, visual 6/6, and tablet+desktop 20/20. The aggregate `npm run test:e2e` command exceeded the local shell timeout, so the equivalent coverage was run as slices.
+- PR #1 CI for the hardening branch is green at GitHub Actions run `30214329194` after stabilizing auth-page accessibility for WebKit/mobile CI.
+- Fourth hardening slice replaces the public GitHub import endpoint's in-memory rate/cache maps with authenticated Supabase user verification, durable per-user daily import events, durable repo cache records, placeholder server env names, and CI validation. Live Supabase migration/env verification remains pending.
+- Fifth hardening slice adds active Interview Studio recovery in repo: local/legacy storage, best-effort Supabase sync, owner-only `active_interview_sessions` RLS migration, resume/discard UI, completion cleanup, regression coverage, and `validate:active-interview-recovery`. Browser refresh/resume and live Supabase verification remain pending.
+- Sixth hardening slice addresses two security QA findings in repo: GitHub import quota claims now go through an atomic Supabase RPC with advisory locking, and content-quality report inserts are hardened to authenticated users only. Live Supabase migration/RLS verification remains pending.
+- Seventh hardening slice starts the visible auth-first IA repair: Home now presents exactly Learn, Practise, and Prove as the primary choices, certification progress is secondary, Account copy no longer promises logged-out demo practice, and `validate:auth-first-ia` is wired into CI. Browser verification remains pending.
+- Eighth hardening slice starts the assessment experience repair: `/arena` is authenticated outside the learner layout, completed runs render an analytical results report with JSON/CSV/print export actions, and `validate:assessment-shell` is wired into CI. Browser/visual verification remains pending.
+- Ninth hardening slice removes Career Lab fixture project cards from the production path: new users see no projects connected, imported public repositories are the only mapper evidence source, `Northstar Inventory API` exists only as a test fixture, and `validate:project-fixtures` is wired into CI. Browser verification remains pending.
+- Tenth hardening slice fixes global product typography in repo: body UI now uses a readable sans-serif stack, code/metadata opt into monospace, and `validate:typography` is wired into CI. Browser/design verification remains pending.
+- Eleventh hardening slice clarifies production-smoke status: `test:production-smoke` now reports explicit PR skips when no production URL is configured, fails `main` if the URL is missing, and no longer falls back to the historical Azure Quest URL. Live production smoke remains pending until the canonical PraxisGrid URL is configured.
+- Twelfth hardening slice deepens Project Intelligence in repo: imports now include typed evidence-backed analysis records, analysis persistence uses owner-scoped Supabase RLS with cascade delete, Career Lab exposes analysis overview/architecture/strengths/risks/prompts, and users can regenerate or delete repository analysis. Live Supabase migration/RLS verification remains pending.
+- Thirteenth hardening slice adds privacy workflows in repo: Settings exposes signed-in cloud export/delete actions, cloud export includes learning and repository analysis tables, cloud deletion removes learning/recovery/import/Project Intelligence rows by user ID, and `validate:privacy-workflows` is wired into CI. Live Supabase RLS verification remains pending.
+- Fourteenth hardening slice tightens the support role boundary in repo: SUPPORT_ADMIN receives read-only support/report queue access through explicit RLS helper policies, guard triggers block support report/content mutation, Admin Review Studio filters queues and hides approve/review publication controls by role, and `validate:support-boundary` is wired into CI. Live Supabase role/RLS verification remains pending.
+- Fifteenth hardening slice closes follow-up governance gaps in repo: Project Intelligence cloud analysis row IDs are user-scoped to avoid same-repo collisions, the GitHub import quota RPC rejects cross-user claims and is revoked from anon/authenticated roles, and content-quality report audit events are Main Admin insert/select-only instead of mutable `for all`. Live Supabase RLS/RPC verification remains pending.
+- Sixteenth hardening slice preserves auth deep links in repo: protected routes pass a safe internal `from` target to `/auth`, AuthPage returns authenticated users to that target, Google SSO can redirect back to the intended protected route instead of always `/account`, and `validate:auth-redirects` is wired into CI. Browser verification remains pending.
+- Seventeenth hardening slice adds a production-content gate in repo: incomplete approved source-grounded coverage disables production quiz/run CTAs instead of routing into the demo bank, Readiness no longer links directly to seed-bank certification runs, and `validate:production-content` is wired into CI. Full live source ingestion/review/published content remains open.
+- Eighteenth hardening slice makes destructive learner-data actions safer in repo: local reset and repository analysis deletion now require explicit browser confirmation, Project Intelligence delete failures surface to the learner instead of being swallowed, and `validate:destructive-actions` is wired into CI. Browser/live Supabase delete verification remains pending.
+- Nineteenth hardening slice adds mandatory learner onboarding in repo: signed-in learners must complete `/onboarding` before learner or assessment routes render, onboarding preserves protected deep-link return targets, preferences are stored in Supabase auth metadata, Account can reopen onboarding in edit mode, and `validate:onboarding` is wired into CI. Browser/live Supabase verification remains pending.
+- Twentieth hardening slice adds umbrella validation gates in repo: `validate:migrations` checks sequential secrets-free Supabase migrations, `validate:rls` checks core owner/role RLS boundaries, and `validate:repository-isolation` checks imported project and Project Intelligence user isolation. Live Supabase migration/RLS/repository-isolation probes remain pending.
+- Twenty-first hardening slice advances canonical production identity: the connected Vercel project was renamed from `azure-quest-pwa` to `praxisgrid`, remote project settings now match Vite, `npm run build`, `dist`, and the repo install command, and fresh deployment `dpl_3amN4Z2CXQap8XKsh6vxXxkBqNic` is READY. Public production smoke passed 20/20 against `https://azure-quest-pwa.vercel.app`; the unique deployment URL and project alias remain protected by Vercel login, and `https://praxisgrid.vercel.app` still returns 404.
+- Twenty-second hardening slice expands signed-in browser gates in repo: local Playwright now starts Vite with a dev-only E2E auth harness, signed-in learner onboarding redirect/completion is browser-tested, regular users are browser-tested out of Admin Review Studio, SUPPORT_ADMIN support-queue access is browser-tested without publication actions, and `validate:e2e-auth-harness` keeps the harness dev-only and skipped for production smoke. Local browser slices passed with the new gates: Chromium 13/13, WebKit 13/13, mobile 26/26, accessibility 36/36, visual 6/6, and public production smoke 20 passed with 6 dev-only skips. Live Supabase role/auth verification remains pending.
+- Senior Product Designer and Principal Engineer reviews on 2026-07-28 keep production sign-off at FAIL. New open blockers include Home IA, dedicated Assessment Shell/results, mandatory-auth copy cleanup, sans-serif body typography, Project Intelligence depth, production-smoke clarity, atomic GitHub import quotas, authenticated-only report RLS, and live Supabase/RLS verification.
 - M5.0 authorization hardening migration `0006_m5_authorization_hardening.sql` was added to separate review/publish authority, block reviewer publication, harden audit actors, and fix imported-project cloud row collisions. Live Supabase RLS application remains pending.
 - M5.1 Reliable Assessment Sessions are implemented in repo with local/cloud session persistence, recovery choices, timestamp expiry, direct question grid, mark/review/low-confidence filters, deliberate submission review, and confidence persistence. M5.12 E2E/live verification remains pending.
 - M5.2 Rich Assessment Item Types are implemented in repo with a discriminated item union, scoring helpers, walkthrough-only sample items, `/exam-walkthrough`, and CI validation. Full browser E2E verification remains pending.
@@ -27,7 +54,7 @@ Harness state:
 - M5.9 Curated Domain Quiz Structure is implemented in repo with five quiz tracks per domain, explicit timing/unlock rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0015`, tests, and CI validation.
 - M5.10 Finite Certification Runs are implemented in repo with Baseline, Applied, Pressure, Final, and Personalized run definitions, version/effective metadata, distribution rules, approved-item-only placement validation, blocked status for missing coverage, Assessment Center display, migration `0016`, tests, and CI validation.
 - M5.11 User Reporting and Content-Quality Feedback is implemented in repo with approved-item-only report creation, item/source/attempt/session context fields, no-auto-mutation guard, Assessment Center report action, Admin Review Studio queue summary, migration `0017`, tests, and CI validation.
-- M5.12 Completion and Validation is complete in repo with Principal Engineer, Security/Data/Governance QA, and Product/Regression/Accessibility QA marked PASS after the full local CI-equivalent suite passed on 2026-07-26. Pushed GitHub Actions verification remains pending until the final commits are pushed.
+- Previous M5.12 Completion and Validation passed the earlier static/local suite, but is now reopened because the new production-hardening baseline found live auth, RLS, admin, source-content, browser, accessibility, and production identity gaps.
 - M5 production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
 - M5 production deployment ID: `dpl_GQJ2jVsRXWAeMX4SWvQHcTHKt6wi`.
 - M5 production deployment URL: `https://azure-quest-a7y7zxukg-tonybabalola-1114s-projects.vercel.app`.
@@ -48,7 +75,7 @@ M5.0 rebrand status:
 - AZ-500 is marked RETIRING with retirement date 2026-08-31. New activation routes users toward SC-500 while preserving historical progress and attempts.
 - Role foundation migration adds MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, and USER with RLS and role-change audit tables.
 - Founder-specific sample project data was removed from Career Lab fixtures and replaced with fictional instructional examples.
-- The production Vercel URL currently remains `https://azure-quest-pwa.vercel.app`; Vercel project/domain rebrand is a known remaining deployment task and was not completed in M5.0.
+- The Vercel project is now renamed to `praxisgrid`; the fresh production deployment is READY and the historical public alias `https://azure-quest-pwa.vercel.app` serves it until a canonical `praxisgrid` domain is assigned.
 - M5.0 production deployment is READY and aliased to `https://azure-quest-pwa.vercel.app`.
 - M5.0 production deployment ID: `dpl_9ipiSJqApivdyLRU5dhqwDriGRAT`.
 - M5.0 deployment URL: `https://azure-quest-ky5gzhqz5-tonybabalola-1114s-projects.vercel.app`.
@@ -187,9 +214,9 @@ Required UI copy or equivalent:
 - Full replacement of the demo/seed question bank with approved source-grounded questions.
 - Route-level code splitting for bundle-size reduction.
 
-## Current approved milestone
+## Current approved programme
 
-M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approved.
+M5 Production Perfection followed by Phase 6 public beta delivery is approved by the user. M7 remains not approved.
 
 ## Current blockers
 
@@ -197,13 +224,19 @@ M5 continuation - M5.0 through M5.12 approved by the user. M6 remains not approv
 - Approved M5.2 Rich Assessment Item Types are fixed in repo through the Exam Walkthrough and shared rich item/scoring contracts; M5.12 browser E2E verification remains pending.
 - Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
 - Google SSO is implemented in repo, but live Supabase Google provider setup and redirect allow-list verification remain pending for each deployed environment.
-- `/admin` review studio is not implemented yet.
-- KQL Gym needs trust-copy and answer-reveal alignment if it remains an assessment/practice surface.
+- `/admin` review studio exists and is now route-protected in repo, but live role-specific browser verification remains pending.
+- KQL Gym trust-copy and answer-reveal alignment is fixed in repo; broader learner browser verification remains pending.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.
 - The M5 scaffold proves approved-only serving, validation, and role-gated review policy shape, but production-scale ingestion, real embeddings, real batch generation, automated critic execution, and admin review UI still need backend/admin implementation before launch.
 - GitHub import is public-read-only. GitHub OAuth, write scopes, and private repo access remain blocked.
+- GitHub import now has authenticated server-side durable rate/cache scaffolding in repo. Live Supabase migration and server env verification remain pending before production release.
+- GitHub import quota RPC is atomic and service-role-scoped in repo; live Supabase RPC execution and denial tests remain pending.
+- Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
+- Interview Studio active-session recovery is fixed in repo with local/cloud draft persistence, but browser refresh/resume coverage and live Supabase verification remain pending.
+- Latest design/security reviews require remaining source-grounded production content, live Supabase/RLS verification, browser verification, Project Intelligence visual refinement, onboarding, live Admin operations, and production canonical deployment before sign-off.
+- Public production smoke passed 20 public checks against `https://azure-quest-pwa.vercel.app` after the Vercel project rename; 6 dev-only signed-in harness checks skipped as intended outside localhost. Live Supabase/RLS, role-specific Admin, onboarding provider, and source-grounded content verification remain pending.
 - LLM-backed project stories, embeddings, source ingestion, and generated questions remain blocked until server-side execution, rate limits, content-hash caching, budget caps or kill switches, and failure logging are fully implemented for the live backend path.
 - Bundle size warning remains: Vite reports the main JS chunk is larger than 500 kB after minification. This is not a build failure, but future M6 work should consider route-level code splitting.
 - First dev-server verification attempt on `127.0.0.1:5173` did not respond and was restarted on `localhost:5174`, where checks passed.
-- Automated M1 E2E tests are still missing.
+- Playwright browser, mobile, WebKit, axe, and visual gates exist and pass locally for the public auth/legal/status, anonymous routing, signed-in onboarding, and initial Admin role-boundary contracts. Broader repository import, Project Intelligence, Interview Studio, Assessment Shell, and results E2E coverage remains pending.
 - Duplicate validation is strict for approved source-grounded fingerprints and duplicate keys. Seed/demo duplicate warnings remain non-blocking because the bank is still labelled demo/seed content.

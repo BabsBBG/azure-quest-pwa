@@ -5,6 +5,7 @@ import { scenarios } from "../data/scenarios";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import { QuestionBankNotice } from "../components/QuestionBankNotice";
 
 function findScenario(exam: string | undefined, scenarioId: string | undefined) {
   if ((exam !== "sc-300" && exam !== "sc-500") || !scenarioId) return undefined;
@@ -41,6 +42,7 @@ export function ScenarioPlayer() {
           <ClipboardList className="h-10 w-10 text-[var(--aq-blue-600)]" />
         </CardHeader>
       </Card>
+      <QuestionBankNotice compact />
       <div className="grid gap-3">
         {steps.map((step, index) => (
           <Card key={step} className="aq-row-card">

@@ -15,37 +15,49 @@ PraxisGrid description: PraxisGrid is a source-grounded technical capability pla
 
 This product is an independent learning platform and is not affiliated with, endorsed by, or sponsored by Microsoft, Amazon Web Services, Google Cloud, or other certification providers.
 
-## Current approved milestone
+## Current approved programme
 
-M5 continuation - M5.0 PraxisGrid rename, provider-neutral trust copy, AZ-500 retirement transition, roles foundation, M2 Career Lab, M3 Supabase foundation, M4 public GitHub import, and M5 source-grounded question pipeline scaffold.
+M5 Production Perfection followed by Phase 6 public beta delivery.
 
-The user explicitly approved continuing from M1.6 through M5.
+The user explicitly approved reopening M5 production-hardening work and completing Phase 6 on 2026-07-26.
 
 Approved work now:
 
-- Rename Azure Quest to PraxisGrid across product surfaces, PWA metadata, storage namespace, and documentation while preserving legacy storage migration.
-- Expand Career Lab with the complete track set, 30-minute mock interviews, typed answers, coaching notes, self-score rubric, and local/cloud interview history.
-- Mark AZ-500 as retiring on 2026-08-31, block new activation, preserve historical attempts/progress, and recommend SC-500 without transferring progress.
-- Add role foundations for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, and USER with server-controlled bootstrap and audit logging.
-- Add Supabase data foundation for profiles, quiz attempts, interview sessions, question flags, imported projects, and source-pipeline tables with RLS.
-- Preserve logged-out local/demo mode through Zustand/localForage.
-- Add question flag persistence while keeping practice/exam answers hidden until completion.
-- Add public GitHub project import with no write scopes, no private repo access, README/language import, content-hash caching, rate limits, server-side draft story creation, and review status.
-- Add source-grounded question pipeline scaffolding with Microsoft Learn source docs, source chunks, approved-only serving, duplicate detection, and validation.
-- Keep the existing static question bank visibly labelled as demo/seed content until the approved source-grounded pool is complete enough to replace it.
-- Preserve provider-neutral non-affiliation disclaimer.
-- Update source-of-truth docs, known failures, blockers, tests, and validation scripts.
+- Reopen M5 claims that are scaffold-only, fixture-only, static, or externally unverified.
+- Make public authentication mandatory, with signup/sign-in, Google SSO through Supabase, password recovery, email-verification states, and onboarding.
+- Remove logged-out public demo practice and production demo/founder project surfaces.
+- Build the three-destination learner IA: Learn, Practise, Prove.
+- Redesign Home around exactly three primary cards: Learn, Practise, Prove.
+- Build a dedicated Assessment Shell and analytical Results experience.
+- Complete repository import and Project Intelligence with authenticated user ownership, privacy-safe redaction, deletion, and durable rate limits.
+- Complete Interview Studio integration using selected repository evidence.
+- Complete production source-grounded SC-300 and SC-500 content workflows without serving seed/demo questions as trusted content.
+- Complete live protected Admin operations for M6.0 through M6.12.
+- Add Playwright, accessibility, visual, production-smoke, migration, RLS, production-content, and repository-isolation gates.
+- Configure and verify Vercel/Supabase production environments where connected access permits, without committing secrets.
+- Rename/canonicalize production identity to PraxisGrid where access permits.
+- Preserve provider-neutral non-affiliation disclaimer and certification-provider independence.
+- Keep payments, native mobile apps, voice/audio grading, community-submitted questions, and M7 out of scope.
 
 Still not approved:
 
 - GitHub write permissions.
-- Private repository import.
+- Broad GitHub scopes or organization-wide automatic indexing.
 - Client-side LLM calls or frontend LLM API keys.
 - Live LLM question generation during quiz/exam attempts.
-- Production replacement of the static question bank before the approved source-grounded pool is complete.
+- Automatic publication of generated certification content.
 - Payments, native mobile apps, voice/audio grading, or community-submitted questions.
+- M7.
 
-The roadmap is context only. Complete only the current approved milestone.
+Current harness state:
+
+- Product: PraxisGrid.
+- Active programme: M5 Production Perfection followed by Phase 6.
+- M5 status: REOPENED FOR PRODUCTION HARDENING.
+- M6 status: APPROVED.
+- M7 status: NOT APPROVED.
+
+The roadmap is context only. Complete only the current approved programme.
 
 ## Source of truth order
 
@@ -63,15 +75,16 @@ If code conflicts with source-of-truth docs, update the code or report the misma
 
 ## Subagent operating model
 
-PraxisGrid uses three named subagent roles for meaningful product work. They are advisory by default unless the user explicitly asks for implementation delegation.
+PraxisGrid uses four named senior roles for M5/M6 production delivery. They are advisory by default unless the user explicitly asks for implementation delegation.
 
 Use subagents when the work affects multiple surfaces, changes user experience, changes core exam behavior, or prepares a milestone handoff.
 
-Required subagents:
+Required senior roles:
 
-1. UI/UX Revamp Lead
-2. Senior Software Engineer
-3. QA and Product Lead
+1. Senior Principal Engineer
+2. Senior Product Designer and Design Systems Lead
+3. Senior QA Engineer: Security, Data and Governance
+4. Senior QA Engineer: Product, UX, Accessibility and Regression
 
 Authoritative role briefs live in:
 
@@ -83,10 +96,10 @@ Coordination rules:
 
 - The main agent owns final decisions, integration, and source-of-truth updates.
 - Subagents must not override AGENTS.md, PRODUCT_SPEC.md, SECURITY.md, or ACCEPTANCE_CRITERIA.md.
-- Subagents must not start future milestones without explicit approval.
-- Subagents must keep the demo/seed question-bank warning visible.
+- Subagents must not start M7.
+- Subagents must keep the demo/seed question-bank warning visible until the seed bank is removed from public trusted content.
 - Subagents must preserve the provider-neutral non-affiliation disclaimer.
-- Subagents must not add Supabase, GitHub import, LLM calls, source ingestion, payments, or admin surfaces unless the matching milestone is approved.
+- Subagents must not add payments, native mobile apps, voice/audio grading, community-submitted questions, or M7 scope.
 - If subagents disagree, prefer the option that is safest for learners, easiest to verify, and closest to the current approved milestone.
 
 Default review sequence:
@@ -99,7 +112,7 @@ Every subagent-backed run should update `CURRENT_STATE.md`, `KNOWN_FAILURES.md`,
 
 ## Non-negotiable rules
 
-- Do not build outside the currently approved milestone.
+- Do not build outside the currently approved programme.
 - Do not rewrite the whole app unless explicitly instructed.
 - Do not remove working functionality without replacing it and updating tests/checks.
 - Do not expose LLM API keys in frontend code.
@@ -194,7 +207,7 @@ Frontend:
 Hosting:
 
 - Vercel for frontend
-- Supabase later for backend/auth/database
+- Supabase for auth, backend data, RLS, and live production validation
 
 ## Visual direction
 
@@ -222,7 +235,8 @@ The app should feel credible for cybersecurity learners and early-career securit
 
 Typography:
 
-- Use a developer/security monospace direction with this stack: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace.
+- Use a highly legible sans-serif stack for body text, forms, dashboards, results, tables, and assessment questions.
+- Use monospace selectively for code, commands, compact technical metadata, and labels where it adds genuine value.
 - Keep sizes readable and weights controlled.
 
 Icons:

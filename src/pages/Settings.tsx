@@ -3,17 +3,22 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Download, Moon, Trash2, Volume2, Wand2, WifiOff } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { useAuth } from "../hooks/useAuth";
+import { deleteCloudLearningData, exportCloudData } from "../lib/cloudSync";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Switch } from "../components/ui/switch";
 import { PRODUCT_NAME } from "../lib/brand";
 
 export function Settings() {
+  const auth = useAuth();
   const settings = useAppStore((state) => state.settings);
   const setSettings = useAppStore((state) => state.setSettings);
   const exportData = useAppStore((state) => state.exportData);
   const resetLocalData = useAppStore((state) => state.resetLocalData);
   const [exported, setExported] = useState(false);
+  const [cloudMessage, setCloudMessage] = useState<string | null>(null);
+  const [cloudBusy, setCloudBusy] = useState(false);
 
   async function downloadExport() {
     const json = await exportData();
@@ -25,6 +30,43 @@ export function Settings() {
     link.click();
     URL.revokeObjectURL(url);
     setExported(true);
+  }
+
+  async function downloadCloudExport() {
+    setCloudBusy(true);
+    setCloudMessage(null);
+    const result = await exportCloudData();
+    if (!result.ok || !result.data) {
+      setCloudMessage(typeof result.error === "string" ? result.error : "Cloud export is unavailable right now.");
+      setCloudBusy(false);
+      return;
+    }
+    const json = JSON.stringify(result.data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `praxisgrid-cloud-export-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setCloudMessage("Cloud export downloaded.");
+    setCloudBusy(false);
+  }
+
+  async function deleteCloudData() {
+    const confirmed = window.confirm("Delete cloud learning data, repository imports, Project Intelligence analyses, assessment recovery, and interview recovery for this signed-in account? Your sign-in profile stays active.");
+    if (!confirmed) return;
+    setCloudBusy(true);
+    setCloudMessage(null);
+    const result = await deleteCloudLearningData();
+    setCloudMessage(result.ok ? "Cloud learning and repository analysis data deleted. Local data on this device was not reset." : typeof result.error === "string" ? result.error : "Cloud delete is unavailable right now.");
+    setCloudBusy(false);
+  }
+
+  async function resetLocalDeviceData() {
+    const confirmed = window.confirm("Reset local PraxisGrid data on this device? This removes local progress, attempts, interview history, repository imports, and recovery state. Cloud data is not deleted.");
+    if (!confirmed) return;
+    await resetLocalData();
   }
 
   return (
@@ -53,9 +95,24 @@ export function Settings() {
         </CardHeader>
         <div className="grid gap-3 sm:grid-cols-2">
           <Button onClick={() => void downloadExport()} variant="hero" size="lg"><Download className="h-5 w-5" /> Export progress</Button>
-          <Button onClick={() => void resetLocalData()} variant="danger" size="lg"><Trash2 className="h-5 w-5" /> Reset local data</Button>
+          <Button onClick={() => void resetLocalDeviceData()} variant="danger" size="lg"><Trash2 className="h-5 w-5" /> Reset local data</Button>
         </div>
         {exported ? <p className="aq-subtle-panel mt-3 p-3 font-semibold">Export downloaded</p> : null}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div>
+            <CardTitle>Cloud Privacy</CardTitle>
+            <p className="font-semibold text-[var(--aq-muted)]">Export or delete account-owned cloud learning data and repository analysis. This does not delete your Supabase sign-in account.</p>
+          </div>
+        </CardHeader>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button onClick={() => void downloadCloudExport()} variant="soft" size="lg" disabled={!auth.user || cloudBusy}><Download className="h-5 w-5" /> Export cloud data</Button>
+          <Button onClick={() => void deleteCloudData()} variant="danger" size="lg" disabled={!auth.user || cloudBusy}><Trash2 className="h-5 w-5" /> Delete cloud learning data</Button>
+        </div>
+        {!auth.user ? <p className="aq-subtle-panel mt-3 p-3 text-sm font-semibold">Sign in to manage cloud data tied to your account.</p> : null}
+        {cloudMessage ? <p className="aq-subtle-panel mt-3 p-3 text-sm font-semibold">{cloudMessage}</p> : null}
       </Card>
     </motion.div>
   );

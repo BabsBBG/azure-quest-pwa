@@ -199,3 +199,30 @@ Follow-up actions taken:
 - Added provider-neutral sign-in copy near the auth actions.
 - Updated auth setup, security, acceptance, and current-state docs with Google SSO scope and secret-handling rules.
 - Added focused tests for the disabled local-mode Google button and Supabase OAuth call shape.
+
+## M5/M6 Production-Hardening Advisory Audit
+
+Advisory audit refreshed on 2026-07-28 with the required M5/M6 roles.
+
+High-priority findings driving the latest hardening slices:
+
+- Product/UX QA flagged destructive learner-data actions as too easy to trigger and too quiet when cloud deletion failed.
+- Security/Data/Governance QA flagged Project Intelligence ownership, support role boundaries, quota RPC scope, and audit-event immutability as production blockers.
+- Principal Engineering kept source-grounded production content, live Supabase/RLS verification, and CI-equivalent validation as sign-off blockers.
+- Design Systems review kept the professional Azure-blue IA/design direction active while prioritizing trustworthy learner flows over decorative polish.
+
+Follow-up actions taken:
+
+- Added confirmation and visible failure handling for local reset and repository analysis deletion.
+- Added `validate:destructive-actions` and wired it into CI.
+- Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences stored in auth metadata.
+- Added `validate:onboarding` and wired it into CI.
+- Added umbrella `validate:migrations`, `validate:rls`, and `validate:repository-isolation` gates while keeping live Supabase probes marked as pending.
+- Updated the M5/M6 defect ledger, current state, changelog, and testing strategy to track this as fixed in repo with browser/live verification still pending.
+
+M5/M6 signed-in browser gate follow-up on 2026-07-29:
+
+- Added a dev-only Playwright auth harness guarded by `import.meta.env.DEV` and `VITE_E2E_AUTH_HARNESS=true`.
+- Added signed-in browser coverage for onboarding redirect/completion, regular-user Admin denial, and SUPPORT_ADMIN support-only queue access without publication actions. Local slices passed: Chromium 13/13, WebKit 13/13, and mobile 26/26.
+- Added `validate:e2e-auth-harness` so the harness remains local-dev only and the signed-in spec is skipped for production smoke.
+- Live Supabase auth, role, and RLS verification remains pending and is not replaced by the local browser harness.

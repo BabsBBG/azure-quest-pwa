@@ -1,20 +1,23 @@
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { AuthProvider } from "../hooks/useAuth";
-import { Account } from "./Account";
+import { AuthPage } from "./AuthPage";
 
-describe("Account", () => {
-  it("renders logged-out account UI without Supabase env vars", async () => {
+describe("AuthPage", () => {
+  it("renders public logged-out auth UI without Supabase env vars", async () => {
     render(
       <AuthProvider>
-        <Account />
+        <MemoryRouter initialEntries={["/auth?mode=signup"]}>
+          <AuthPage />
+        </MemoryRouter>
       </AuthProvider>
     );
 
-    expect(await screen.findByText("Accounts are not configured locally")).toBeInTheDocument();
-    expect(screen.getByText("Logged out")).toBeInTheDocument();
+    expect(await screen.findByText("Account sign-in is not available in this environment. Please try again later.")).toBeInTheDocument();
+    expect(screen.getByText("Signup")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Create account" })).toBeDisabled();
   });
 });

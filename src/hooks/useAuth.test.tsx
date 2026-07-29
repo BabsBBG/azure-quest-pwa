@@ -26,7 +26,7 @@ function GoogleSignInProbe() {
   const auth = useAuth();
 
   return (
-    <button type="button" onClick={() => void auth.signInWithGoogle()} disabled={auth.loading}>
+    <button type="button" onClick={() => void auth.signInWithGoogle({ redirectTo: "/cert/sc-300/job" })} disabled={auth.loading}>
       Continue with Google
     </button>
   );
@@ -39,7 +39,7 @@ describe("AuthProvider Google SSO", () => {
     window.history.replaceState({}, "", "/account");
   });
 
-  it("starts Supabase Google OAuth with an account redirect", async () => {
+  it("starts Supabase Google OAuth with the requested internal redirect", async () => {
     render(
       <AuthProvider>
         <GoogleSignInProbe />
@@ -54,7 +54,7 @@ describe("AuthProvider Google SSO", () => {
     await waitFor(() => {
       expect(mocks.signInWithOAuth).toHaveBeenCalledWith({
         provider: "google",
-        options: { redirectTo: "http://localhost:3000/account" }
+        options: { redirectTo: "http://localhost:3000/cert/sc-300/job" }
       });
     });
   });

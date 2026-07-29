@@ -21,6 +21,24 @@
 - Added tests for Job Readiness, cloud sync fallback, GitHub import helpers, and source-grounded approval gates.
 - Added `npm run validate:source-grounding`.
 - Added M5.2 duplicate detection with shared question-quality helpers, approved-serving duplicate refusal, global approved duplicate-key enforcement, strict validator mode, tests, and CI coverage.
+- Added Interview Studio active-session recovery with local/legacy storage, best-effort Supabase sync, owner-only RLS migration, resume/discard controls, completion cleanup, regression coverage, and CI validation.
+- Hardened GitHub import quota claims with an atomic Supabase RPC and changed content-quality report RLS to require authenticated users.
+- Rebuilt Home around exactly Learn, Practise, and Prove, removed stale logged-out demo wording from Account, and added an auth-first IA validator.
+- Moved `/arena` into an authenticated assessment route outside the learner layout and replaced completed-run results with an analytical report plus JSON, CSV, and print exports.
+- Removed Career Lab fixture project cards from production UI, added a no-projects-connected state, isolated the synthetic Northstar Inventory API fixture for tests, and added project-fixture validation.
+- Switched the global product typography from monospace-first to a readable sans-serif stack, reserved monospace for code and technical metadata, and added typography validation.
+- Replaced the silent production-smoke workflow condition with an explicit smoke runner that reports PR skips, fails `main` without a configured production URL, and blocks fallback to the historical Azure Quest URL.
+- Added typed Project Intelligence analysis records with evidence sections, owner-scoped Supabase persistence, regenerate/delete UI actions, and validation for repository-isolated analysis workflows.
+- Added signed-in cloud privacy workflows for exporting account-owned cloud data and deleting cloud learning/repository-analysis records, with owner delete RLS policies and validation.
+- Added support-admin read-only report queue boundaries with explicit RLS helpers, mutation guard triggers, role-filtered Admin affordances, and CI validation.
+- Hardened Project Intelligence analysis row isolation, GitHub import quota RPC execute scope, and content-quality report audit-event immutability.
+- Preserved protected-route intent through email sign-in and Google SSO with safe internal auth redirects and CI validation.
+- Blocked production quiz/run starts when approved source-grounded placements are incomplete, preventing demo questions from acting as a silent production fallback.
+- Added confirmation and visible failure handling for local data reset and Project Intelligence deletion, with destructive-action CI validation.
+- Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences plus CI validation.
+- Added umbrella migration, RLS, and repository-isolation validators to CI for production governance gates.
+- Renamed the connected Vercel project to `praxisgrid`, aligned remote Vite build settings, deployed a fresh production build, and passed public production smoke against `https://azure-quest-pwa.vercel.app`; canonical `praxisgrid.vercel.app` remains unavailable.
+- Added dev-only signed-in Playwright browser gates for onboarding and Admin role boundaries, with a validator preventing the E2E auth harness from running in production smoke.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

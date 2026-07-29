@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { BookOpen, BriefcaseBusiness, ClipboardList, History, Home, Moon, Sun, UserRound, Wifi, WifiOff } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ClipboardList, Moon, Sun, UserRound, Wifi, WifiOff } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
 import { useAuth } from "../hooks/useAuth";
@@ -7,12 +7,9 @@ import { Switch } from "./ui/switch";
 import { PRODUCT_INITIALS, PRODUCT_NAME, PRODUCT_TAGLINE, PROVIDER_NEUTRAL_DISCLAIMER } from "../lib/brand";
 
 const navItems = [
-  { to: "/", label: "Home", icon: Home },
   { to: "/cert/sc-300", label: "Learn", icon: BookOpen },
-  { to: "/cert/sc-300/knowledge", label: "Domain Quizzes", icon: ClipboardList },
-  { to: "/cert/sc-300/job", label: "Career Lab", icon: BriefcaseBusiness },
-  { to: "/cert/sc-300/readiness", label: "Progress", icon: History },
-  { to: "/account", label: "Account", icon: UserRound }
+  { to: "/cert/sc-300/knowledge", label: "Practise", icon: ClipboardList },
+  { to: "/cert/sc-300/job", label: "Prove", icon: BriefcaseBusiness }
 ];
 
 function currentCertFromPath(pathname: string) {
@@ -61,13 +58,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[var(--aq-border)] bg-[var(--aq-blue-700)] text-sm font-extrabold text-white shadow-sm">{PRODUCT_INITIALS}</span>
             <span className="text-base font-extrabold">{PRODUCT_NAME}</span>
           </Link>
-          <button
-            onClick={() => void setSettings({ darkMode: !settings.darkMode })}
-            className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--aq-border)] bg-[var(--aq-blue-50)] text-[var(--aq-blue-800)]"
-            aria-label="Toggle dark mode"
-          >
-            {settings.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <Link to="/account" className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--aq-border)] bg-[var(--aq-blue-50)] text-[var(--aq-blue-800)]" aria-label="Account">
+              <UserRound className="h-4 w-4" />
+            </Link>
+            <button
+              onClick={() => void setSettings({ darkMode: !settings.darkMode })}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--aq-border)] bg-[var(--aq-blue-50)] text-[var(--aq-blue-800)]"
+              aria-label="Toggle dark mode"
+            >
+              {settings.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         {/* Desktop header */}
@@ -98,6 +100,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Link to="/account" className="hidden items-center gap-2 rounded-lg border border-[var(--aq-border)] bg-white px-3 py-2 text-sm font-bold text-[var(--aq-blue-800)] shadow-sm hover:bg-[var(--aq-blue-50)] dark:bg-[#0d1d36] dark:text-white md:flex">
+              <UserRound className="h-4 w-4" />
+              Account
+            </Link>
             <div className="hidden items-center gap-2 rounded-lg border border-[var(--aq-border)] bg-[var(--aq-blue-50)] px-3 py-2 text-sm font-bold md:flex">
               {settings.lowBandwidth ? <WifiOff className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
               <Switch checked={settings.lowBandwidth} onCheckedChange={(v) => void setSettings({ lowBandwidth: v })} label="Low bandwidth" />
@@ -118,7 +124,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {showMobileNav ? <nav className="fixed bottom-3 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 rounded-md border border-[var(--aq-border)] bg-white/95 p-2 shadow-[var(--aq-shadow)] backdrop-blur dark:bg-[#061227]/95 sm:hidden">
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-3 gap-1">
           {mobileNav.map((item) => {
             const Icon = item.icon;
             return (

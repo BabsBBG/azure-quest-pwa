@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 
 const dailyLimit = Number(process.env.GITHUB_IMPORT_DAILY_LIMIT ?? 8);
-const cache = new Map();
-const rateBuckets = new Map();
+const cacheTtlHours = Number(process.env.GITHUB_IMPORT_CACHE_TTL_HOURS ?? 24);
+const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 function parseRepoUrl(value) {
   const url = new URL(value);
@@ -19,20 +21,88 @@ function hash(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-function clientKey(req) {
-  return String(req.headers["x-forwarded-for"] ?? req.socket?.remoteAddress ?? "local").split(",")[0].trim();
-}
-
-function checkRateLimit(req) {
-  const day = new Date().toISOString().slice(0, 10);
-  const key = `${clientKey(req)}:${day}`;
-  const count = rateBuckets.get(key) ?? 0;
-  if (count >= dailyLimit) {
-    const error = new Error(`Daily public repo import limit reached (${dailyLimit}).`);
-    error.statusCode = 429;
+function serverSupabase() {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    const error = new Error("GitHub import is unavailable until server-side Supabase controls are configured.");
+    error.statusCode = 503;
     throw error;
   }
-  rateBuckets.set(key, count + 1);
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+
+async function authenticateUser(req, db) {
+  const token = String(req.headers.authorization ?? "").replace(/^Bearer\s+/i, "").trim();
+  if (!token) {
+    const error = new Error("Sign in is required before importing a public GitHub repository.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const { data, error } = await db.auth.getUser(token);
+  if (error || !data.user) {
+    const authError = new Error("Your session could not be verified. Please sign in again.");
+    authError.statusCode = 401;
+    throw authError;
+  }
+  return data.user;
+}
+
+async function claimImportQuota(db, { userId, repoKey, contentHash }) {
+  const { data, error } = await db.rpc("claim_github_import_quota", {
+    p_user_id: userId,
+    p_repo_key: repoKey,
+    p_content_hash: contentHash,
+    p_daily_limit: dailyLimit
+  });
+  if (error) {
+    const limitReached = String(error.message ?? "").includes("Daily public repo import limit reached");
+    const dbError = new Error(limitReached ? `Daily public repo import limit reached (${dailyLimit}).` : "Unable to claim public repo import quota.");
+    dbError.statusCode = limitReached ? 429 : 503;
+    throw dbError;
+  }
+  return data?.[0] ?? { remaining: 0 };
+}
+
+function isFreshCacheEntry(entry) {
+  if (!entry?.updated_at) return false;
+  const ageMs = Date.now() - new Date(entry.updated_at).getTime();
+  return ageMs >= 0 && ageMs <= cacheTtlHours * 60 * 60 * 1000;
+}
+
+async function readCachedImport(db, repoKey) {
+  const { data, error } = await db
+    .from("github_import_cache")
+    .select("payload, updated_at")
+    .eq("repo_key", repoKey)
+    .maybeSingle();
+  if (error) {
+    const dbError = new Error("Unable to read public repo import cache.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
+  if (!isFreshCacheEntry(data)) return null;
+  return data.payload;
+}
+
+async function writeCachedImport(db, { repoKey, parsed, result }) {
+  const { error } = await db.from("github_import_cache").upsert({
+    repo_key: repoKey,
+    owner: parsed.owner,
+    repo: parsed.repo,
+    source_url: parsed.url,
+    default_branch: result.project.defaultBranch,
+    content_hash: result.project.contentHash,
+    payload: result,
+    fetched_at: result.project.importedAt,
+    updated_at: new Date().toISOString()
+  });
+  if (error) {
+    const dbError = new Error("Unable to cache public repo import result.");
+    dbError.statusCode = 503;
+    throw dbError;
+  }
 }
 
 async function githubJson(url) {
@@ -83,6 +153,72 @@ function makeStoryDraft({ owner, repo, readme, primaryLanguage, languages }) {
   };
 }
 
+function detectProjectIntelligence({ contentHash, readme, primaryLanguage, languages, repoMeta }) {
+  const lower = readme.toLowerCase();
+  const detectedFrameworks = [
+    lower.includes("react") ? "React" : null,
+    lower.includes("vite") ? "Vite" : null,
+    lower.includes("next") ? "Next.js" : null,
+    lower.includes("express") ? "Express" : null,
+    lower.includes("fastapi") ? "FastAPI" : null,
+    lower.includes("supabase") ? "Supabase" : null,
+    lower.includes("postgres") || lower.includes("postgresql") ? "Postgres" : null,
+    lower.includes("docker") ? "Docker" : null,
+    lower.includes("github actions") ? "GitHub Actions" : null
+  ].filter(Boolean);
+  const languageLine = [primaryLanguage, ...languages.filter((item) => item !== primaryLanguage)].filter(Boolean).slice(0, 5);
+  const files = ["README.md"];
+  const hasTests = /\b(test|tests|vitest|jest|playwright|pytest)\b/.test(lower);
+  const hasApi = /\b(api|endpoint|route|controller|server)\b/.test(lower);
+  const hasAuth = /\b(auth|oauth|login|sign in|jwt|session)\b/.test(lower);
+  const hasCi = /\b(ci|github actions|workflow|pipeline)\b/.test(lower);
+  const hasDeploy = /\b(vercel|netlify|docker|deploy|hosting|cloud)\b/.test(lower);
+  const hasObservability = /\b(log|logging|monitoring|metrics|telemetry|observability)\b/.test(lower);
+
+  return {
+    id: `analysis-${contentHash.slice(0, 24)}`,
+    generatedAt: new Date().toISOString(),
+    contentHash,
+    overview: {
+      projectType: hasApi ? "Application or service with API-facing behaviour" : "Repository with documentation-backed implementation evidence",
+      detectedFrameworks,
+      keyEntryPoints: files,
+      persistence: lower.includes("database") || lower.includes("postgres") || lower.includes("sql") ? "Persistence is mentioned in repository evidence." : "No persistence layer is confirmed from retrieved evidence.",
+      apis: hasApi ? "API behaviour is mentioned in retrieved evidence." : "No API boundary is confirmed from retrieved evidence.",
+      integrations: detectedFrameworks.length ? `Detected stack signals: ${detectedFrameworks.join(", ")}.` : "No external integration is confirmed from retrieved evidence.",
+      authentication: hasAuth ? "Authentication is mentioned in retrieved evidence." : "Authentication is not confirmed from retrieved evidence.",
+      tests: hasTests ? "Testing signals are present in retrieved evidence." : "Testing is not confirmed from retrieved evidence.",
+      deployment: hasDeploy ? "Deployment or hosting signals are present in retrieved evidence." : "Deployment is not confirmed from retrieved evidence.",
+      ciCd: hasCi ? "CI/CD signals are present in retrieved evidence." : "CI/CD is not confirmed from retrieved evidence.",
+      observability: hasObservability ? "Observability signals are present in retrieved evidence." : "Observability is not confirmed from retrieved evidence."
+    },
+    architectureMap: [
+      { label: "Repository overview and stated purpose", files, confidence: "confirmed" },
+      { label: `Implementation stack: ${languageLine.join(", ") || "not confidently detected"}`, files, confidence: languageLine.length ? "confirmed" : "inferred" },
+      { label: hasApi ? "API boundary appears in repository evidence" : "Inspect source tree before claiming API ownership", files, confidence: hasApi ? "confirmed" : "recommendation" },
+      { label: hasDeploy ? "Deployment path appears in repository evidence" : "Add deployment evidence before presenting operations maturity", files, confidence: hasDeploy ? "confirmed" : "recommendation" }
+    ],
+    strengths: [
+      { label: "Public evidence can be reviewed without requesting private GitHub scopes", files, confidence: "confirmed" },
+      { label: detectedFrameworks.length ? "Stack signals are explicit enough for an interview walkthrough" : "Repository needs clearer stack documentation", files, confidence: detectedFrameworks.length ? "confirmed" : "recommendation" },
+      { label: hasTests ? "Testing evidence is visible" : "Add visible test evidence or avoid claiming test maturity", files, confidence: hasTests ? "confirmed" : "recommendation" }
+    ],
+    risksAndImprovements: [
+      { label: "Generated project story must be reviewed before use as final evidence", files, confidence: "recommendation" },
+      { label: hasAuth ? "Explain authentication boundaries precisely and cite the relevant files" : "Do not claim authentication design until source evidence is reviewed", files, confidence: hasAuth ? "recommendation" : "confirmed" },
+      { label: hasObservability ? "Prepare an operations answer using the monitoring evidence" : "Add logging or monitoring evidence before claiming observability", files, confidence: hasObservability ? "recommendation" : "confirmed" }
+    ],
+    interviewQuestions: [
+      "What problem does this repository solve, and where is that visible in the evidence?",
+      "Which implementation choices are confirmed by files rather than inferred?",
+      "What would you improve first if you had one day?",
+      "How would you test the riskiest path?",
+      "What security boundary should an interviewer ask you to defend?"
+    ],
+    status: "draft"
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -91,13 +227,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    checkRateLimit(req);
+    const db = serverSupabase();
+    const user = await authenticateUser(req, db);
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const parsed = parseRepoUrl(String(body?.url ?? ""));
 
-    const cacheKey = `${parsed.owner}/${parsed.repo}`;
-    if (cache.has(cacheKey)) {
-      res.status(200).json({ ...cache.get(cacheKey), cached: true });
+    const repoKey = `${parsed.owner.toLowerCase()}/${parsed.repo.toLowerCase()}`;
+    const cached = await readCachedImport(db, repoKey);
+    if (cached) {
+      const quota = await claimImportQuota(db, { userId: user.id, repoKey, contentHash: cached.project.contentHash });
+      res.status(200).json({
+        ...cached,
+        cached: true,
+        controls: { ...cached.controls, dailyLimit, remainingToday: quota.remaining, cacheTtlHours }
+      });
       return;
     }
 
@@ -114,6 +257,7 @@ export default async function handler(req, res) {
     const primaryLanguage = repoMeta.language ?? languages[0] ?? null;
     const contentHash = hash(JSON.stringify({ readme, languageStats, defaultBranch: repoMeta.default_branch }));
     const importedAt = new Date().toISOString();
+    const analysis = detectProjectIntelligence({ contentHash, readme, primaryLanguage, languages, repoMeta });
     const result = {
       project: {
         id: contentHash.slice(0, 24),
@@ -129,17 +273,24 @@ export default async function handler(req, res) {
         contentHash,
         importedAt,
         status: "draft",
-        storyDraft: makeStoryDraft({ ...parsed, readme, primaryLanguage, languages })
+        storyDraft: makeStoryDraft({ ...parsed, readme, primaryLanguage, languages }),
+        analysis
       },
       controls: {
         permissionModel: "public-read-only",
         dailyLimit,
+        remainingToday: 0,
         cacheKey: contentHash,
-        storyGeneration: "server-side deterministic draft"
+        cacheTtlHours,
+        storyGeneration: "server-side deterministic draft",
+        rateLimitStorage: "supabase-user-day-rpc",
+        cacheStorage: "supabase-repo-content-hash"
       }
     };
 
-    cache.set(cacheKey, result);
+    const quota = await claimImportQuota(db, { userId: user.id, repoKey, contentHash });
+    result.controls.remainingToday = quota.remaining;
+    await writeCachedImport(db, { repoKey, parsed, result });
     res.status(200).json(result);
   } catch (error) {
     const statusCode = error.statusCode && Number(error.statusCode) >= 400 ? Number(error.statusCode) : 400;

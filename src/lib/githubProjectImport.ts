@@ -1,4 +1,5 @@
 import type { ImportedProject } from "../types";
+import { isSupabaseConfigured, supabase } from "./supabase";
 
 const IMPORT_LIMIT = 8;
 const STORAGE_KEY = "praxisgrid:github-import-rate";
@@ -49,13 +50,18 @@ function safeParseBucket(raw: string, day: string) {
 export async function importPublicGitHubProject(url: string): Promise<ImportedProject> {
   const parsed = parseGitHubRepoUrl(url);
   if (!parsed) throw new Error("Enter a public GitHub repository URL.");
+  if (!isSupabaseConfigured || !supabase) throw new Error("Sign in is required before importing a public GitHub repository.");
 
   const rate = canImportPublicRepo();
   if (!rate.allowed) throw new Error(`Daily public repo import limit reached (${IMPORT_LIMIT}).`);
 
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) throw new Error("Sign in is required before importing a public GitHub repository.");
+
   const response = await fetch("/api/github-project", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({ url: parsed.url })
   });
   const data = await response.json() as { project?: ImportedProject; error?: string };

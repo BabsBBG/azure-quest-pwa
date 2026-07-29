@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { KeyRound, LogIn, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -37,13 +38,13 @@ export function Account() {
       <section className="aq-hero p-5 sm:p-6">
         <Badge className="mb-3 border-[var(--aq-blue-600)] bg-[var(--aq-blue-700)] text-white">Account</Badge>
         <h1 className="text-3xl font-bold leading-tight sm:text-4xl">Your {PRODUCT_NAME} profile.</h1>
-        <p className="mt-3 max-w-2xl text-sm font-semibold text-[var(--aq-muted)]">Sign in for an individual account while local demo practice and attempt history continue to work on this device.</p>
+        <p className="mt-3 max-w-2xl text-sm font-semibold text-[var(--aq-muted)]">Your account controls access to Learn, Practise, Prove, repository analysis, assessment history, and Interview Studio recovery.</p>
       </section>
 
       {!auth.configured ? (
         <Card className="border-l-4 border-l-amber-400">
           <CardHeader><CardTitle>Accounts are not configured locally</CardTitle><ShieldCheck className="h-6 w-6 text-amber-500" /></CardHeader>
-          <p className="font-semibold text-[var(--aq-muted)]">Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to enable Supabase email/password and Google accounts. Logged-out demo practice remains available.</p>
+          <p className="font-semibold text-[var(--aq-muted)]">Account services are required for learner access. Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in local development to test Supabase email/password and Google sign-in.</p>
         </Card>
       ) : null}
 
@@ -66,7 +67,10 @@ export function Account() {
               <Button type="submit" variant="hero" disabled={auth.loading} className="self-end">{auth.loading ? "Saving..." : "Save profile"}</Button>
             </form>
             {auth.error ? <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-900">{auth.error}</p> : null}
-            <Button onClick={() => void auth.signOut()} variant="soft" disabled={auth.loading} className="mt-4"><LogOut className="h-4 w-4" /> Sign out</Button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild variant="soft"><Link to="/onboarding?edit=true&from=/account"><ShieldCheck className="h-4 w-4" /> Update onboarding</Link></Button>
+              <Button onClick={() => void auth.signOut()} variant="soft" disabled={auth.loading}><LogOut className="h-4 w-4" /> Sign out</Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -75,7 +79,7 @@ export function Account() {
             <div>
               <Badge className="mb-2">Logged out</Badge>
               <CardTitle>{mode === "sign-up" ? "Create account" : "Sign in"}</CardTitle>
-              <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">Google and email sign-in use Supabase. Local demo practice and attempt history still work on this device.</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">Google and email sign-in use Supabase. Sign in to access learning paths, assessments, repository import, progress, and recovery.</p>
             </div>
             <LogIn className="h-8 w-8 text-[var(--aq-blue-600)]" />
           </CardHeader>

@@ -15,7 +15,9 @@
   --aq-ink: #102033;
   --aq-muted: #5d6b82;
   --aq-shadow: 0 14px 34px rgba(0, 87, 184, 0.10);
-  font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --aq-font-sans: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --aq-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family: var(--aq-font-sans);
   color-scheme: light;
   font-size: 15px;
 }
@@ -42,8 +44,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-family: var(--aq-font-sans);
   -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
   letter-spacing: 0;
   line-height: 1.5;
   color: var(--aq-ink);
@@ -61,8 +64,16 @@ h1, h2, h3 {
 .font-extrabold { font-weight: 700 !important; }
 .font-bold { font-weight: 650 !important; }
 
+code,
+kbd,
+samp,
+pre,
+.font-mono,
+.aq-technical {
+  font-family: var(--aq-font-mono);
+}
+
 pre {
-  font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   white-space: pre-wrap;
   word-break: break-word;
 }

@@ -1,10 +1,12 @@
-import { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, type ReactNode } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHydrateApp } from "./hooks/useHydrateApp";
 import { useAppStore } from "./store/useAppStore";
 import { Layout } from "./components/Layout";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
 import { Dashboard } from "./pages/Dashboard";
 import { PathHome } from "./pages/PathHome";
 import { CertHome } from "./pages/CertHome";
@@ -23,8 +25,79 @@ import { CaseFiles } from "./pages/CaseFiles";
 import { KqlGym } from "./pages/KqlGym";
 import { Readiness } from "./pages/Readiness";
 import { Account } from "./pages/Account";
+import { Onboarding } from "./pages/Onboarding";
 import { AdminReviewStudio } from "./pages/AdminReviewStudio";
+import { AuthPage } from "./pages/AuthPage";
+import { PublicInfoPage } from "./pages/PublicInfoPage";
 import { PRODUCT_INITIALS, PRODUCT_NAME } from "./lib/brand";
+
+function authPath(mode: "signin" | "signup", location: ReturnType<typeof useLocation>) {
+  const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+  return `/auth?mode=${mode}&from=${from}`;
+}
+
+function onboardingPath(location: ReturnType<typeof useLocation>) {
+  const from = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+  return `/onboarding?from=${from}`;
+}
+
+function AuthLoadingScreen() {
+  return (
+    <main className="grid min-h-screen place-items-center bg-slate-950 text-white">
+      <div className="text-center">
+        <div className="text-4xl font-black tracking-tight">{PRODUCT_INITIALS}</div>
+        <p className="mt-3 text-xl font-black">Checking access...</p>
+      </div>
+    </main>
+  );
+}
+
+function ProtectedLearnerShell({ children }: { children: ReactNode }) {
+  const auth = useAuth();
+  const location = useLocation();
+
+  if (auth.loading) return <AuthLoadingScreen />;
+  if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
+  if (!auth.onboardingComplete && location.pathname !== "/onboarding") return <Navigate to={onboardingPath(location)} replace state={{ from: location.pathname }} />;
+
+  return <Layout>{children}</Layout>;
+}
+
+function AdminAccessDenied() {
+  return (
+    <main className="grid min-h-screen place-items-center bg-slate-50 px-4 text-[var(--aq-ink)] dark:bg-[#061227]">
+      <section className="w-full max-w-xl rounded-md border border-[var(--aq-border)] bg-white p-6 shadow-[var(--aq-shadow)] dark:bg-[#0b1b33]">
+        <Badge className="mb-3">Admin</Badge>
+        <h1 className="text-2xl font-bold">Admin access denied</h1>
+        <p className="mt-3 text-sm font-semibold text-[var(--aq-muted)]">This area requires a server-backed PraxisGrid admin role. Learner accounts cannot access Admin operations.</p>
+        <Button className="mt-5" variant="soft" onClick={() => window.location.assign("/")}>Return home</Button>
+      </section>
+    </main>
+  );
+}
+
+function ProtectedAdminRoute() {
+  const auth = useAuth();
+  const location = useLocation();
+  const adminRoles = new Set(["MAIN_ADMIN", "CONTENT_REVIEWER", "SUPPORT_ADMIN"]);
+
+  if (auth.loading || auth.roleLoading) return <AuthLoadingScreen />;
+  if (!auth.user) return <Navigate to={authPath("signin", location)} replace state={{ from: location.pathname }} />;
+  if (!adminRoles.has(auth.role)) return <AdminAccessDenied />;
+
+  return <AdminReviewStudio />;
+}
+
+function ProtectedAssessmentRoute() {
+  const auth = useAuth();
+  const location = useLocation();
+
+  if (auth.loading) return <AuthLoadingScreen />;
+  if (!auth.user) return <Navigate to={authPath("signup", location)} replace state={{ from: location.pathname }} />;
+  if (!auth.onboardingComplete) return <Navigate to={onboardingPath(location)} replace state={{ from: location.pathname }} />;
+
+  return <PracticeArena />;
+}
 
 export default function App() {
   const hydrated = useHydrateApp();
@@ -49,25 +122,33 @@ export default function App() {
     <AnimatePresence mode="wait">
       <AuthProvider>
         <Routes>
-          <Route path="/admin" element={<AdminReviewStudio />} />
-          <Route path="*" element={<Layout>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/callback" element={<AuthPage />} />
+          <Route path="/privacy" element={<PublicInfoPage kind="privacy" />} />
+          <Route path="/terms" element={<PublicInfoPage kind="terms" />} />
+          <Route path="/status" element={<PublicInfoPage kind="status" />} />
+          <Route path="/admin" element={<ProtectedAdminRoute />} />
+          <Route path="/arena" element={<ProtectedAssessmentRoute />} />
+          <Route path="*" element={<ProtectedLearnerShell>
           <Routes>
             <Route path="/" element={<PathHome />} />
             <Route path="/legacy-dashboard" element={<Dashboard />} />
             <Route path="/quiz" element={<Navigate to="/cert/sc-300/knowledge" replace />} />
             <Route path="/exams" element={<Navigate to="/cert/sc-300/readiness" replace />} />
             <Route path="/learn" element={<Navigate to="/cert/sc-300" replace />} />
+            <Route path="/practise" element={<Navigate to="/cert/sc-300/knowledge" replace />} />
+            <Route path="/prove" element={<Navigate to="/cert/sc-300/job" replace />} />
             <Route path="/domain-quizzes" element={<Navigate to="/cert/sc-300/knowledge" replace />} />
             <Route path="/certification-runs" element={<Navigate to="/cert/sc-300/readiness" replace />} />
             <Route path="/career-lab" element={<Navigate to="/cert/sc-300/job" replace />} />
             <Route path="/progress" element={<Navigate to="/cert/sc-300/readiness" replace />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/cert/:cert" element={<CertHome />} />
             <Route path="/cert/:cert/knowledge" element={<KnowledgeCheck />} />
             <Route path="/cert/:cert/readiness" element={<Readiness />} />
             <Route path="/cert/:cert/job" element={<JobReadiness />} />
             <Route path="/study" element={<StudyMode />} />
-            <Route path="/arena" element={<PracticeArena />} />
             <Route path="/exam-walkthrough" element={<ExamWalkthrough />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/history" element={<PastExams />} />
@@ -80,7 +161,7 @@ export default function App() {
             <Route path="/readiness" element={<Readiness />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Layout>} />
+        </ProtectedLearnerShell>} />
         </Routes>
       </AuthProvider>
     </AnimatePresence>

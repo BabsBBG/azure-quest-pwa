@@ -18,8 +18,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm install --legacy-peer-deps
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - run: npm run test:integration
       - run: node scripts/validate-harness.mjs
       - run: node scripts/validate-question-bank.mjs
       - run: npm run validate:source-grounding
@@ -36,6 +39,32 @@ jobs:
       - run: npm run validate:content-quality-reports
       - run: npm run validate:duplicates
       - run: npm run validate:authorization
+      - run: npm run validate:migrations
+      - run: npm run validate:rls
+      - run: npm run validate:repository-isolation
       - run: npm run validate:rich-items
-      - run: node scripts/check-routes.mjs
+      - run: npm run validate:github-import-controls
+      - run: npm run validate:active-interview-recovery
+      - run: npm run validate:auth-first-ia
+      - run: npm run validate:auth-redirects
+      - run: npm run validate:onboarding
+      - run: npm run validate:e2e-auth-harness
+      - run: npm run validate:assessment-shell
+      - run: npm run validate:project-fixtures
+      - run: npm run validate:project-intelligence
+      - run: npm run validate:privacy-workflows
+      - run: npm run validate:support-boundary
+      - run: npm run validate:production-content
+      - run: npm run validate:destructive-actions
+      - run: npm run validate:typography
+      - run: npm run validate:production-smoke-gate
+      - run: npm run validate:routes
+      - run: npm run test:e2e:chromium
+      - run: npm run test:e2e:webkit
+      - run: npm run test:e2e:mobile
+      - run: npm run test:accessibility
+      - run: npm run test:visual
       - run: npm run build
+      - run: npm run test:production-smoke
+        env:
+          PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}

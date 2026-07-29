@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
-import { ArrowLeft, Bookmark, CheckCircle2, Clock, Flag, RotateCcw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Bookmark, CheckCircle2, Clock, Download, Flag, Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 import type { AssessmentSession, ConfidenceRating, Cert, ExamMode, Question, QuizOption } from "../types";
 import { buildExam, scoreAttempt } from "../utils/quizEngine";
@@ -364,6 +364,28 @@ export function PracticeArena() {
     return `/arena?${next.toString()}`;
   }
 
+  function downloadText(filename: string, contents: string, type: string) {
+    const blob = new Blob([contents], { type });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportResultsJson() {
+    downloadText(`${cert.toLowerCase()}-assessment-result.json`, JSON.stringify(finalAttemptWithSession, null, 2), "application/json");
+  }
+
+  function exportDomainCsv() {
+    const rows = [["domain", "correct", "total", "percentage"]];
+    for (const [domain, stats] of Object.entries(finalAttempt.domains)) {
+      rows.push([domain, String(stats.correct), String(stats.total), String(Math.round((stats.correct / stats.total) * 100))]);
+    }
+    downloadText(`${cert.toLowerCase()}-domain-performance.csv`, rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n"), "text/csv");
+  }
+
   function toggleMarkedQuestion(targetQuestion: Question) {
     setMarkedQuestionIds((prev) => ({ ...prev, [targetQuestion.id]: !prev[targetQuestion.id] }));
   }
@@ -664,28 +686,41 @@ export function PracticeArena() {
 
   if (finished) {
     return (
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-        <Card className="aq-hero">
-          <CardHeader>
-            <div>
-              <Badge className={finalAttempt.passed ? "border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-100" : "border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100"}>{finalAttempt.kind.toUpperCase()} COMPLETE</Badge>
-              <CardTitle className="mt-3 text-2xl font-bold sm:text-3xl">{examTitle}</CardTitle>
-              <p className="font-semibold text-[var(--aq-muted)]">{formatSeconds(finalAttempt.timeTakenSeconds)} used / {formatSeconds(timeLimitSeconds)} limit</p>
+      <motion.main initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="min-h-screen bg-slate-50 px-4 py-4 text-[var(--aq-ink)] dark:bg-[#061227] sm:px-6 print:bg-white">
+        <div className="mx-auto max-w-6xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+            <Button asChild variant="ghost" size="sm"><Link to={`/cert/${pathFor(cert)}/knowledge`}><ArrowLeft className="h-4 w-4" /> Back to Practise</Link></Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={exportResultsJson} variant="soft" size="sm"><Download className="h-4 w-4" /> JSON</Button>
+              <Button onClick={exportDomainCsv} variant="soft" size="sm"><Download className="h-4 w-4" /> CSV</Button>
+              <Button onClick={() => window.print()} variant="soft" size="sm"><Printer className="h-4 w-4" /> Print</Button>
+              <Button asChild variant="hero" size="sm"><Link to={arenaUrl(exam.seed)}><RotateCcw className="h-4 w-4" /> Retake</Link></Button>
             </div>
-            <div className="text-right">
-              <div className="text-4xl font-bold text-[var(--aq-blue-700)] dark:text-[var(--aq-blue-500)]">{finalAttempt.percentage}%</div>
-              <p className="text-sm font-bold text-[var(--aq-muted)]">{finalAttempt.passed ? "Passed" : "Needs review"}</p>
-            </div>
-          </CardHeader>
-          <Progress value={finalAttempt.percentage} />
-          <div className="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-            <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.score}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Correct</p></div>
-            <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.total}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Total</p></div>
-            <div className="aq-metric"><p className="text-xl font-bold">{finalAttempt.simulatedScore}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Sim score</p></div>
-            <div className="aq-metric"><p className="text-xl font-bold">+{finalAttempt.readinessDelta ?? 0}</p><p className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--aq-muted)]">Progress</p></div>
           </div>
-          <p className="mt-4 text-xs font-semibold text-[var(--aq-muted)]">{SIMULATED_SCORE_DISCLAIMER}</p>
-        </Card>
+
+          <section className="rounded-md border border-[var(--aq-border)] bg-white p-5 shadow-sm dark:bg-[#0b1b33] print:border-slate-300 print:shadow-none">
+            <div className="grid gap-5 lg:grid-cols-[1fr_13rem] lg:items-center">
+              <div>
+                <Badge className={finalAttempt.passed ? "border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-100" : "border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100"}>{finalAttempt.kind.toUpperCase()} COMPLETE</Badge>
+                <h1 className="mt-3 text-2xl font-bold sm:text-3xl">{examTitle}</h1>
+                <p className="mt-2 text-sm font-semibold text-[var(--aq-muted)]">{finalAttempt.passed ? "At or above the 70% practice threshold." : "Below the 70% practice threshold. Review the weakest domains before retaking."}</p>
+                <p className="mt-2 text-xs font-semibold text-[var(--aq-muted)]">{SIMULATED_SCORE_DISCLAIMER}</p>
+              </div>
+              <div className="mx-auto grid h-44 w-44 place-items-center rounded-full border-[12px] border-[var(--aq-blue-100)] bg-[var(--aq-blue-50)] text-center dark:border-[#103b67] dark:bg-[#08264a]">
+                <div>
+                  <div className="text-4xl font-bold text-[var(--aq-blue-700)] dark:text-[var(--aq-blue-300)]">{finalAttempt.percentage}%</div>
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--aq-muted)]">{finalAttempt.passed ? "Passed" : "Review"}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-4">
+              <div className="rounded-md border border-[var(--aq-border)] p-3"><p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Correct</p><p className="mt-1 text-xl font-semibold">{finalAttempt.score}/{finalAttempt.total}</p></div>
+              <div className="rounded-md border border-[var(--aq-border)] p-3"><p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Time used</p><p className="mt-1 text-xl font-semibold">{formatSeconds(finalAttempt.timeTakenSeconds)}</p></div>
+              <div className="rounded-md border border-[var(--aq-border)] p-3"><p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Sim score</p><p className="mt-1 text-xl font-semibold">{finalAttempt.simulatedScore}</p></div>
+              <div className="rounded-md border border-[var(--aq-border)] p-3"><p className="text-xs font-bold uppercase text-[var(--aq-muted)]">Progress delta</p><p className="mt-1 text-xl font-semibold">+{finalAttempt.readinessDelta ?? 0}</p></div>
+            </div>
+          </section>
 
         {saveError ? (
           <Card className="border-rose-200 bg-rose-50 text-rose-950 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-50">
@@ -697,48 +732,81 @@ export function PracticeArena() {
           </Card>
         ) : null}
 
-        <Card>
-          <CardHeader><CardTitle>Domain report</CardTitle><ShieldCheck className="h-6 w-6 text-blue-500" /></CardHeader>
-          <div className="grid gap-3">
-            {Object.entries(finalAttempt.domains).map(([domain, stats]) => {
-              const pct = Math.round((stats.correct / stats.total) * 100);
-              return <div key={domain} className="aq-subtle-panel p-3"><div className="mb-2 flex justify-between gap-3 text-sm font-semibold"><span>{domain}</span><span>{stats.correct}/{stats.total} / {pct}%</span></div><Progress value={pct} /></div>;
-            })}
+          <section className="rounded-md border border-[var(--aq-border)] bg-white p-5 dark:bg-[#0b1b33]">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold">Domain Performance</h2>
+                <p className="text-sm font-semibold text-[var(--aq-muted)]">Recommended next action: review the lowest domain, then retake the same question set.</p>
+              </div>
+              <ShieldCheck className="h-6 w-6 text-blue-500" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[36rem] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--aq-border)] text-left text-xs uppercase text-[var(--aq-muted)]">
+                    <th className="py-2 pr-3">Domain</th>
+                    <th className="py-2 pr-3">Correct</th>
+                    <th className="py-2 pr-3">Total</th>
+                    <th className="py-2 pr-3">Performance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(finalAttempt.domains).map(([domain, stats]) => {
+                    const pct = Math.round((stats.correct / stats.total) * 100);
+                    return (
+                      <tr key={domain} className="border-b border-[var(--aq-border)]">
+                        <td className="py-3 pr-3 font-semibold">{domain}</td>
+                        <td className="py-3 pr-3">{stats.correct}</td>
+                        <td className="py-3 pr-3">{stats.total}</td>
+                        <td className="py-3 pr-3">
+                          <div className="flex items-center gap-3">
+                            <Progress value={pct} />
+                            <span className="w-10 text-right font-semibold">{pct}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="rounded-md border border-[var(--aq-border)] bg-white p-5 dark:bg-[#0b1b33]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold">Question Review</h2>
+              <CheckCircle2 className="h-6 w-6 text-sky-500" />
+            </div>
+            <QuestionBankNotice compact />
+            <div className="mt-4 space-y-2">
+              {exam.questions.map((q, i) => {
+                const chosen = selections[q.id];
+                const chosenText = q.options.find((o) => o.id === chosen)?.text ?? "Unanswered";
+                const correctText = q.options.find((o) => o.id === q.answer)?.text ?? q.answer;
+                const ok = chosen === q.answer;
+                return (
+                  <details key={q.id} className="rounded-md border border-[var(--aq-border)] bg-slate-50 p-4 dark:bg-[#081d38]">
+                    <summary className="cursor-pointer text-sm font-semibold">{i + 1}. {ok ? "Correct" : "Missed"} / {q.domain}</summary>
+                    <p className="mt-3 font-semibold">{q.stem}</p>
+                    <div className="mt-3 grid gap-2 text-sm font-medium">
+                      <p className={ok ? "text-blue-600 dark:text-blue-300" : "text-rose-600 dark:text-rose-300"}>Your answer: {chosen ? `${chosen}. ${chosenText}` : "Unanswered"}</p>
+                      <p className="text-blue-700 dark:text-blue-300">Correct answer: {q.answer}. {correctText}</p>
+                      <p className="text-slate-600 dark:text-slate-300">{q.explanation}</p>
+                      {!ok && chosen && q.whyWrong[chosen] ? <p className="rounded-md border border-[var(--aq-border)] bg-white p-3 dark:bg-[#0b1b33]">Why your answer missed: {q.whyWrong[chosen]}</p> : null}
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          </section>
+
+          <div className="grid gap-3 sm:grid-cols-3 print:hidden">
+            <Button asChild size="lg" variant="hero"><Link to={arenaUrl()}><RotateCcw /> New randomized structure</Link></Button>
+            <Button asChild size="lg" variant="soft"><Link to={arenaUrl(exam.seed)}>Retake same questions</Link></Button>
+            <Button asChild size="lg" variant="default"><Link to="/history">Activity History</Link></Button>
           </div>
-        </Card>
-
-
-        <Card>
-          <CardHeader><CardTitle>Answer review</CardTitle><CheckCircle2 className="h-6 w-6 text-sky-500" /></CardHeader>
-          <div className="mb-3"><QuestionBankNotice compact /></div>
-          <div className="space-y-3">
-            {exam.questions.map((q, i) => {
-              const chosen = selections[q.id];
-              const chosenText = q.options.find((o) => o.id === chosen)?.text ?? "Unanswered";
-              const correctText = q.options.find((o) => o.id === q.answer)?.text ?? q.answer;
-              const ok = chosen === q.answer;
-              return (
-                <details key={q.id} className="aq-row-card p-4">
-                  <summary className="cursor-pointer text-sm font-semibold">{i + 1}. {ok ? "Correct" : "Missed"} / {q.domain}</summary>
-                  <p className="mt-3 font-semibold">{q.stem}</p>
-                  <div className="mt-3 grid gap-2 text-sm font-medium">
-                    <p className={ok ? "text-blue-600 dark:text-blue-300" : "text-rose-600 dark:text-rose-300"}>Your answer: {chosen ? `${chosen}. ${chosenText}` : "Unanswered"}</p>
-                    <p className="text-blue-700 dark:text-blue-300">Correct answer: {q.answer}. {correctText}</p>
-                    <p className="text-slate-600 dark:text-slate-300">{q.explanation}</p>
-                    {!ok && chosen && q.whyWrong[chosen] ? <p className="aq-subtle-panel p-3">Why your answer missed: {q.whyWrong[chosen]}</p> : null}
-                  </div>
-                </details>
-              );
-            })}
-          </div>
-        </Card>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Button asChild size="lg" variant="hero"><Link to={arenaUrl()}><RotateCcw /> New randomized structure</Link></Button>
-          <Button asChild size="lg" variant="soft"><Link to={arenaUrl(exam.seed)}>Retake same questions</Link></Button>
-          <Button asChild size="lg" variant="default"><Link to="/history">Activity History</Link></Button>
         </div>
-      </motion.div>
+      </motion.main>
     );
   }
 
