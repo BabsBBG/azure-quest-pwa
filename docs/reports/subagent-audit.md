@@ -219,3 +219,10 @@ Follow-up actions taken:
 - Added `validate:onboarding` and wired it into CI.
 - Added umbrella `validate:migrations`, `validate:rls`, and `validate:repository-isolation` gates while keeping live Supabase probes marked as pending.
 - Updated the M5/M6 defect ledger, current state, changelog, and testing strategy to track this as fixed in repo with browser/live verification still pending.
+
+M5/M6 signed-in browser gate follow-up on 2026-07-29:
+
+- Added a dev-only Playwright auth harness guarded by `import.meta.env.DEV` and `VITE_E2E_AUTH_HARNESS=true`.
+- Added signed-in browser coverage for onboarding redirect/completion, regular-user Admin denial, and SUPPORT_ADMIN support-only queue access without publication actions. Local slices passed: Chromium 13/13, WebKit 13/13, and mobile 26/26.
+- Added `validate:e2e-auth-harness` so the harness remains local-dev only and the signed-in spec is skipped for production smoke.
+- Live Supabase auth, role, and RLS verification remains pending and is not replaced by the local browser harness.

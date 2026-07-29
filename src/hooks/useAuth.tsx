@@ -4,6 +4,10 @@ import type { UserRole } from "../types";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { upsertProfile } from "../lib/cloudSync";
 
+const E2E_AUTH_STORAGE_KEY = "praxisgrid:e2e-auth";
+const e2eAuthHarnessEnabled = import.meta.env.DEV && import.meta.env.VITE_E2E_AUTH_HARNESS === "true";
+const userRoles = new Set<UserRole>(["MAIN_ADMIN", "CONTENT_REVIEWER", "SUPPORT_ADMIN", "USER"]);
+
 interface AuthContextValue {
   configured: boolean;
   loading: boolean;
@@ -39,6 +43,71 @@ function hasCompletedOnboarding(user?: User | null) {
   return user?.user_metadata?.praxisgrid_onboarded === true;
 }
 
+function isUserRole(value: unknown): value is UserRole {
+  return typeof value === "string" && userRoles.has(value as UserRole);
+}
+
+function readE2eSession(): Session | null {
+  if (!e2eAuthHarnessEnabled || typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(E2E_AUTH_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const fixture = JSON.parse(raw) as { id?: string; email?: string; name?: string; role?: UserRole; onboarded?: boolean; primaryCert?: string; goal?: string; experience?: string };
+    const now = new Date().toISOString();
+    const role = isUserRole(fixture.role) ? fixture.role : "USER";
+    const user: User = {
+      id: fixture.id ?? "e2e-user",
+      aud: "authenticated",
+      role: "authenticated",
+      email: fixture.email ?? "learner@example.com",
+      email_confirmed_at: now,
+      confirmed_at: now,
+      last_sign_in_at: now,
+      app_metadata: { provider: "email", providers: ["email"] },
+      user_metadata: {
+        full_name: fixture.name ?? "E2E Learner",
+        praxisgrid_role: role,
+        praxisgrid_onboarded: fixture.onboarded === true,
+        praxisgrid_primary_cert: fixture.primaryCert ?? "SC-300",
+        praxisgrid_goal: fixture.goal ?? "learn",
+        praxisgrid_experience: fixture.experience ?? "new"
+      },
+      created_at: now,
+      updated_at: now
+    };
+
+    return {
+      access_token: "e2e-access-token",
+      refresh_token: "e2e-refresh-token",
+      token_type: "bearer",
+      expires_in: 3600,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      user
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeE2eSession(nextSession: Session | null) {
+  if (!e2eAuthHarnessEnabled || typeof window === "undefined") return;
+  if (!nextSession?.user) {
+    window.localStorage.removeItem(E2E_AUTH_STORAGE_KEY);
+    return;
+  }
+  window.localStorage.setItem(E2E_AUTH_STORAGE_KEY, JSON.stringify({
+    id: nextSession.user.id,
+    email: nextSession.user.email,
+    name: profileName(nextSession.user),
+    role: nextSession.user.user_metadata?.praxisgrid_role ?? "USER",
+    onboarded: hasCompletedOnboarding(nextSession.user),
+    primaryCert: nextSession.user.user_metadata?.praxisgrid_primary_cert,
+    goal: nextSession.user.user_metadata?.praxisgrid_goal,
+    experience: nextSession.user.user_metadata?.praxisgrid_experience
+  }));
+}
+
 function syncProfile(session: Session | null) {
   if (!session?.user) return;
   void upsertProfile({
@@ -48,6 +117,8 @@ function syncProfile(session: Session | null) {
 }
 
 async function readCurrentRole(user: User | null): Promise<UserRole> {
+  const e2eRole = user?.user_metadata?.praxisgrid_role;
+  if (e2eAuthHarnessEnabled && isUserRole(e2eRole)) return e2eRole;
   if (!supabase || !user) return "USER";
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
   if (error || !data?.role) return "USER";
@@ -77,6 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!supabase) {
+      if (e2eAuthHarnessEnabled) {
+        void applySession(readE2eSession()).finally(() => setLoading(false));
+        return;
+      }
       setLoading(false);
       return;
     }
@@ -99,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
-    configured: isSupabaseConfigured,
+    configured: isSupabaseConfigured || e2eAuthHarnessEnabled,
     loading,
     session,
     user: session?.user ?? null,
@@ -125,6 +200,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     },
     signIn: async ({ email, password }) => {
+      if (!supabase && e2eAuthHarnessEnabled) {
+        setLoading(true);
+        setError(null);
+        window.localStorage.setItem(E2E_AUTH_STORAGE_KEY, JSON.stringify({ email, name: email, role: "USER", onboarded: false }));
+        await applySession(readE2eSession());
+        setLoading(false);
+        void password;
+        return;
+      }
       if (!supabase) {
         setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts.");
         return;
@@ -166,6 +250,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     },
     signOut: async () => {
+      if (!supabase && e2eAuthHarnessEnabled) {
+        writeE2eSession(null);
+        await applySession(null);
+        return;
+      }
       if (!supabase) return;
       setLoading(true);
       setError(null);
@@ -174,6 +263,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     },
     updateProfile: async ({ name }) => {
+      if (!supabase && e2eAuthHarnessEnabled && session?.user) {
+        const nextSession = { ...session, user: { ...session.user, user_metadata: { ...session.user.user_metadata, full_name: name } } };
+        setSession(nextSession);
+        writeE2eSession(nextSession);
+        return;
+      }
       if (!supabase) return;
       setLoading(true);
       setError(null);
@@ -186,6 +281,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     },
     completeOnboarding: async ({ primaryCert, goal, experience }) => {
+      if (!supabase && e2eAuthHarnessEnabled && session?.user) {
+        const nextSession = {
+          ...session,
+          user: {
+            ...session.user,
+            user_metadata: {
+              ...session.user.user_metadata,
+              praxisgrid_onboarded: true,
+              praxisgrid_primary_cert: primaryCert,
+              praxisgrid_goal: goal,
+              praxisgrid_experience: experience
+            }
+          }
+        };
+        setSession(nextSession);
+        writeE2eSession(nextSession);
+        return;
+      }
       if (!supabase || !session?.user) {
         setError("Sign in is required to complete onboarding.");
         return;

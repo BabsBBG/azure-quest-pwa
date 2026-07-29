@@ -7,7 +7,7 @@ export default [
     ignores: ["dist/**", "dev-dist/**", "node_modules/**", "*.tsbuildinfo", "*.d.ts", "vite.config.*.js", "tailwind.config.*.js"]
   },
   {
-    files: ["src/**/*.{ts,tsx}", "scripts/**/*.mjs", "*.config.{js,ts}", "*.ts"],
+    files: ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.mjs", "*.config.{js,ts}", "*.ts"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

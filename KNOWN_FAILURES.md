@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 parallel Playwright server contention during signed-in retest
+
+Date:
+2026-07-29
+
+Command:
+Parallel run of `npm run test:accessibility` and `npm run test:visual`.
+
+Error:
+`npm run test:accessibility` failed with multiple `page.goto: Could not connect to server` and `net::ERR_CONNECTION_REFUSED` errors after the first Chromium checks passed.
+
+Likely cause:
+Two Playwright commands were run concurrently against the same local dev-server port. The visual slice passed, but the accessibility slice lost the shared local server mid-run.
+
+Fix attempted:
+Stop using parallel Playwright commands for slices that start the local server, clear generated Playwright artifacts, and rerun accessibility by itself.
+
+Result:
+Resolved. `npm run test:accessibility` passed 36/36 when rerun by itself after clearing generated Playwright artifacts.
+
+Remaining issue:
+None for this local command contention. Keep Playwright slices that start the dev server serialized.
+
+### M5/M6 signed-in E2E spec lint parser miss
+
+Date:
+2026-07-29
+
+Command:
+`npm run lint`
+
+Error:
+`tests/e2e/signed-in-flows.spec.ts` failed with `Parsing error: Unexpected token Page`.
+
+Likely cause:
+The ESLint flat config applied the TypeScript parser to `src`, scripts, and root config files, but not `tests/**/*.ts`. The new Playwright spec used a valid TypeScript type-only import and was parsed by the default JavaScript parser.
+
+Fix attempted:
+Added `tests/**/*.ts` to the TypeScript parser file globs in `eslint.config.js`.
+
+Result:
+Resolved. `npm run lint` passed after adding `tests/**/*.ts` to the TypeScript parser globs.
+
+Remaining issue:
+None for this lint parser miss.
+
 ### M5/M6 production smoke timeout against fresh PraxisGrid deployment
 
 Date:

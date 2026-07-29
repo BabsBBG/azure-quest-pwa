@@ -20,6 +20,7 @@ export default defineConfig({
     : {
         command: "npm run dev -- --host 127.0.0.1 --port 4173",
         url: baseURL,
+        env: { ...process.env, VITE_E2E_AUTH_HARNESS: "true" },
         reuseExistingServer: !process.env.CI,
         timeout: 120_000
       },

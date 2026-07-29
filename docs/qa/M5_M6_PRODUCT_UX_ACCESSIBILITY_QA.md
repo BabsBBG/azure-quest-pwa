@@ -10,7 +10,7 @@ The existing Vitest and static-validator suite passed before implementation chan
 
 ## Blocking Issues
 
-- Playwright, WebKit, mobile, accessibility, visual, and production-smoke gates now exist and pass for the public auth/legal/status contract, including 20/20 public production smoke against `https://azure-quest-pwa.vercel.app`.
+- Playwright, WebKit, mobile, accessibility, visual, and production-smoke gates now exist and pass for the public auth/legal/status contract, including 20 public production checks against `https://azure-quest-pwa.vercel.app` with 6 dev-only signed-in checks skipped as intended. Local signed-in browser gates now cover onboarding redirect/completion, regular-user Admin denial, and SUPPORT_ADMIN support-only access through a dev-only harness.
 - Route validation now includes runtime browser navigation for the public/auth smoke contract, but broader learner/admin signed-in journeys still need E2E coverage.
 - `/admin` lacks browser-tested anonymous and role-specific access denial.
 - Secondary practice surfaces lack regression tests for demo-bank trust copy and answer reveal timing.
@@ -19,7 +19,7 @@ The existing Vitest and static-validator suite passed before implementation chan
 
 ## Required Before PASS
 
-- Extend CI/browser coverage beyond the current public auth/legal/status contract into signed-in learner, onboarding, Admin role, repository import, Project Intelligence, Interview Studio, Assessment Shell, and results journeys.
+- Extend CI/browser coverage beyond the current public auth/legal/status and initial signed-in onboarding/Admin contract into repository import, Project Intelligence, Interview Studio, Assessment Shell, and results journeys.
 - Add accessibility checks for auth, onboarding, Home, Learn, Practise, Prove, repository import, Project Intelligence, Interview Studio, Assessment Shell, results, Account, and Admin.
 - Add mobile viewport checks for 320px, 390px, tablet portrait, tablet landscape, 1280px, and 1440px.
 

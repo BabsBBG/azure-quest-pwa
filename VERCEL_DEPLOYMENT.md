@@ -59,4 +59,4 @@ dist
 
 ## Latest production smoke
 
-- 2026-07-29: `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke` passed 20/20 across production Chromium and mobile projects.
+- 2026-07-29: `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke` passed 20 public production checks across production Chromium and mobile projects; the 6 dev-only signed-in E2E harness checks were skipped as intended outside localhost.

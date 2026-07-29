@@ -48,6 +48,7 @@ jobs:
       - run: npm run validate:auth-first-ia
       - run: npm run validate:auth-redirects
       - run: npm run validate:onboarding
+      - run: npm run validate:e2e-auth-harness
       - run: npm run validate:assessment-shell
       - run: npm run validate:project-fixtures
       - run: npm run validate:project-intelligence
