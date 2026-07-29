@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 accessibility gate local timeout during assessment-shell retest
+
+Date:
+2026-07-29
+
+Command:
+`npm run test:accessibility`
+
+Error:
+The first run exceeded the local 420-second tool timeout before returning a result, leaving orphaned Playwright/Vite Node processes active.
+
+Likely cause:
+The full accessibility matrix runs 36 tests across Chromium, WebKit, mobile, tablet, and desktop projects. WebKit/mobile startup was slower than the local timeout budget.
+
+Fix attempted:
+Identified and stopped the orphaned Node processes from the timed run, then reran `npm run test:accessibility` with a longer timeout.
+
+Result:
+Resolved. The rerun passed 36/36 on 2026-07-29.
+
+Remaining issue:
+Use a longer local timeout for the full accessibility matrix. CI remains the source of truth after push.
+
 ### M5/M6 parallel Playwright server contention during signed-in retest
 
 Date:

@@ -39,6 +39,8 @@
 - Added umbrella migration, RLS, and repository-isolation validators to CI for production governance gates.
 - Renamed the connected Vercel project to `praxisgrid`, aligned remote Vite build settings, deployed a fresh production build, and passed public production smoke against `https://azure-quest-pwa.vercel.app`; canonical `praxisgrid.vercel.app` remains unavailable.
 - Added dev-only signed-in Playwright browser gates for onboarding and Admin role boundaries, with a validator preventing the E2E auth harness from running in production smoke.
+- Added Flashcards seed-bank trust copy and signed-in browser coverage for secondary practice notices plus Assessment Shell review/results exports.
+- Fixed Assessment Shell final submit so the submission review panel closes and the analytical results screen renders.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

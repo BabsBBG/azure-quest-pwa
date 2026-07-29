@@ -278,6 +278,11 @@ export function PracticeArena() {
     setIndex(Math.min(Math.max(0, nextIndex), exam.questions.length - 1));
   }
 
+  function submitFinalAnswers() {
+    setSubmissionReviewOpen(false);
+    setFinished(true);
+  }
+
   const reviewSummary = useMemo(() => {
     const answeredIds = new Set(Object.entries(selections).filter(([, value]) => Boolean(value)).map(([id]) => id));
     const markedIds = new Set(Object.entries(markedQuestionIds).filter(([, value]) => value).map(([id]) => id));
@@ -638,7 +643,7 @@ export function PracticeArena() {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
               <Button onClick={() => setSubmissionReviewOpen(false)} size="lg" variant="soft">Return to current question</Button>
-              <Button onClick={() => setFinished(true)} size="lg" variant="hero">Submit final answers</Button>
+              <Button onClick={submitFinalAnswers} size="lg" variant="hero">Submit final answers</Button>
             </div>
           </CardContent>
         </Card>

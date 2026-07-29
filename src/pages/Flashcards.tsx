@@ -6,6 +6,7 @@ import { useAppStore } from "../store/useAppStore";
 import { Button } from "../components/ui/button";
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import { QuestionBankNotice } from "../components/QuestionBankNotice";
 
 export function Flashcards() {
   const questions = useAppStore((state) => state.questions);
@@ -50,6 +51,8 @@ export function Flashcards() {
           <div className="text-right"><Brain className="ml-auto h-9 w-9 text-[var(--aq-blue-600)]" /><p className="mt-2 rounded-md border border-[var(--aq-border)] bg-[var(--aq-blue-50)] px-3 py-1 text-sm font-semibold text-[var(--aq-blue-800)] dark:text-[var(--aq-ink)]">Combo x{combo}</p></div>
         </CardHeader>
       </Card>
+
+      <QuestionBankNotice compact />
 
       {!card ? (
         <Card>
