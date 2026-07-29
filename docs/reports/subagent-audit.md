@@ -147,6 +147,37 @@ Follow-up actions taken:
 
 Finish M1 hardening by adding automated tests for exam scoring, Finish Now, history grouping, retake seed behavior, and demo-warning visibility.
 
+## M5/M6 Production-Hardening Advisory Refresh
+
+Advisory refresh requested on 2026-07-29 with four required senior roles.
+
+Subagents completed read-only reviews:
+
+- Senior Product Designer and Design Systems Lead: Zeno
+- Senior Principal Engineer: Tesla
+- Senior QA Engineer, Product/UX/Accessibility/Regression: Linnaeus
+- Senior QA Engineer, Security/Data/Governance: Ampere
+
+Highest-priority findings:
+
+- Flashcards lacked the shared demo/seed trust copy required for assessment-like practice surfaces.
+- Signed-in browser coverage did not yet exercise secondary practice notices or the Assessment Shell submit/results path.
+- The Assessment Shell/results experience still needed proof that review, final submit, exports, domain performance, and question review worked in browser.
+- Live Supabase, Google SSO, production auth journeys, role/RLS probes, Admin live operations, and canonical PraxisGrid domain remain unverified and cannot be signed off from local source checks.
+
+Follow-up actions taken:
+
+- Added the shared `QuestionBankNotice` to Flashcards.
+- Added signed-in Playwright checks for Flashcards, KQL, Cases, and Scenario Player trust copy.
+- Added signed-in Playwright coverage for Assessment Shell answer selection, review-before-submit, final submit, analytical results, JSON/CSV/print exports, domain-performance table, and expandable question review.
+- Fixed a real Assessment Shell blocker where final submit left `submissionReviewOpen` true, preventing the results screen from rendering.
+- Reran the complete CI-equivalent local suite: install, Playwright install, typecheck, lint, `npm test`, integration, all validators, Chromium, WebKit, mobile, accessibility, visual, build, and explicit public production smoke.
+
+Current result:
+
+- In-repository/browser slice passed locally.
+- M5/M6 production sign-off remains FAIL until live Supabase/RLS/auth/Google SSO/canonical-domain/Admin-operation verification is completed.
+
 ## M1.6 Account and CI Hardening Audit
 
 M1.6 audit requested on 2026-07-14 while adding account/profile auth, Azure-blue visual system hardening, icon/font decisions, and CI tests.

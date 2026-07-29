@@ -23,7 +23,9 @@ const specSnippets = [
   "Uses the dev-only E2E auth harness, never production.",
   "signed-in learner must complete onboarding before protected learning routes",
   "regular signed-in learners cannot render Admin Review Studio",
-  "support admin can inspect support queues without publication actions"
+  "support admin can inspect support queues without publication actions",
+  "assessment-like secondary practice routes show seed-bank trust copy",
+  "assessment shell supports review, submission, exports, domain table, and question review"
 ];
 
 for (const snippet of authSnippets) {
