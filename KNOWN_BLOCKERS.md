@@ -15,8 +15,8 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
-- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Live Supabase migration, live RLS, and live two-user repository-isolation probes remain pending.
-- Connected Vercel project identity is now `praxisgrid`, but the canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves production until a fresh deploy/alias completes.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration, live RLS, and live two-user repository-isolation probes remain pending.
+- Connected Vercel project identity is now `praxisgrid`, and a fresh production deployment is READY. The canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves public production.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
 
@@ -83,7 +83,7 @@ The GitHub repository has been renamed to `BabsBBG/praxisgrid`, and product surf
 
 Still blocked/deferred:
 
-- Production Vercel project/domain still uses the historical `azure-quest-pwa.vercel.app` name until a separate Vercel project/domain rename or alias migration is approved and completed.
+- Production Vercel project is renamed to `praxisgrid`, but the public production domain still uses the historical `azure-quest-pwa.vercel.app` alias until a canonical PraxisGrid domain is assigned.
 
 ## Cost-control blocker
 

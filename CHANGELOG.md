@@ -37,7 +37,7 @@
 - Added confirmation and visible failure handling for local data reset and Project Intelligence deletion, with destructive-action CI validation.
 - Added mandatory signed-in learner onboarding with starting-certification, goal, and experience preferences plus CI validation.
 - Added umbrella migration, RLS, and repository-isolation validators to CI for production governance gates.
-- Renamed the connected Vercel project to `praxisgrid` and aligned remote Vite build settings; the new default alias still requires deployment.
+- Renamed the connected Vercel project to `praxisgrid`, aligned remote Vite build settings, deployed a fresh production build, and passed public production smoke against `https://azure-quest-pwa.vercel.app`; canonical `praxisgrid.vercel.app` remains unavailable.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.

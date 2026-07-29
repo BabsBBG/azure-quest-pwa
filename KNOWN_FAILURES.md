@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5/M6 production smoke timeout against fresh PraxisGrid deployment
+
+Date:
+2026-07-29
+
+Command:
+`PRODUCTION_BASE_URL=https://praxisgrid-om99h3h2u-tonybabalola-1114s-projects.vercel.app npm run test:production-smoke`
+
+Error:
+The first command exceeded the local 300-second tool timeout before returning Playwright output. A longer rerun against the unique deployment URL failed because Vercel deployment protection redirected Playwright to Vercel login instead of PraxisGrid.
+
+Likely cause:
+The unique deployment URL `https://praxisgrid-om99h3h2u-tonybabalola-1114s-projects.vercel.app` is protected in the connected Vercel account. The public production alias `https://azure-quest-pwa.vercel.app` serves the same latest deployment without the Vercel login interstitial.
+
+Fix attempted:
+Cleared generated Playwright artifacts, identified the protected-target redirect, and reran production smoke against the public production alias.
+
+Result:
+Resolved for public production smoke. `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke` passed 20/20 on 2026-07-29.
+
+Remaining issue:
+Do not use protected unique Vercel deployment URLs as public smoke targets unless deployment protection is disabled. The canonical `https://praxisgrid.vercel.app` domain remains unavailable.
+
 ### M5/M6 destructive delete error narrowing
 
 Date:

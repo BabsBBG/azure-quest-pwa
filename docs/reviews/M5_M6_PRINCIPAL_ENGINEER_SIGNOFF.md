@@ -2,19 +2,19 @@
 
 Status: FAIL - production sign-off not granted
 
-Date: 2026-07-26
+Date: 2026-07-29
 
-Basis: Baseline audit at commit `a12ba2c`.
+Basis: Baseline audit at commit `a12ba2c`, updated after the M5/M6 hardening slices through the PraxisGrid Vercel migration.
 
 ## Findings
 
 - M5 is reopened for production hardening.
 - Phase 6 is approved but not complete.
-- `/admin` is a static publicly routable scaffold, not a protected operational application.
+- `/admin` is route-protected in repo, but live role-specific browser and Supabase RLS verification are still pending.
 - Source-grounded content is scaffolded with fixtures and migrations, not live production ingestion/review/publication.
 - Supabase migrations and RLS policies are not live-verified.
-- GitHub import rate limiting and caching are non-durable.
-- Browser, accessibility, visual, production-smoke, migration, RLS, production-content, and repository-isolation gates are missing.
+- GitHub import rate limiting and caching are durable in repo, but live Supabase RPC/quota denial verification is still pending.
+- Browser, accessibility, visual, production-smoke, migration, RLS, production-content, and repository-isolation gates now exist in repo/CI. Public production smoke passed against `https://azure-quest-pwa.vercel.app`; live Supabase and role-specific browser probes remain pending.
 
 ## Required Before PASS
 
