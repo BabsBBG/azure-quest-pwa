@@ -33,6 +33,15 @@ if (!baseUrl) {
 }
 
 console.log(`PRODUCTION_SMOKE_STATUS=RUNNING baseURL=${baseUrl}`);
+const mainWaitSeconds = isMain && process.env.GITHUB_ACTIONS === "true"
+  ? Number.parseInt(process.env.PRODUCTION_SMOKE_WAIT_SECONDS ?? "120", 10)
+  : 0;
+
+if (mainWaitSeconds > 0) {
+  console.log(`PRODUCTION_SMOKE_STATUS=WAITING_FOR_PRODUCTION_ALIAS seconds=${mainWaitSeconds}`);
+  await new Promise((resolve) => setTimeout(resolve, mainWaitSeconds * 1000));
+}
+
 const result = spawnSync("npx", ["playwright", "test", "--config=playwright.production.config.ts"], {
   stdio: "inherit",
   shell: process.platform === "win32",
