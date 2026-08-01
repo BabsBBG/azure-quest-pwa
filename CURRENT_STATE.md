@@ -71,6 +71,7 @@ Harness state:
 - Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for the live Supabase project. The browser key is the Supabase publishable key, not a service-role key.
 - Fresh production deployment `dpl_72KcnyvFKWKA2FxoPPbBVcR54xrz` is READY at `https://praxisgrid-kjc9kwys4-tonybabalola-1114s-projects.vercel.app` and aliased to `https://azure-quest-pwa.vercel.app`; public production smoke passed 20/20 with 10 expected signed-in skips.
 - Live owner bootstrap, Google SSO, two-user RLS isolation, role-boundary, audit-integrity, and production authenticated browser verification remain blocked until `PRAXISGRID_OWNER_EMAIL` and Google OAuth credentials are supplied where required.
+- Current follow-up branch `codex/finish-m5-production` fixes the pushed production-mobile accessibility failure source by using explicit disabled button colors, makes production smoke skip pull requests because that gate targets the deployed production alias rather than the unmerged branch, converts auth methods to typed success/failure results, adds a real `/auth?mode=update-password` recovery-session flow, hides Google sign-in unless `VITE_GOOGLE_AUTH_ENABLED=true`, blocks onboarding navigation after failed profile saves, and adds migration `0026_project_intelligence_owner_fk.sql` so Project Intelligence analyses must reference an imported project owned by the same user. Local focused retests passed: `npm run typecheck`, `npm run validate:auth-redirects`, `npm run validate:production-smoke-gate`, focused auth tests, `npm run validate:migrations`, `npm run validate:rls`, and `npm run validate:repository-isolation`.
 
 M5.0 rebrand status:
 
@@ -232,6 +233,7 @@ M5 Production Perfection followed by Phase 6 public beta delivery is approved by
 - Approved M5.2 Rich Assessment Item Types are fixed in repo through the Exam Walkthrough and shared rich item/scoring contracts; M5.12 browser E2E verification remains pending.
 - Authorization/RLS foundation defects for reviewer publication, approved-serving integrity, caller-shaped audit fields, and imported-project ID collisions are fixed in-repo and statically retested, but live Supabase RLS verification remains pending.
 - Google SSO is implemented in repo, but live Supabase Google provider setup and redirect allow-list verification remain pending for each deployed environment.
+- Google SSO is feature-gated in the UI until live Supabase Google provider setup and redirect allow-list verification are complete.
 - `/admin` review studio exists and is now route-protected in repo, but live role-specific browser verification remains pending.
 - KQL Gym trust-copy and answer-reveal alignment is fixed in repo; broader learner browser verification remains pending.
 - The current 600-question bank remains blocked from production trust until a full source-grounded Microsoft Learn pipeline, duplicate checks, and admin review approve enough replacement content.

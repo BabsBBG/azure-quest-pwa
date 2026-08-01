@@ -22,7 +22,7 @@ for (const snippet of requiredAppSnippets) {
 
 const requiredAuthSnippets = [
   "onboardingComplete: boolean",
-  "completeOnboarding: (args: { primaryCert: string; goal: string; experience: string }) => Promise<void>",
+  "completeOnboarding: (args: { primaryCert: string; goal: string; experience: string }) => Promise<AuthActionResult>",
   "praxisgrid_onboarded: true",
   "praxisgrid_primary_cert: primaryCert",
   "praxisgrid_goal: goal",

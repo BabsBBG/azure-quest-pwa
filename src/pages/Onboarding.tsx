@@ -44,8 +44,8 @@ export function Onboarding() {
 
   async function finish(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await auth.completeOnboarding({ primaryCert, goal, experience });
-    navigate(returnTo, { replace: true });
+    const result = await auth.completeOnboarding({ primaryCert, goal, experience });
+    if (result.ok) navigate(returnTo, { replace: true });
   }
 
   return (
@@ -120,7 +120,7 @@ export function Onboarding() {
               </button>
             ))}
           </div>
-          {auth.error ? <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-900">{auth.error}</p> : null}
+          {auth.error ? <p role="alert" className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-900">{auth.error}</p> : null}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-semibold text-[var(--aq-muted)]">Onboarding stores only workspace preferences on your signed-in profile.</p>
             <Button type="submit" variant="hero" size="lg" disabled={auth.loading}>

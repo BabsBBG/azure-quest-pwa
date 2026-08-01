@@ -17,7 +17,7 @@ describe("AuthPage", () => {
 
     expect(await screen.findByText("Account sign-in is not available in this environment. Please try again later.")).toBeInTheDocument();
     expect(screen.getByText("Signup")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Create account" })).toBeDisabled();
   });
 });

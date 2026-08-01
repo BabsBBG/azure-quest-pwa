@@ -13,6 +13,7 @@ vi.mock("../lib/cloudSync", () => ({
 
 vi.mock("../lib/supabase", () => ({
   isSupabaseConfigured: true,
+  isGoogleAuthEnabled: true,
   supabase: {
     auth: {
       getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),

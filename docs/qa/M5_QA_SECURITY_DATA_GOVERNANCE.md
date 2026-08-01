@@ -1,14 +1,14 @@
 # M5 QA Security, Data, And Governance
 
-Date updated: 2026-07-26
+Date updated: 2026-07-30
 
 Role: Senior QA Engineer - Security, Authorization, Data Integrity and Content Governance
 
 ## Current Decision
 
-Status: `PASS`
+Status: `FAIL - live security/data sign-off not granted`
 
-The baseline S1/S2 authorization and governance defects are fixed in repo and covered by static validators/tests. M5 data structures now include assessment sessions, official source ingestion, graph relations, summaries, generation jobs, orchestration, critic gates, source impact, curated quizzes, finite runs, and quality reports.
+The baseline S1/S2 authorization and governance defects are partially fixed in repo and covered by static validators/tests, but production security sign-off remains blocked until live owner bootstrap, authenticated auth flows, RLS, role-boundary, two-user isolation, and audit-integrity probes pass. M5 data structures now include assessment sessions, official source ingestion, graph relations, summaries, generation jobs, orchestration, critic gates, source impact, curated quizzes, finite runs, and quality reports.
 
 ## Authorization Matrix
 
@@ -46,4 +46,4 @@ The baseline S1/S2 authorization and governance defects are fixed in repo and co
 
 ## Pass Or Fail
 
-`PASS`
+`FAIL - live security/data sign-off not granted`
