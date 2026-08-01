@@ -6,10 +6,10 @@ import { Button } from "../components/ui/button";
 import { useAuth } from "../hooks/useAuth";
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from "../lib/brand";
 
-type AuthMode = "signin" | "signup" | "reset";
+type AuthMode = "signin" | "signup" | "reset" | "update-password";
 
 function modeFromQuery(value: string | null): AuthMode {
-  if (value === "signup" || value === "reset") return value;
+  if (value === "signup" || value === "reset" || value === "update-password") return value;
   return "signin";
 }
 
@@ -26,17 +26,20 @@ export function AuthPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-  const mode = modeFromQuery(params.get("mode"));
+  const queryMode = modeFromQuery(params.get("mode"));
+  const mode = auth.passwordRecoveryRequired && queryMode !== "update-password" ? "update-password" : queryMode;
   const returnTo = safeReturnPath(params.get("from") ?? (location.state as { from?: string } | null)?.from);
 
   const title = useMemo(() => {
     if (mode === "signup") return "Create your PraxisGrid account";
     if (mode === "reset") return "Reset your password";
+    if (mode === "update-password") return "Set a new password";
     return "Sign in to PraxisGrid";
   }, [mode]);
 
-  if (auth.user) return <Navigate to={returnTo} replace />;
+  if (auth.user && mode !== "update-password") return <Navigate to={returnTo} replace />;
 
   function setMode(nextMode: AuthMode) {
     auth.clearError();
@@ -48,13 +51,21 @@ export function AuthPage() {
     event.preventDefault();
     setNotice(null);
     if (mode === "signup") {
-      await auth.signUp({ email, password, name });
-      setNotice("Check your inbox if email verification is required for this Supabase project.");
+      const result = await auth.signUp({ email, password, name });
+      if (result.ok) setNotice("Check your inbox if email verification is required for this Supabase project.");
       return;
     }
     if (mode === "reset") {
-      await auth.resetPassword({ email });
-      setNotice("If the address exists, Supabase will send a password reset link.");
+      const result = await auth.resetPassword({ email });
+      if (result.ok) setNotice("If the address exists, Supabase will send a password reset link.");
+      return;
+    }
+    if (mode === "update-password") {
+      const result = await auth.updatePassword({ password: newPassword });
+      if (result.ok) {
+        setNotice("Your password has been updated. You can continue to your workspace.");
+        setNewPassword("");
+      }
       return;
     }
     await auth.signIn({ email, password });
@@ -83,17 +94,19 @@ export function AuthPage() {
         >
           <header className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <Badge className="mb-2">{mode === "signup" ? "Signup" : mode === "reset" ? "Recovery" : "Signin"}</Badge>
+              <Badge className="mb-2">{mode === "signup" ? "Signup" : mode === "reset" || mode === "update-password" ? "Recovery" : "Signin"}</Badge>
               <h2 className="text-xl font-bold leading-tight text-slate-950">{title}</h2>
             <p className="mt-2 text-sm font-semibold text-slate-700">Your account controls access to Learn, Practise, and Prove.</p>
             </div>
             <Mail className="h-7 w-7 text-[var(--aq-blue-700)]" />
           </header>
           <div>
-            <Button type="button" variant="soft" disabled={auth.loading || !auth.configured} onClick={() => void auth.signInWithGoogle({ redirectTo: returnTo })} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)]">
-              <KeyRound className="h-4 w-4" />
-              Continue with Google
-            </Button>
+            {auth.googleConfigured ? (
+              <Button type="button" variant="soft" disabled={auth.loading} onClick={() => void auth.signInWithGoogle({ redirectTo: returnTo })} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)]">
+                <KeyRound className="h-4 w-4" />
+                Continue with Google
+              </Button>
+            ) : null}
             <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
               <span className="h-px flex-1 bg-[var(--aq-border)]" />
               {mode === "reset" ? "Recovery email" : "Email access"}
@@ -115,15 +128,21 @@ export function AuthPage() {
                 Email
                 <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required placeholder="you@example.com" autoComplete="email" />
               </label>
-              {mode !== "reset" ? (
+              {mode !== "reset" && mode !== "update-password" ? (
                 <label className="grid gap-1 text-sm font-semibold text-slate-700">
                   Password
                   <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} placeholder="Minimum 6 characters" autoComplete={mode === "signup" ? "new-password" : "current-password"} />
                 </label>
               ) : null}
+              {mode === "update-password" ? (
+                <label className="grid gap-1 text-sm font-semibold text-slate-700">
+                  New password
+                  <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required minLength={6} placeholder="Minimum 6 characters" autoComplete="new-password" />
+                </label>
+              ) : null}
               {auth.error ? <p className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-900">{auth.error}</p> : null}
               {notice ? <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-900">{notice}</p> : null}
-              <Button type="submit" variant="hero" disabled={auth.loading || !auth.configured}>{auth.loading ? "Working..." : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : "Sign in"}</Button>
+              <Button type="submit" variant="hero" disabled={auth.loading || !auth.configured}>{auth.loading ? "Working..." : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : mode === "update-password" ? "Update password" : "Sign in"}</Button>
             </form>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold">

@@ -35,7 +35,7 @@ for (const snippet of requiredAuthPageSnippets) {
   }
 }
 
-if (!useAuth.includes("signInWithGoogle: (args?: { redirectTo?: string }) => Promise<void>") || !useAuth.includes("args?.redirectTo ?? \"/account\"")) {
+if (!useAuth.includes("signInWithGoogle: (args?: { redirectTo?: string }) => Promise<AuthActionResult>") || !useAuth.includes("args?.redirectTo ?? \"/account\"")) {
   console.error("Auth redirect validation failed: AuthProvider does not accept safe OAuth redirect targets.");
   process.exit(1);
 }

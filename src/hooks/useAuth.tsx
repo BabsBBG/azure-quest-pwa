@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import type { UserRole } from "../types";
-import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { isGoogleAuthEnabled, isSupabaseConfigured, supabase } from "../lib/supabase";
 import { upsertProfile } from "../lib/cloudSync";
 
 const E2E_AUTH_STORAGE_KEY = "praxisgrid:e2e-auth";
@@ -10,24 +10,34 @@ const userRoles = new Set<UserRole>(["MAIN_ADMIN", "CONTENT_REVIEWER", "SUPPORT_
 
 interface AuthContextValue {
   configured: boolean;
+  googleConfigured: boolean;
   loading: boolean;
   session: Session | null;
   user: User | null;
   onboardingComplete: boolean;
+  passwordRecoveryRequired: boolean;
   role: UserRole;
   roleLoading: boolean;
   error: string | null;
   clearError: () => void;
-  signUp: (args: { email: string; password: string; name?: string }) => Promise<void>;
-  signIn: (args: { email: string; password: string }) => Promise<void>;
-  signInWithGoogle: (args?: { redirectTo?: string }) => Promise<void>;
-  resetPassword: (args: { email: string }) => Promise<void>;
-  signOut: () => Promise<void>;
-  updateProfile: (args: { name: string }) => Promise<void>;
-  completeOnboarding: (args: { primaryCert: string; goal: string; experience: string }) => Promise<void>;
+  signUp: (args: { email: string; password: string; name?: string }) => Promise<AuthActionResult>;
+  signIn: (args: { email: string; password: string }) => Promise<AuthActionResult>;
+  signInWithGoogle: (args?: { redirectTo?: string }) => Promise<AuthActionResult>;
+  resetPassword: (args: { email: string }) => Promise<AuthActionResult>;
+  updatePassword: (args: { password: string }) => Promise<AuthActionResult>;
+  signOut: () => Promise<AuthActionResult>;
+  updateProfile: (args: { name: string }) => Promise<AuthActionResult>;
+  completeOnboarding: (args: { primaryCert: string; goal: string; experience: string }) => Promise<AuthActionResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export type AuthActionResult = { ok: true } | { ok: false; error: string };
+
+function authFailure(message: string, setError: (message: string) => void): AuthActionResult {
+  setError(message);
+  return { ok: false, error: message };
+}
 
 function authErrorMessage(error: unknown) {
   if (error && typeof error === "object" && "message" in error) return String(error.message);
@@ -131,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>("USER");
   const [roleLoading, setRoleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passwordRecoveryRequired, setPasswordRecoveryRequired] = useState(false);
 
   async function applySession(nextSession: Session | null) {
     setSession(nextSession);
@@ -163,7 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       void applySession(data.session ?? null).finally(() => setLoading(false));
     });
 
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "PASSWORD_RECOVERY") setPasswordRecoveryRequired(true);
       void applySession(nextSession).finally(() => setLoading(false));
     });
 
@@ -175,18 +187,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(() => ({
     configured: isSupabaseConfigured || e2eAuthHarnessEnabled,
+    googleConfigured: isGoogleAuthEnabled,
     loading,
     session,
     user: session?.user ?? null,
     onboardingComplete: hasCompletedOnboarding(session?.user),
+    passwordRecoveryRequired,
     role,
     roleLoading,
     error,
     clearError: () => setError(null),
     signUp: async ({ email, password, name }) => {
       if (!supabase) {
-        setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts.");
-        return;
+        return authFailure("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts.", setError);
       }
       setLoading(true);
       setError(null);
@@ -195,9 +208,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         options: { data: { full_name: name ?? "" } }
       });
-      if (signUpError) setError(authErrorMessage(signUpError));
-      else syncProfile(data.session ?? null);
+      if (signUpError) {
+        const message = authErrorMessage(signUpError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      syncProfile(data.session ?? null);
       setLoading(false);
+      return { ok: true };
     },
     signIn: async ({ email, password }) => {
       if (!supabase && e2eAuthHarnessEnabled) {
@@ -207,23 +226,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await applySession(readE2eSession());
         setLoading(false);
         void password;
-        return;
+        return { ok: true };
       }
       if (!supabase) {
-        setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts.");
-        return;
+        return authFailure("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts.", setError);
       }
       setLoading(true);
       setError(null);
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) setError(authErrorMessage(signInError));
-      else syncProfile(data.session ?? null);
+      if (signInError) {
+        const message = authErrorMessage(signInError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      syncProfile(data.session ?? null);
+      setPasswordRecoveryRequired(false);
       setLoading(false);
+      return { ok: true };
     },
     signInWithGoogle: async (args) => {
+      if (!isGoogleAuthEnabled) {
+        return authFailure("Google sign-in is not available for this deployment yet. Use email sign-in for now.", setError);
+      }
       if (!supabase) {
-        setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable Google sign-in.");
-        return;
+        return authFailure("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable Google sign-in.", setError);
       }
       setLoading(true);
       setError(null);
@@ -232,53 +259,94 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: "google",
         options: redirectTo ? { redirectTo } : undefined
       });
-      if (oauthError) setError(authErrorMessage(oauthError));
+      if (oauthError) {
+        const message = authErrorMessage(oauthError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
       setLoading(false);
+      return { ok: true };
     },
     resetPassword: async ({ email }) => {
       if (!supabase) {
-        setError("Account sign-in is not available in this environment.");
-        return;
+        return authFailure("Account sign-in is not available in this environment.", setError);
       }
       setLoading(true);
       setError(null);
-      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/auth?mode=signin`;
+      const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/auth?mode=update-password`;
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo
       });
-      if (resetError) setError(authErrorMessage(resetError));
+      if (resetError) {
+        const message = authErrorMessage(resetError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
       setLoading(false);
+      return { ok: true };
+    },
+    updatePassword: async ({ password }) => {
+      if (!supabase) {
+        return authFailure("Account sign-in is not available in this environment.", setError);
+      }
+      setLoading(true);
+      setError(null);
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) {
+        const message = authErrorMessage(updateError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      setPasswordRecoveryRequired(false);
+      setLoading(false);
+      return { ok: true };
     },
     signOut: async () => {
       if (!supabase && e2eAuthHarnessEnabled) {
         writeE2eSession(null);
         await applySession(null);
-        return;
+        return { ok: true };
       }
-      if (!supabase) return;
+      if (!supabase) return { ok: true };
       setLoading(true);
       setError(null);
       const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) setError(authErrorMessage(signOutError));
+      if (signOutError) {
+        const message = authErrorMessage(signOutError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      setPasswordRecoveryRequired(false);
       setLoading(false);
+      return { ok: true };
     },
     updateProfile: async ({ name }) => {
       if (!supabase && e2eAuthHarnessEnabled && session?.user) {
         const nextSession = { ...session, user: { ...session.user, user_metadata: { ...session.user.user_metadata, full_name: name } } };
         setSession(nextSession);
         writeE2eSession(nextSession);
-        return;
+        return { ok: true };
       }
-      if (!supabase) return;
+      if (!supabase) return authFailure("Account sign-in is not available in this environment.", setError);
       setLoading(true);
       setError(null);
       const { data, error: updateError } = await supabase.auth.updateUser({ data: { full_name: name } });
-      if (updateError) setError(authErrorMessage(updateError));
-      else if (data.user) {
+      if (updateError) {
+        const message = authErrorMessage(updateError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      if (data.user) {
         if (session) setSession({ ...session, user: data.user });
         await upsertProfile({ email: data.user.email, fullName: name }).catch(() => undefined);
       }
       setLoading(false);
+      return { ok: true };
     },
     completeOnboarding: async ({ primaryCert, goal, experience }) => {
       if (!supabase && e2eAuthHarnessEnabled && session?.user) {
@@ -297,11 +365,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setSession(nextSession);
         writeE2eSession(nextSession);
-        return;
+        return { ok: true };
       }
       if (!supabase || !session?.user) {
-        setError("Sign in is required to complete onboarding.");
-        return;
+        return authFailure("Sign in is required to complete onboarding.", setError);
       }
       setLoading(true);
       setError(null);
@@ -314,14 +381,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           praxisgrid_experience: experience
         }
       });
-      if (updateError) setError(authErrorMessage(updateError));
-      else if (data.user) {
+      if (updateError) {
+        const message = authErrorMessage(updateError);
+        setError(message);
+        setLoading(false);
+        return { ok: false, error: message };
+      }
+      if (data.user) {
         setSession({ ...session, user: data.user });
         await upsertProfile({ email: data.user.email, fullName: profileName(data.user) }).catch(() => undefined);
       }
       setLoading(false);
+      return { ok: true };
     }
-  }), [error, loading, role, roleLoading, session]);
+  }), [error, loading, passwordRecoveryRequired, role, roleLoading, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

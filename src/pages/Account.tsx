@@ -79,20 +79,24 @@ export function Account() {
             <div>
               <Badge className="mb-2">Logged out</Badge>
               <CardTitle>{mode === "sign-up" ? "Create account" : "Sign in"}</CardTitle>
-              <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">Google and email sign-in use Supabase. Sign in to access learning paths, assessments, repository import, progress, and recovery.</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--aq-muted)]">{auth.googleConfigured ? "Google and email sign-in use Supabase." : "Email sign-in uses Supabase."} Sign in to access learning paths, assessments, repository import, progress, and recovery.</p>
             </div>
             <LogIn className="h-8 w-8 text-[var(--aq-blue-600)]" />
           </CardHeader>
           <CardContent>
-            <Button type="button" variant="soft" disabled={auth.loading || !auth.configured} onClick={() => void auth.signInWithGoogle()} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)] dark:bg-[#0d1d36] dark:text-white dark:hover:bg-[#10284c]">
-              <KeyRound className="h-4 w-4" />
-              Continue with Google
-            </Button>
-            <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aq-muted)]">
-              <span className="h-px flex-1 bg-[var(--aq-border)]" />
-              Email sign-in
-              <span className="h-px flex-1 bg-[var(--aq-border)]" />
-            </div>
+            {auth.googleConfigured ? (
+              <>
+                <Button type="button" variant="soft" disabled={auth.loading} onClick={() => void auth.signInWithGoogle()} className="mb-4 w-full justify-center bg-white text-[var(--aq-ink)] hover:bg-[var(--aq-blue-50)] dark:bg-[#0d1d36] dark:text-white dark:hover:bg-[#10284c]">
+                  <KeyRound className="h-4 w-4" />
+                  Continue with Google
+                </Button>
+                <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aq-muted)]">
+                  <span className="h-px flex-1 bg-[var(--aq-border)]" />
+                  Email sign-in
+                  <span className="h-px flex-1 bg-[var(--aq-border)]" />
+                </div>
+              </>
+            ) : null}
             <p className="mb-4 rounded-md border border-[var(--aq-border)] bg-[var(--aq-blue-50)] p-3 text-xs font-semibold text-[var(--aq-muted)]">PraxisGrid sign-in does not imply affiliation with Google, Microsoft, AWS, or certification providers.</p>
             <form onSubmit={submit} className="grid gap-3">
               {mode === "sign-up" ? (

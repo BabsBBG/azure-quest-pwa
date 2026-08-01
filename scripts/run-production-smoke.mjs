@@ -2,6 +2,20 @@ import { spawnSync } from "node:child_process";
 
 const baseUrl = process.env.PRODUCTION_BASE_URL || process.env.PLAYWRIGHT_BASE_URL || "";
 const isMain = process.env.GITHUB_REF === "refs/heads/main";
+const isPullRequest = process.env.GITHUB_EVENT_NAME === "pull_request";
+
+if (isPullRequest) {
+  const message = [
+    "PRODUCTION_SMOKE_STATUS=SKIPPED_PULL_REQUEST",
+    "Production smoke is skipped on pull requests because it verifies the deployed production alias, not the unmerged branch.",
+    "Post-merge main validation must run this gate against PRODUCTION_BASE_URL."
+  ].join("\n");
+  console.log(message);
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    await import("node:fs").then(({ appendFileSync }) => appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Production smoke\n\n${message}\n`));
+  }
+  process.exit(0);
+}
 
 if (!baseUrl) {
   const message = [
@@ -19,6 +33,15 @@ if (!baseUrl) {
 }
 
 console.log(`PRODUCTION_SMOKE_STATUS=RUNNING baseURL=${baseUrl}`);
+const mainWaitSeconds = isMain && process.env.GITHUB_ACTIONS === "true"
+  ? Number.parseInt(process.env.PRODUCTION_SMOKE_WAIT_SECONDS ?? "120", 10)
+  : 0;
+
+if (mainWaitSeconds > 0) {
+  console.log(`PRODUCTION_SMOKE_STATUS=WAITING_FOR_PRODUCTION_ALIAS seconds=${mainWaitSeconds}`);
+  await new Promise((resolve) => setTimeout(resolve, mainWaitSeconds * 1000));
+}
+
 const result = spawnSync("npx", ["playwright", "test", "--config=playwright.production.config.ts"], {
   stdio: "inherit",
   shell: process.platform === "win32",

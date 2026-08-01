@@ -2,6 +2,8 @@
 
 Date: 2026-07-29
 
+Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
+
 ## Starting State
 
 - Product: PraxisGrid.
@@ -26,7 +28,7 @@ Date: 2026-07-29
 
 ## Migration Verification
 
-- Repository migrations present: 25.
+- Repository migrations present: 26.
 - Static migration validation: PASS.
 - Static RLS validation: PASS.
 - Static authorization validation: PASS.
@@ -37,9 +39,10 @@ Date: 2026-07-29
 - Hosted staging fallback: the pre-existing empty default project was used because Docker is unavailable in this environment.
 - Staging dry run: PASS, exactly migrations `0001` through `0025`.
 - Staging apply: PASS, migrations `0001` through `0025`.
-- Production dry run: PASS, exactly migrations `0001` through `0025`.
-- Production apply: PASS, migrations `0001` through `0025`.
+- Production dry run: PASS, exactly migrations `0001` through `0025` before the latest M5 hardening slice.
+- Production apply: PASS, migrations `0001` through `0025` before the latest M5 hardening slice.
 - Production migration history: PASS, local and remote histories match for `0001` through `0025`.
+- Latest repository migration `0026_project_intelligence_owner_fk.sql`: repository/static validation PASS; live production application pending.
 - Docker local reset: externally unavailable in this environment.
 
 ## Authentication Configuration
@@ -55,8 +58,8 @@ Date: 2026-07-29
   - local development callback/account URLs on port `4173`.
 - Email/password signup: configured.
 - Email confirmation: enabled.
-- Password recovery redirect: repository implementation still requires live browser verification.
-- Google OAuth: externally blocked because no Google OAuth client ID or client secret is available in the environment.
+- Password recovery redirect: repository implementation now sends recovery links to `/auth?mode=update-password` and exposes an update-password form; live browser verification pending.
+- Google OAuth: externally blocked because no Google OAuth client ID or client secret is available in the environment. The browser button is hidden unless `VITE_GOOGLE_AUTH_ENABLED=true`.
 
 ## Vercel Configuration
 
@@ -72,10 +75,10 @@ Date: 2026-07-29
 ## Validation Run
 
 - `npm install --legacy-peer-deps`: PASS.
-- `npm run validate:migrations`: PASS.
+- `npm run validate:migrations`: PASS for 26 sequential migrations.
 - `npm run validate:rls`: PASS.
 - `npm run validate:authorization`: PASS.
-- `npm run validate:repository-isolation`: PASS.
+- `npm run validate:repository-isolation`: PASS, including the Project Intelligence owner-scoped row contract.
 - `npm run validate:github-import-controls`: PASS.
 - `npm run validate:project-intelligence`: PASS.
 - `npm run validate:privacy-workflows`: PASS.
@@ -102,13 +105,14 @@ Date: 2026-07-29
 - Role-boundary tests: repository/static validation only; live verification pending.
 - Audit-integrity tests: repository/static validation only; live verification pending.
 - Production browser auth tests: public unauthenticated/auth-route smoke complete; signed-in tests pending live QA identity bootstrap.
-- Service-role absence from frontend bundle: pending redeploy and built-bundle scan.
+- Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
 - Temporary QA cleanup: pending creation of live QA identities.
 
 ## Remaining External Blockers
 
 - `PRAXISGRID_OWNER_EMAIL` is not present, so the real owner cannot be resolved or bootstrapped as `MAIN_ADMIN`.
 - Google OAuth client ID and client secret are not present, so Google SSO cannot be safely enabled or tested.
+- `SUPABASE_SERVICE_ROLE_KEY` is not present in the shell, so protected owner bootstrap and live production QA scripts cannot be executed from this environment.
 - Docker Desktop is unavailable, so local `supabase db reset` cannot run; hosted staging fallback passed.
 - `https://praxisgrid.vercel.app` is not assigned to the connected Vercel account; production auth uses the working fallback `https://azure-quest-pwa.vercel.app`.
 

@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5 production-mobile auth contrast failure on main and PR 4
+
+Date:
+2026-07-30
+
+Command:
+GitHub Actions runs `30484240674` and `30521845484`, step `npm run test:production-smoke`.
+
+Error:
+Production mobile accessibility failed with serious axe `color-contrast` violations on `/auth?mode=signin` and `/auth?mode=signup`.
+
+Likely cause:
+Disabled auth buttons used opacity-based styling, which blended Azure buttons and soft Google buttons into insufficient contrast on the deployed production alias.
+
+Fix attempted:
+Replaced opacity-disabled button styling with explicit accessible disabled border/background/text colors in `src/components/ui/button.tsx`. Then changed production smoke to skip pull requests explicitly because that gate tests the deployed production alias, not the unmerged branch.
+
+Result:
+Local focused mobile auth accessibility passed before this continuation. `npm run validate:production-smoke-gate` passes with the explicit pull-request skip.
+
+Remaining issue:
+PR #4 and post-merge `main` CI still need to pass after the current branch changes are pushed, merged, and production is redeployed.
+
+### M5 auth success notices shown after failed hook actions
+
+Date:
+2026-08-01
+
+Command:
+Subagent audit and source inspection of `src/pages/AuthPage.tsx` and `src/hooks/useAuth.tsx`.
+
+Error:
+Signup and reset notices were shown immediately after awaiting auth actions, even though the hook only set `auth.error` and did not throw or return success/failure.
+
+Likely cause:
+Auth actions returned `Promise<void>`, so the page could not distinguish success from a handled Supabase error.
+
+Fix attempted:
+Auth actions now return typed `{ ok }` results, signup/reset notices appear only on confirmed success, onboarding navigation waits for successful metadata persistence, and password recovery uses `/auth?mode=update-password` with `updateUser({ password })`.
+
+Result:
+Focused auth tests, `npm run validate:auth-redirects`, and `npm run typecheck` passed.
+
+Remaining issue:
+Live email signup/sign-in/password recovery browser tests remain blocked until production QA identities and required secrets are available.
+
 ### Live Supabase CLI non-interactive login block
 
 Date:
