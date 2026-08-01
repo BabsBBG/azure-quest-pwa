@@ -41,8 +41,8 @@ Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
 - Staging apply: PASS, migrations `0001` through `0025`.
 - Production dry run: PASS, exactly migrations `0001` through `0025` before the latest M5 hardening slice.
 - Production apply: PASS, migrations `0001` through `0025` before the latest M5 hardening slice.
-- Production migration history: PASS, local and remote histories match for `0001` through `0025`.
-- Latest repository migration `0026_project_intelligence_owner_fk.sql`: repository/static validation PASS; live production application pending.
+- Production migration history: PASS, local and remote histories match for `0001` through `0026`.
+- Latest repository migration `0026_project_intelligence_owner_fk.sql`: dry run PASS and production apply PASS.
 - Docker local reset: externally unavailable in this environment.
 
 ## Authentication Configuration

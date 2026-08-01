@@ -10,7 +10,7 @@ Decision: `FAIL - M5 production sign-off not granted`
 
 - Supabase organisation selected: `BabsBBG's Org`.
 - Production project exists: `praxisgrid-production`, ref `ozf...agfd`, region `eu-west-1`.
-- Production migrations `0001` through `0025` were applied before this branch and local/remote history matched.
+- Production migrations `0001` through `0026` are applied and local/remote history matches.
 - Vercel Production has encrypted browser-safe `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - Public fallback production URL exists: `https://azure-quest-pwa.vercel.app`.
 
@@ -22,7 +22,7 @@ Decision: `FAIL - M5 production sign-off not granted`
 - Password reset links target `/auth?mode=update-password`, and the auth page exposes a new-password form for recovery sessions.
 - Google sign-in is hidden unless `VITE_GOOGLE_AUTH_ENABLED=true`.
 - Onboarding remains on the page when metadata/profile persistence fails and exposes errors with `role="alert"`.
-- Project Intelligence parent ownership is hardened by additive migration `0026_project_intelligence_owner_fk.sql`.
+- Project Intelligence parent ownership is hardened by additive migration `0026_project_intelligence_owner_fk.sql`, now applied live.
 - Static checks passed for migrations, RLS, repository isolation, auth redirects, production-smoke gate, and focused auth tests.
 
 ## Missing Or Broken For M5 Sign-Off
@@ -60,5 +60,5 @@ Decision: `FAIL - M5 production sign-off not granted`
 1. Finish full local suite and PR CI for `codex/finish-m5-production`.
 2. Merge only after CI is green.
 3. Redeploy production and rerun production smoke against the public alias.
-4. When owner/service-role secrets are supplied, apply migration `0026`, bootstrap owner, and run live auth/RLS/role/audit/two-user production probes.
+4. When owner/service-role secrets are supplied, bootstrap owner and run live auth/RLS/role/audit/two-user production probes.
 5. Continue remaining M5 implementation gaps: live Admin operations, trusted source-grounded content serving, rich assessment runtime, and user-partitioned local persistence.
