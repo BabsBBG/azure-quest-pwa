@@ -2,7 +2,7 @@
 
 Date: 2026-07-29
 
-Latest update: 2026-08-02 on branch `codex/m5-local-user-isolation`.
+Latest update: 2026-08-02 on `main` after PR #6.
 
 ## Starting State
 
@@ -72,6 +72,8 @@ Latest update: 2026-08-02 on branch `codex/m5-local-user-isolation`.
 - Deployment ID: `dpl_72KcnyvFKWKA2FxoPPbBVcR54xrz`.
 - Deployment URL: `https://praxisgrid-kjc9kwys4-tonybabalola-1114s-projects.vercel.app`.
 - Public alias: `https://azure-quest-pwa.vercel.app`.
+- PR #6 verification deployment ID: `dpl_3FK5MjhS14Kbo5VdqA8HsTPE3nZC`.
+- PR #6 verification deployment URL: `https://praxisgrid-1rk29n3if-tonybabalola-1114s-projects.vercel.app`.
 
 ## Validation Run
 
@@ -89,6 +91,8 @@ Latest update: 2026-08-02 on branch `codex/m5-local-user-isolation`.
 - `npm test`: PASS, 26 files and 72 tests.
 - `npm run build`: PASS with existing large chunk warning.
 - `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke`: PASS, 20 public checks passed and 10 signed-in checks skipped pending live QA identities.
+- Main CI run `30766968811`: PASS for the full CI-equivalent suite after PR #6 merge.
+- Public production smoke after PR #6 verification deployment `dpl_3FK5MjhS14Kbo5VdqA8HsTPE3nZC`: PASS, 20 public checks passed and 10 signed-in checks skipped pending live QA identities.
 
 ## Requirement Classification
 

@@ -48,6 +48,10 @@ Decision: `FAIL - M5 production sign-off not granted`
 
 ## Latest Local Commands
 
+- PR #6 CI: PASS.
+- Merged `main` CI run `30766968811`: PASS.
+- Production deployment `dpl_3FK5MjhS14Kbo5VdqA8HsTPE3nZC`: READY.
+- `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke`: PASS, 20 public checks and 10 expected signed-in skips.
 - `npm run typecheck`: PASS.
 - `npm run validate:auth-redirects`: PASS.
 - `npm run validate:production-smoke-gate`: PASS.
@@ -69,8 +73,6 @@ Decision: `FAIL - M5 production sign-off not granted`
 
 ## Next Work
 
-1. Finish full local suite and PR CI for `codex/m5-local-user-isolation`.
-2. Merge only after CI is green.
-3. Redeploy production and rerun production smoke against the public alias.
-4. When owner/service-role secrets are supplied, bootstrap owner and run live auth/RLS/role/audit/two-user production probes.
-5. Continue remaining M5 implementation gaps: live Admin operations, trusted source-grounded content serving, rich assessment runtime, and live signed-in local partition browser verification.
+1. When owner/service-role secrets are supplied, bootstrap owner and run live auth/RLS/role/audit/two-user production probes.
+2. Continue remaining M5 implementation gaps: live Admin operations, trusted source-grounded content serving, rich assessment runtime, and live signed-in local partition browser verification.
+3. Begin approved M6 only after M5 production hardening receives PASS.
