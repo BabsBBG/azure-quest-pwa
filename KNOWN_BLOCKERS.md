@@ -4,23 +4,23 @@
 
 The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6. The current production baseline is blocked by:
 
-- Public `/admin` route is runtime auth/role gated in repo; live role-browser and Supabase RLS verification remain pending.
-- Public learner routes are auth-gated and onboarding-gated in repo; live auth browser and onboarding verification remain pending.
-- Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for `praxisgrid-production`; production redeploy and public unauthenticated smoke verification pass, while authenticated smoke verification remains pending.
+- Public `/admin` route is runtime auth/role gated in repo; live browser verification passed for USER denial and MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN access.
+- Public learner routes are auth-gated and onboarding-gated in repo; live disposable auth and onboarding verification passed.
+- Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for `praxisgrid-production`; production redeploy, public unauthenticated smoke, and focused authenticated live auth verification pass.
 - Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0026` are applied with matching local/remote history.
-- Live Supabase test identities and real owner role bootstrap are not configured/verified because `PRAXISGRID_OWNER_EMAIL` is not present in the environment.
-- Protected owner bootstrap, role/RLS/audit probes, and production cleanup cannot run from this shell until `SUPABASE_SERVICE_ROLE_KEY` is supplied securely outside source control.
+- Live owner role bootstrap is configured and verified for `tobibabalola21@gmail.com` as `MAIN_ADMIN`; personal study account `tonybabalola@gmail.com` is verified as `USER`.
+- Protected role/RLS probes ran from this shell using service-role access retrieved only in-process. Temporary QA identities and bounded QA records were cleaned up.
 - Google SSO cannot be enabled live until real Google OAuth client ID and client secret values are supplied outside source control.
 - Google SSO is now hidden in the browser unless `VITE_GOOGLE_AUTH_ENABLED=true`; enable that flag only after the Supabase Google provider is live-configured and tested.
 - Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
 - Production quiz/run CTAs are blocked when approved coverage is incomplete in repo, but live source ingestion, review, publication, and production serving remain pending.
-- GitHub import abuse controls are durable and authenticated in repo; live Supabase RPC/quota denial verification remains pending.
-- Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
-- Project Intelligence parent ownership is now hardened in repo and applied live by migration `0026_project_intelligence_owner_fk.sql`; live two-user repository-isolation verification remains pending.
-- Same-browser local learner data is partitioned by authenticated user ID in repo; live signed-in account-switching browser verification remains pending.
+- GitHub import abuse controls are durable and authenticated in repo; broader live RPC/quota denial verification remains pending.
+- Project Intelligence analysis rows are user-scoped in repo; live two-user database isolation passed for imported projects and Project Intelligence analyses.
+- Project Intelligence parent ownership is now hardened in repo and applied live by migration `0026_project_intelligence_owner_fk.sql`; live two-user database isolation passed for the owner FK path.
+- Same-browser local learner data is partitioned by authenticated user ID in repo; database isolation is live-verified, while browser account-switching regression remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
-- Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
-- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application is complete, while live RLS and live two-user repository-isolation probes remain pending.
+- Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo and focused live Supabase RLS/role verification passed.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application, focused live RLS, and two-user repository-isolation probes pass for the covered M5 surfaces.
 - Connected Vercel project identity is now `praxisgrid`, and a fresh production deployment is READY. The canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves public production.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
@@ -89,6 +89,8 @@ The GitHub repository has been renamed to `BabsBBG/praxisgrid`, and product surf
 Still blocked/deferred:
 
 - Production Vercel project is renamed to `praxisgrid`, but the public production domain still uses the historical `azure-quest-pwa.vercel.app` alias until a canonical PraxisGrid domain is assigned.
+- Supabase owner password-reset email is temporarily provider-rate-limited; retry after cooldown or configure approved SMTP.
+- Supabase database password rotation is required because the CLI `db dump --dry-run` printed a database password in local tool output.
 
 ## Cost-control blocker
 
@@ -121,14 +123,14 @@ Any feature that calls an LLM, imports GitHub repositories, generates questions,
 
 Migrations `0001` through `0025` are applied to `praxisgrid-production`, and Vercel Production has the browser-safe Supabase project URL and publishable key.
 
-Still blocked until live authenticated QA identities and the real owner are bootstrapped:
+Still blocked until broader live authenticated QA coverage is automated and the remaining external auth constraints are cleared:
 
-- production cloud sync verification
+- production cloud sync verification beyond the focused database probes
 - cross-device attempt history verification
 - cross-device interview history verification
-- production imported project sync verification
-- live two-user RLS isolation verification
-- live role-boundary verification
+- production imported project sync verification through the full UI
+- live browser account-switching verification
+- owner self-service password reset after Supabase email cooldown
 
 ## GitHub blocker
 

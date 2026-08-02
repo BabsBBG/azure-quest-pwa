@@ -18,7 +18,7 @@ M7 status: NOT APPROVED
 
 M5 was previously marked complete after local/static validation, but the 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production hardening and approved Phase 6.
 
-The previous repository state is preserved as a useful scaffold. It is not production-complete until live authentication, Supabase migration/RLS verification, Admin authorization, source-grounded content, browser/accessibility gates, production-content checks, and canonical PraxisGrid deployment gates pass.
+The previous repository state is preserved as a useful scaffold. Live authentication, Supabase migration/RLS verification, focused Admin authorization, browser/accessibility gates, and production-content checks now have passing evidence for the covered M5 surfaces. M5 is not production-complete until remaining S1/S2 defects, source-grounded content activation, owner reset delivery, database password rotation, broader live product smoke, and canonical PraxisGrid deployment gates pass.
 
 M5 cannot be marked complete until:
 
@@ -27,7 +27,7 @@ M5 cannot be marked complete until:
 - Security/data/governance QA passes.
 - Product/UX/accessibility QA passes.
 - Required validation commands pass locally and in GitHub Actions.
-- Live Supabase auth, migrations, RLS, role boundaries, and user isolation pass.
+- Live Supabase auth, migrations, RLS, role boundaries, and user isolation pass for the required covered M5 surfaces.
 - Public production deployment uses a canonical PraxisGrid identity where access permits.
 - No unresolved S1/S2 defects remain.
 
@@ -179,7 +179,7 @@ Implemented:
 
 ## M5.8 Separate PraxisGrid Admin Review Studio
 
-Status: complete in repo; live role-auth/RLS verification pending in M5.12.
+Status: complete in repo; focused live role-auth/RLS verification passed in M5.12.
 
 Implemented:
 
@@ -188,6 +188,7 @@ Implemented:
 - Role-protected Main Admin, Content Reviewer, Support Admin, and User access boundaries.
 - Support Admin report queues are read-only in repo through explicit support RLS helpers, mutation guard triggers, and role-filtered Admin affordances.
 - Admin scaffold connected to content orchestration, critic reports, source impact, summaries, route/CI validation, and report.
+- Live verification on 2026-08-03 confirmed USER denial for `/admin`, MAIN_ADMIN/CONTENT_REVIEWER/SUPPORT_ADMIN route access, USER role-escalation denial, reviewer/support publication denial, support report read access, and MAIN_ADMIN audit read access.
 
 ## M5.9 Curated Domain Quiz Structure
 

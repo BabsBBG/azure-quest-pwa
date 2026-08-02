@@ -1,27 +1,29 @@
 # M5/M6 Security, Data And Governance QA
 
-Status: FAIL - live security/data sign-off not granted
+Status: FOCUSED PASS WITH EXCEPTIONS - final security/data sign-off not granted
 
-Date: 2026-07-29
+Date: 2026-08-03
 
 ## Baseline Result
 
-Static validators pass, umbrella migration/RLS/repository-isolation gates exist in repo, and the production Supabase project is now live with migrations applied. Production security and data governance sign-off remains blocked until live RLS, role, owner, audit, and two-user probes pass.
+Static validators pass, umbrella migration/RLS/repository-isolation gates exist in repo, and the production Supabase project is live with migrations applied. Focused live security and data governance probes now pass for owner bootstrap, email auth, role boundaries, admin route access, user-owned RLS, and two-user isolation across the covered M5 tables.
 
 ## Blocking Issues
 
-- Live Supabase migration application is verified for migrations `0001` through `0025` against `praxisgrid-production`.
-- Live RLS probes for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, USER_A, and USER_B are not available.
-- Live two-user Project Intelligence repository-isolation probes are not available.
-- Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values, but production authenticated browser verification remains pending.
+- Live Supabase migration application is verified for migrations `0001` through `0026` against `praxisgrid-production`.
+- Live RLS probes passed for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, USER_A, and USER_B over the covered M5 tables.
+- Live two-user Project Intelligence repository-isolation probes passed.
+- Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values, and focused production authenticated browser verification passed.
+- Final sign-off remains blocked by database password rotation after local CLI dry-run exposure, owner reset email cooldown, absent Google OAuth credentials, absent canonical `praxisgrid.vercel.app` alias, and broader audit-forgery/privileged-mutation automation.
 
 ## External Blockers
 
-- `PRAXISGRID_OWNER_EMAIL` is not present, so the real owner cannot be bootstrapped as `MAIN_ADMIN`.
 - Google OAuth client ID and client secret are not present, so live Google SSO remains disabled/unverified.
+- Supabase built-in email delivery is rate-limiting the owner password-reset email.
+- Supabase database password must be rotated outside source control after a CLI dry-run printed it in local output.
 - Docker Desktop is unavailable, so hosted staging was used as the clean migration fallback.
 - `https://praxisgrid.vercel.app` is not assigned to the connected Vercel account; auth uses `https://azure-quest-pwa.vercel.app` as the working fallback canonical URL.
 
 ## Sign-Off
 
-Security/Data/Governance QA: FAIL
+Security/Data/Governance QA: FOCUSED PASS WITH EXCEPTIONS

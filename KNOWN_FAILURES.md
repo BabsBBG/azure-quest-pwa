@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### Supabase db dump dry-run exposed database password locally
+
+Date:
+2026-08-03
+
+Command:
+`npx --yes supabase@latest db dump --schema public --linked --dry-run`
+
+Error:
+The Supabase CLI printed a generated `PGPASSWORD` value as part of the dry-run shell script for `pg_dump`.
+
+Likely cause:
+The CLI dry-run mode prints the exact shell script it would execute, including database connection environment variables.
+
+Fix attempted:
+Stopped using the dump dry-run path and switched to `supabase db query --linked` for live schema/RLS inspection because query output does not print database credentials.
+
+Result:
+Mitigated for future checks in this run. No database password was committed to source, documentation, or Vercel browser configuration.
+
+Remaining issue:
+Rotate the Supabase database password from the dashboard or a safe Management API path before final security sign-off.
+
+### Owner password reset email rate-limited
+
+Date:
+2026-08-03
+
+Command:
+Supabase public password reset request for `tobibabalola21@gmail.com`.
+
+Error:
+Supabase returned `email rate limit exceeded`.
+
+Likely cause:
+The built-in Supabase email service had recently sent or attempted multiple auth emails during disposable-account signup/recovery verification.
+
+Fix attempted:
+Owner account was still created and verified as `MAIN_ADMIN` using temporary bootstrap credentials stored outside the repository. Password reset email was not retried immediately to avoid worsening the provider throttle.
+
+Result:
+Owner bootstrap and fresh-session role verification passed. Owner self-service password reset remains pending cooldown.
+
+Remaining issue:
+Retry the owner reset email after the Supabase provider cooldown, or configure approved SMTP credentials and retest delivery.
+
 ### M5 live auth recovery form required email after reset callback
 
 Date:
