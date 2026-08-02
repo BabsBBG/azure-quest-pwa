@@ -59,7 +59,7 @@ Latest update: 2026-08-02 on `main` after PR #6.
   - local development callback/account URLs on port `4173`.
 - Email/password signup: configured.
 - Email confirmation: enabled.
-- Password recovery redirect: repository implementation now sends recovery links to `/auth?mode=update-password` and exposes an update-password form; live browser verification pending.
+- Password recovery redirect: repository implementation sends recovery links to `/auth?mode=update-password`; live disposable-account verification found the update form still required email, and the current branch fixes the form so recovery mode only requires a new password. Production retest is pending redeploy.
 - Google OAuth: externally blocked because no Google OAuth client ID or client secret is available in the environment. The browser button is hidden unless `VITE_GOOGLE_AUTH_ENABLED=true`.
 
 ## Vercel Configuration
@@ -74,6 +74,8 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - Public alias: `https://azure-quest-pwa.vercel.app`.
 - PR #6 verification deployment ID: `dpl_3FK5MjhS14Kbo5VdqA8HsTPE3nZC`.
 - PR #6 verification deployment URL: `https://praxisgrid-1rk29n3if-tonybabalola-1114s-projects.vercel.app`.
+- M5 live-auth env refresh: production `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` were rotated to clean Supabase project values after browser sign-in exposed malformed header encoding in the deployed anon-key value. No secret values were printed or committed.
+- M5 live-auth env refresh deployment URL: `https://praxisgrid-am85i7tkh-tonybabalola-1114s-projects.vercel.app`.
 
 ## Validation Run
 
@@ -88,7 +90,7 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - `npm run validate:privacy-workflows`: PASS.
 - `npm run typecheck`: PASS.
 - `npm run lint`: PASS.
-- `npm test`: PASS, 26 files and 72 tests.
+- `npm test`: PASS, 26 files and 75 tests after adding the recovery-form regression.
 - `npm run build`: PASS with existing large chunk warning.
 - `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke`: PASS, 20 public checks passed and 10 signed-in checks skipped pending live QA identities.
 - Main CI run `30766968811`: PASS for the full CI-equivalent suite after PR #6 merge.
@@ -104,7 +106,7 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - Migration history match: complete and live-verified.
 - Vercel Production Supabase env: complete and live-verified.
 - Supabase auth Site URL/redirects: complete and live-verified for fallback canonical URL.
-- Email auth configuration: repository and hosted configuration complete; live signup/sign-in/reset browser verification pending.
+- Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, and re-sign-in are live-verified. Password reset/update remains pending production redeploy of the recovery-form fix and provider rate-limit cooldown.
 - Google SSO: externally blocked pending Google OAuth credentials.
 - Owner `MAIN_ADMIN` bootstrap: externally blocked pending `PRAXISGRID_OWNER_EMAIL`.
 - Live RLS/two-user isolation tests: externally blocked pending live QA identity bootstrap credentials.

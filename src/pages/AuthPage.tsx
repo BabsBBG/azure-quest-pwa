@@ -124,10 +124,12 @@ export function AuthPage() {
                   <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" autoComplete="name" />
                 </label>
               ) : null}
-              <label className="grid gap-1 text-sm font-semibold text-slate-700">
-                Email
-                <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required placeholder="you@example.com" autoComplete="email" />
-              </label>
+              {mode !== "update-password" ? (
+                <label className="grid gap-1 text-sm font-semibold text-slate-700">
+                  Email
+                  <input className="aq-input px-4 py-3 text-[var(--aq-ink)]" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required placeholder="you@example.com" autoComplete="email" />
+                </label>
+              ) : null}
               {mode !== "reset" && mode !== "update-password" ? (
                 <label className="grid gap-1 text-sm font-semibold text-slate-700">
                   Password
