@@ -38,6 +38,7 @@
     "validate:migrations": "node scripts/validate-migrations.mjs",
     "validate:rls": "node scripts/validate-rls.mjs",
     "validate:repository-isolation": "node scripts/validate-repository-isolation.mjs",
+    "validate:local-user-isolation": "node scripts/validate-local-user-isolation.mjs",
     "validate:rich-items": "node scripts/validate-rich-items.mjs",
     "validate:github-import-controls": "node scripts/validate-github-import-controls.mjs",
     "validate:active-interview-recovery": "node scripts/validate-active-interview-recovery.mjs",

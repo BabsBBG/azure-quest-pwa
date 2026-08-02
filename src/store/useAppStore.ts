@@ -42,6 +42,20 @@ const legacyForage = localforage.createInstance({ name: "AzureQuest", storeName:
 
 localforage.config({ name: "PraxisGrid", storeName: "learning_progress" });
 
+export const ANONYMOUS_STORAGE_OWNER = "anonymous";
+const ownerScopedKeys = Object.keys(LEGACY_STORAGE_KEYS) as Array<keyof typeof LEGACY_STORAGE_KEYS>;
+
+export function localStorageKeyForOwner(key: keyof typeof LEGACY_STORAGE_KEYS, ownerId = ANONYMOUS_STORAGE_OWNER) {
+  if (!ownerId || ownerId === ANONYMOUS_STORAGE_OWNER) return STORAGE_KEYS[key];
+  const suffix = STORAGE_KEYS[key].replace(/^praxisgrid:/, "");
+  return `praxisgrid:user:${encodeURIComponent(ownerId)}:${suffix}`;
+}
+
+function migrationStorageKey(ownerId = ANONYMOUS_STORAGE_OWNER) {
+  if (!ownerId || ownerId === ANONYMOUS_STORAGE_OWNER) return STORAGE_KEYS.migration;
+  return `praxisgrid:user:${encodeURIComponent(ownerId)}:migration:v1`;
+}
+
 const defaultProgress: UserProgress = {
   xp: 0,
   level: 1,
@@ -64,6 +78,7 @@ const defaultSettings: SettingsState = {
 
 interface AppStore {
   hydrated: boolean;
+  storageOwnerId: string;
   questions: Question[];
   attempts: ExamAttempt[];
   progress: UserProgress;
@@ -74,7 +89,7 @@ interface AppStore {
   importedProjects: ImportedProject[];
   assessmentSession: AssessmentSession | null;
   activeInterviewSession: ActiveInterviewSession | null;
-  hydrate: () => Promise<void>;
+  hydrate: (ownerId?: string) => Promise<void>;
   recordAttempt: (attempt: ExamAttempt) => Promise<void>;
   saveAssessmentSession: (session: AssessmentSession) => Promise<void>;
   updateAssessmentSession: (sessionId: string, patch: Partial<AssessmentSession>) => Promise<void>;
@@ -131,6 +146,20 @@ function errorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function defaultStatePatch() {
+  return {
+    attempts: [],
+    progress: defaultProgress,
+    settings: defaultSettings,
+    flashcards: {},
+    interviewSessions: [],
+    questionFlags: [],
+    importedProjects: [],
+    assessmentSession: null,
+    activeInterviewSession: null
+  };
+}
+
 export function isTerminalAssessmentStatus(status: AssessmentSessionStatus) {
   return status === "SUBMITTED" || status === "EXPIRED" || status === "ABANDONED";
 }
@@ -164,37 +193,47 @@ export function chooseLatestActiveInterviewSession(localSession: ActiveInterview
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0] ?? null;
 }
 
-async function readWithLegacyFallback<T>(key: keyof typeof LEGACY_STORAGE_KEYS) {
-  const current = await localforage.getItem<T>(STORAGE_KEYS[key]);
+async function readWithLegacyFallback<T>(key: keyof typeof LEGACY_STORAGE_KEYS, ownerId: string) {
+  const current = await localforage.getItem<T>(localStorageKeyForOwner(key, ownerId));
   if (current !== null && current !== undefined) return current;
+  if (ownerId !== ANONYMOUS_STORAGE_OWNER) return null;
   return legacyForage.getItem<T>(LEGACY_STORAGE_KEYS[key]);
 }
 
-async function migrateLegacyStorage() {
-  const complete = await localforage.getItem<{ completedAt: string }>(STORAGE_KEYS.migration);
+async function migrateLegacyStorage(ownerId: string) {
+  if (ownerId !== ANONYMOUS_STORAGE_OWNER) return;
+  const complete = await localforage.getItem<{ completedAt: string }>(migrationStorageKey(ownerId));
   if (complete) return;
 
   const migrated = await Promise.all(
-    (Object.keys(LEGACY_STORAGE_KEYS) as Array<keyof typeof LEGACY_STORAGE_KEYS>).map(async (key) => {
-      const current = await localforage.getItem(STORAGE_KEYS[key]);
+    ownerScopedKeys.map(async (key) => {
+      const current = await localforage.getItem(localStorageKeyForOwner(key, ownerId));
       if (current !== null && current !== undefined) return [key, false] as const;
       const legacy = await legacyForage.getItem(LEGACY_STORAGE_KEYS[key]);
       if (legacy === null || legacy === undefined) return [key, false] as const;
-      await localforage.setItem(STORAGE_KEYS[key], legacy);
-      const verified = await localforage.getItem(STORAGE_KEYS[key]);
+      await localforage.setItem(localStorageKeyForOwner(key, ownerId), legacy);
+      const verified = await localforage.getItem(localStorageKeyForOwner(key, ownerId));
       return [key, verified !== null && verified !== undefined] as const;
     })
   );
 
-  await localforage.setItem(STORAGE_KEYS.migration, {
+  await localforage.setItem(migrationStorageKey(ownerId), {
     completedAt: new Date().toISOString(),
     copiedKeys: migrated.filter(([, copied]) => copied).map(([key]) => key),
     legacyPreserved: true
   });
 }
 
+async function removeOwnerStorage(ownerId: string) {
+  await Promise.all([
+    ...ownerScopedKeys.map((key) => localforage.removeItem(localStorageKeyForOwner(key, ownerId))),
+    localforage.removeItem(migrationStorageKey(ownerId))
+  ]);
+}
+
 export const useAppStore = create<AppStore>((set, get) => ({
   hydrated: false,
+  storageOwnerId: ANONYMOUS_STORAGE_OWNER,
   questions: questionBank as Question[],
   attempts: [],
   progress: defaultProgress,
@@ -206,18 +245,20 @@ export const useAppStore = create<AppStore>((set, get) => ({
   assessmentSession: null,
   activeInterviewSession: null,
 
-  hydrate: async () => {
-    await migrateLegacyStorage();
+  hydrate: async (ownerId = ANONYMOUS_STORAGE_OWNER) => {
+    const storageOwnerId = ownerId || ANONYMOUS_STORAGE_OWNER;
+    set({ ...defaultStatePatch(), hydrated: false, storageOwnerId });
+    await migrateLegacyStorage(storageOwnerId);
     const [progress, attempts, settings, flashcards, interviewSessions, questionFlags, importedProjects, assessmentSession, activeInterviewSession] = await Promise.all([
-      readWithLegacyFallback<UserProgress>("progress"),
-      readWithLegacyFallback<ExamAttempt[]>("attempts"),
-      readWithLegacyFallback<SettingsState>("settings"),
-      readWithLegacyFallback<Record<string, FlashcardProgress>>("flashcards"),
-      readWithLegacyFallback<InterviewSessionAttempt[]>("interviewSessions"),
-      readWithLegacyFallback<QuestionFlag[]>("questionFlags"),
-      readWithLegacyFallback<ImportedProject[]>("importedProjects"),
-      readWithLegacyFallback<AssessmentSession>("assessmentSession"),
-      readWithLegacyFallback<ActiveInterviewSession>("activeInterviewSession")
+      readWithLegacyFallback<UserProgress>("progress", storageOwnerId),
+      readWithLegacyFallback<ExamAttempt[]>("attempts", storageOwnerId),
+      readWithLegacyFallback<SettingsState>("settings", storageOwnerId),
+      readWithLegacyFallback<Record<string, FlashcardProgress>>("flashcards", storageOwnerId),
+      readWithLegacyFallback<InterviewSessionAttempt[]>("interviewSessions", storageOwnerId),
+      readWithLegacyFallback<QuestionFlag[]>("questionFlags", storageOwnerId),
+      readWithLegacyFallback<ImportedProject[]>("importedProjects", storageOwnerId),
+      readWithLegacyFallback<AssessmentSession>("assessmentSession", storageOwnerId),
+      readWithLegacyFallback<ActiveInterviewSession>("activeInterviewSession", storageOwnerId)
     ]);
 
     const localAttempts = attempts ?? [];
@@ -239,8 +280,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
       activeInterviewSession: localActiveInterviewSession,
       hydrated: true
     });
-    if (localAssessmentSession) await localforage.setItem(STORAGE_KEYS.assessmentSession, localAssessmentSession);
-    if (localActiveInterviewSession) await localforage.setItem(STORAGE_KEYS.activeInterviewSession, localActiveInterviewSession);
+    if (localAssessmentSession) await localforage.setItem(localStorageKeyForOwner("assessmentSession", storageOwnerId), localAssessmentSession);
+    if (localActiveInterviewSession) await localforage.setItem(localStorageKeyForOwner("activeInterviewSession", storageOwnerId), localActiveInterviewSession);
 
     try {
       const cloudData = await fetchCloudLearningData();
@@ -260,12 +301,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
         activeInterviewSession: mergedActiveInterviewSession
       });
       await Promise.all([
-        localforage.setItem(STORAGE_KEYS.attempts, mergedAttempts),
-        localforage.setItem(STORAGE_KEYS.interviewSessions, mergedInterviewSessions),
-        localforage.setItem(STORAGE_KEYS.questionFlags, mergedQuestionFlags),
-        localforage.setItem(STORAGE_KEYS.importedProjects, mergedImportedProjects),
-        mergedAssessmentSession ? localforage.setItem(STORAGE_KEYS.assessmentSession, mergedAssessmentSession) : Promise.resolve(),
-        mergedActiveInterviewSession ? localforage.setItem(STORAGE_KEYS.activeInterviewSession, mergedActiveInterviewSession) : localforage.removeItem(STORAGE_KEYS.activeInterviewSession)
+        localforage.setItem(localStorageKeyForOwner("attempts", storageOwnerId), mergedAttempts),
+        localforage.setItem(localStorageKeyForOwner("interviewSessions", storageOwnerId), mergedInterviewSessions),
+        localforage.setItem(localStorageKeyForOwner("questionFlags", storageOwnerId), mergedQuestionFlags),
+        localforage.setItem(localStorageKeyForOwner("importedProjects", storageOwnerId), mergedImportedProjects),
+        mergedAssessmentSession ? localforage.setItem(localStorageKeyForOwner("assessmentSession", storageOwnerId), mergedAssessmentSession) : Promise.resolve(),
+        mergedActiveInterviewSession
+          ? localforage.setItem(localStorageKeyForOwner("activeInterviewSession", storageOwnerId), mergedActiveInterviewSession)
+          : localforage.removeItem(localStorageKeyForOwner("activeInterviewSession", storageOwnerId))
       ]);
     } catch {
       // Local study mode remains authoritative if cloud sync is unavailable.
@@ -276,7 +319,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const current = get().assessmentSession;
     if (current?.id === session.id && isTerminalAssessmentStatus(current.status) && !isTerminalAssessmentStatus(session.status)) return;
     set({ assessmentSession: session });
-    await localforage.setItem(STORAGE_KEYS.assessmentSession, session);
+    await localforage.setItem(localStorageKeyForOwner("assessmentSession", get().storageOwnerId), session);
     void syncAssessmentSession(session).catch(() => undefined);
   },
 
@@ -286,7 +329,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     if (isTerminalAssessmentStatus(current.status) && (!patch.status || !isTerminalAssessmentStatus(patch.status))) return;
     const next = { ...current, ...patch, id: current.id, updatedAt: patch.updatedAt ?? new Date().toISOString() };
     set({ assessmentSession: next });
-    await localforage.setItem(STORAGE_KEYS.assessmentSession, next);
+    await localforage.setItem(localStorageKeyForOwner("assessmentSession", get().storageOwnerId), next);
     void syncAssessmentSession(next).catch(() => undefined);
   },
 
@@ -303,7 +346,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       updatedAt: now
     };
     set({ assessmentSession: next });
-    await localforage.setItem(STORAGE_KEYS.assessmentSession, next);
+    await localforage.setItem(localStorageKeyForOwner("assessmentSession", get().storageOwnerId), next);
     void syncAssessmentSession(next).catch(() => undefined);
   },
 
@@ -340,8 +383,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const nextAttempts = [attempt, ...attempts].slice(0, 200);
     set({ progress: nextProgress, attempts: nextAttempts });
     await Promise.all([
-      localforage.setItem(STORAGE_KEYS.progress, nextProgress),
-      localforage.setItem(STORAGE_KEYS.attempts, nextAttempts)
+      localforage.setItem(localStorageKeyForOwner("progress", get().storageOwnerId), nextProgress),
+      localforage.setItem(localStorageKeyForOwner("attempts", get().storageOwnerId), nextAttempts)
     ]);
     void syncExamAttempt(attempt).catch(() => undefined);
   },
@@ -349,14 +392,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
   recordInterviewSession: async (session) => {
     const interviewSessions = [session, ...get().interviewSessions].slice(0, 100);
     set({ interviewSessions });
-    await localforage.setItem(STORAGE_KEYS.interviewSessions, interviewSessions);
+    await localforage.setItem(localStorageKeyForOwner("interviewSessions", get().storageOwnerId), interviewSessions);
     void syncInterviewSession(session).catch(() => undefined);
   },
 
   saveActiveInterviewSession: async (session) => {
     set({ activeInterviewSession: session });
     try {
-      await localforage.setItem(STORAGE_KEYS.activeInterviewSession, session);
+      await localforage.setItem(localStorageKeyForOwner("activeInterviewSession", get().storageOwnerId), session);
     } catch {
       // Some test or constrained browser contexts lack IndexedDB/localStorage drivers.
     }
@@ -367,7 +410,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const id = sessionId ?? get().activeInterviewSession?.id;
     set({ activeInterviewSession: null });
     try {
-      await localforage.removeItem(STORAGE_KEYS.activeInterviewSession);
+      await localforage.removeItem(localStorageKeyForOwner("activeInterviewSession", get().storageOwnerId));
     } catch {
       // Keep UI state cleared even if local storage is unavailable.
     }
@@ -377,14 +420,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
   recordQuestionFlag: async (flag) => {
     const questionFlags = [flag, ...get().questionFlags.filter((item) => item.id !== flag.id)].slice(0, 500);
     set({ questionFlags });
-    await localforage.setItem(STORAGE_KEYS.questionFlags, questionFlags);
+    await localforage.setItem(localStorageKeyForOwner("questionFlags", get().storageOwnerId), questionFlags);
     void syncQuestionFlag(flag).catch(() => undefined);
   },
 
   recordImportedProject: async (project) => {
     const importedProjects = [project, ...get().importedProjects.filter((item) => item.id !== project.id)].slice(0, 50);
     set({ importedProjects });
-    await localforage.setItem(STORAGE_KEYS.importedProjects, importedProjects);
+    await localforage.setItem(localStorageKeyForOwner("importedProjects", get().storageOwnerId), importedProjects);
     void syncImportedProject(project).catch(() => undefined);
   },
 
@@ -392,7 +435,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const current = get().importedProjects.find((project) => project.id === projectId);
     const importedProjects = get().importedProjects.filter((project) => project.id !== projectId);
     set({ importedProjects });
-    await localforage.setItem(STORAGE_KEYS.importedProjects, importedProjects);
+    await localforage.setItem(localStorageKeyForOwner("importedProjects", get().storageOwnerId), importedProjects);
     if (current) {
       const result = await deleteCloudImportedProject(current);
       if (!result.ok && !result.skipped) {
@@ -404,7 +447,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   setSettings: async (partial) => {
     const settings = { ...get().settings, ...partial };
     set({ settings });
-    await localforage.setItem(STORAGE_KEYS.settings, settings);
+    await localforage.setItem(localStorageKeyForOwner("settings", get().storageOwnerId), settings);
   },
 
   toggleResource: async (resourceId) => {
@@ -414,7 +457,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       : [...(progress.completedResources ?? []), resourceId];
     const nextProgress = { ...progress, completedResources };
     set({ progress: nextProgress });
-    await localforage.setItem(STORAGE_KEYS.progress, nextProgress);
+    await localforage.setItem(localStorageKeyForOwner("progress", get().storageOwnerId), nextProgress);
   },
 
   recordFlashcard: async (cardId, rating) => {
@@ -424,7 +467,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const dueAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
     const flashcards = { ...get().flashcards, [cardId]: { cardId, ease, dueAt, seen: current.seen + 1 } };
     set({ flashcards });
-    await localforage.setItem(STORAGE_KEYS.flashcards, flashcards);
+    await localforage.setItem(localStorageKeyForOwner("flashcards", get().storageOwnerId), flashcards);
   },
 
   exportData: async () => {
@@ -444,7 +487,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   resetLocalData: async () => {
-    await localforage.clear();
-    set({ attempts: [], progress: defaultProgress, settings: defaultSettings, flashcards: {}, interviewSessions: [], questionFlags: [], importedProjects: [], assessmentSession: null, activeInterviewSession: null });
+    const storageOwnerId = get().storageOwnerId;
+    await removeOwnerStorage(storageOwnerId);
+    set({ ...defaultStatePatch(), hydrated: true, storageOwnerId });
   }
 }));

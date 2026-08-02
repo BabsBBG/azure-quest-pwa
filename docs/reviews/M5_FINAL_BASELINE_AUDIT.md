@@ -23,6 +23,7 @@ Decision: `FAIL - M5 production sign-off not granted`
 - Google sign-in is hidden unless `VITE_GOOGLE_AUTH_ENABLED=true`.
 - Onboarding remains on the page when metadata/profile persistence fails and exposes errors with `role="alert"`.
 - Project Intelligence parent ownership is hardened by additive migration `0026_project_intelligence_owner_fk.sql`, now applied live.
+- Local persisted learner data is partitioned by authenticated user ID in repo; anonymous legacy migration remains isolated from signed-in partitions.
 - Static checks passed for migrations, RLS, repository isolation, auth redirects, production-smoke gate, and focused auth tests.
 
 ## Missing Or Broken For M5 Sign-Off
@@ -35,7 +36,7 @@ Decision: `FAIL - M5 production sign-off not granted`
 - Admin Review Studio remains partly scaffold/static and must be connected to protected Supabase queues and audited mutations before PASS.
 - Production source-grounded content is not serving as the trusted learner bank; seed/demo warnings must remain.
 - Primary assessment runtime still needs full rich-item integration beyond the walkthrough/demo contract.
-- Local persisted learner data is not yet partitioned by authenticated user ID for shared-browser account switching.
+- Live signed-in account-switching browser verification for local persistence partitions is not verified.
 
 ## External Blockers
 
@@ -54,11 +55,22 @@ Decision: `FAIL - M5 production sign-off not granted`
 - `npm run validate:migrations`: PASS.
 - `npm run validate:rls`: PASS.
 - `npm run validate:repository-isolation`: PASS.
+- `npm run validate:local-user-isolation`: PASS.
+- `npm test -- src/store/useAppStore.test.ts`: PASS.
+- `npm run lint`: PASS.
+- `npm test`: PASS, 26 files and 74 tests.
+- `npm run build`: PASS with the existing large chunk warning.
+- `npm run test:e2e:chromium`: PASS, 15/15.
+- `npm run test:e2e:webkit`: PASS, 15/15.
+- `CI=true npm run test:e2e:webkit`: PASS, 15/15 after serializing Playwright workers for CI stability.
+- `npm run test:e2e:mobile`: PASS, 30/30 after rerun with a longer local timeout.
+- `npm run test:accessibility`: PASS, 36/36.
+- `npm run test:visual`: PASS, 6/6.
 
 ## Next Work
 
-1. Finish full local suite and PR CI for `codex/finish-m5-production`.
+1. Finish full local suite and PR CI for `codex/m5-local-user-isolation`.
 2. Merge only after CI is green.
 3. Redeploy production and rerun production smoke against the public alias.
 4. When owner/service-role secrets are supplied, bootstrap owner and run live auth/RLS/role/audit/two-user production probes.
-5. Continue remaining M5 implementation gaps: live Admin operations, trusted source-grounded content serving, rich assessment runtime, and user-partitioned local persistence.
+5. Continue remaining M5 implementation gaps: live Admin operations, trusted source-grounded content serving, rich assessment runtime, and live signed-in local partition browser verification.

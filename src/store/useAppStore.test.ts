@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseLatestActiveInterviewSession, chooseLatestRecoverableSession, isTerminalAssessmentStatus, normalizeAssessmentSession } from "./useAppStore";
+import { chooseLatestActiveInterviewSession, chooseLatestRecoverableSession, isTerminalAssessmentStatus, localStorageKeyForOwner, normalizeAssessmentSession } from "./useAppStore";
 import type { ActiveInterviewSession, AssessmentSession } from "../types";
 import { northstarInventoryProject } from "../fixtures/northstarInventoryProject";
 
@@ -26,6 +26,18 @@ const session = (patch: Partial<AssessmentSession> = {}): AssessmentSession => (
   status: "ACTIVE",
   version: { schemaVersion: 1, appVersion: "0.1.0", storageNamespace: "praxisgrid" },
   ...patch
+});
+
+describe("local persistence owner scoping", () => {
+  it("keeps anonymous learner data on the legacy-compatible PraxisGrid keys", () => {
+    expect(localStorageKeyForOwner("attempts")).toBe("praxisgrid:attempts");
+    expect(localStorageKeyForOwner("importedProjects", "anonymous")).toBe("praxisgrid:imported-projects");
+  });
+
+  it("partitions signed-in learner data by encoded auth user id", () => {
+    expect(localStorageKeyForOwner("attempts", "user-123")).toBe("praxisgrid:user:user-123:attempts");
+    expect(localStorageKeyForOwner("importedProjects", "auth0|owner@example.com")).toBe("praxisgrid:user:auth0%7Cowner%40example.com:imported-projects");
+  });
 });
 
 const activeInterview = (patch: Partial<ActiveInterviewSession> = {}): ActiveInterviewSession => ({

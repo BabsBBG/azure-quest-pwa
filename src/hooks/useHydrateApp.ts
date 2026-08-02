@@ -1,13 +1,15 @@
 import { useEffect } from "react";
-import { useAppStore } from "../store/useAppStore";
+import { ANONYMOUS_STORAGE_OWNER, useAppStore } from "../store/useAppStore";
 
-export function useHydrateApp() {
+export function useHydrateApp(ownerId?: string | null, paused = false) {
   const hydrate = useAppStore((state) => state.hydrate);
   const hydrated = useAppStore((state) => state.hydrated);
+  const storageOwnerId = useAppStore((state) => state.storageOwnerId);
+  const effectiveOwnerId = ownerId || ANONYMOUS_STORAGE_OWNER;
 
   useEffect(() => {
-    if (!hydrated) void hydrate();
-  }, [hydrate, hydrated]);
+    if (!paused && (!hydrated || storageOwnerId !== effectiveOwnerId)) void hydrate(effectiveOwnerId);
+  }, [effectiveOwnerId, hydrate, hydrated, paused, storageOwnerId]);
 
-  return hydrated;
+  return !paused && hydrated && storageOwnerId === effectiveOwnerId;
 }

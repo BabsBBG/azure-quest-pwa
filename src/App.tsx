@@ -99,8 +99,9 @@ function ProtectedAssessmentRoute() {
   return <PracticeArena />;
 }
 
-export default function App() {
-  const hydrated = useHydrateApp();
+function AppRoutes() {
+  const auth = useAuth();
+  const hydrated = useHydrateApp(auth.user?.id, auth.loading);
   const settings = useAppStore((state) => state.settings);
 
   useEffect(() => {
@@ -120,16 +121,15 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <AuthProvider>
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/callback" element={<AuthPage />} />
-          <Route path="/privacy" element={<PublicInfoPage kind="privacy" />} />
-          <Route path="/terms" element={<PublicInfoPage kind="terms" />} />
-          <Route path="/status" element={<PublicInfoPage kind="status" />} />
-          <Route path="/admin" element={<ProtectedAdminRoute />} />
-          <Route path="/arena" element={<ProtectedAssessmentRoute />} />
-          <Route path="*" element={<ProtectedLearnerShell>
+      <Routes>
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/callback" element={<AuthPage />} />
+        <Route path="/privacy" element={<PublicInfoPage kind="privacy" />} />
+        <Route path="/terms" element={<PublicInfoPage kind="terms" />} />
+        <Route path="/status" element={<PublicInfoPage kind="status" />} />
+        <Route path="/admin" element={<ProtectedAdminRoute />} />
+        <Route path="/arena" element={<ProtectedAssessmentRoute />} />
+        <Route path="*" element={<ProtectedLearnerShell>
           <Routes>
             <Route path="/" element={<PathHome />} />
             <Route path="/legacy-dashboard" element={<Dashboard />} />
@@ -162,8 +162,15 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ProtectedLearnerShell>} />
-        </Routes>
-      </AuthProvider>
+      </Routes>
     </AnimatePresence>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
