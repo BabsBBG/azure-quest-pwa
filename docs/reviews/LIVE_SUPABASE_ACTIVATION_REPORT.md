@@ -2,7 +2,7 @@
 
 Date: 2026-07-29
 
-Latest update: 2026-08-02 on `main` after PR #6.
+Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 
 ## Starting State
 
@@ -51,9 +51,11 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - Supabase Site URL: `https://azure-quest-pwa.vercel.app`.
 - Redirect allow-list includes:
   - `https://azure-quest-pwa.vercel.app/auth`
+  - `https://azure-quest-pwa.vercel.app/auth?mode=update-password`
   - `https://azure-quest-pwa.vercel.app/auth/callback`
   - `https://azure-quest-pwa.vercel.app/account`
   - `https://praxisgrid.vercel.app/auth`
+  - `https://praxisgrid.vercel.app/auth?mode=update-password`
   - `https://praxisgrid.vercel.app/auth/callback`
   - `https://praxisgrid.vercel.app/account`
   - local development callback/account URLs on port `4173`.
@@ -76,6 +78,10 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - PR #6 verification deployment URL: `https://praxisgrid-1rk29n3if-tonybabalola-1114s-projects.vercel.app`.
 - M5 live-auth env refresh: production `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` were rotated to clean Supabase project values after browser sign-in exposed malformed header encoding in the deployed anon-key value. No secret values were printed or committed.
 - M5 live-auth env refresh deployment URL: `https://praxisgrid-am85i7tkh-tonybabalola-1114s-projects.vercel.app`.
+- PR #7 recovery-form deployment ID: `dpl_C6V68F25yyWdRQDRZpnsCjazidcC`.
+- PR #8 recovery-redirect deployment ID: `dpl_2yfxrw9Ji7kjvfiahoCntv1sNaRu`.
+- Current production deployment URL: `https://praxisgrid-rg9891u72-tonybabalola-1114s-projects.vercel.app`.
+- Current deployment SHA: `af91959a`.
 
 ## Validation Run
 
@@ -95,6 +101,18 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - `PRODUCTION_BASE_URL=https://azure-quest-pwa.vercel.app npm run test:production-smoke`: PASS, 20 public checks passed and 10 signed-in checks skipped pending live QA identities.
 - Main CI run `30766968811`: PASS for the full CI-equivalent suite after PR #6 merge.
 - Public production smoke after PR #6 verification deployment `dpl_3FK5MjhS14Kbo5VdqA8HsTPE3nZC`: PASS, 20 public checks passed and 10 signed-in checks skipped pending live QA identities.
+- PR #7 CI run `30770640414`: PASS.
+- Merged `main` CI run `30770848102`: PASS.
+- PR #8 CI run `30771363518`: PASS.
+- Merged `main` CI run `30771557919`: PASS for the full CI-equivalent suite.
+- Live disposable account verification: signup confirmation, role default, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in PASS.
+- Live owner bootstrap: `tobibabalola21@gmail.com` created and verified with fresh session role `MAIN_ADMIN`.
+- Live personal study account: `tonybabalola@gmail.com` created and verified with fresh session role `USER`.
+- Live RLS flags: all returned public tables have row-level security enabled.
+- Live two-user isolation: PASS, 27 cross-user read/update/delete checks in each direction across profiles, assessment sessions, quiz attempts, question flags, imported projects, Project Intelligence analyses, interview sessions, active interview sessions, and content quality reports.
+- Live role-boundary checks: PASS. USER cannot escalate or read audit events; CONTENT_REVIEWER cannot publish approved questions; SUPPORT_ADMIN can read support reports but cannot publish; MAIN_ADMIN can read audit events.
+- Live admin browser checks: PASS. Personal study USER is denied `/admin`; MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN can enter the protected Admin route.
+- Temporary role/RLS QA users: deleted after verification. Temporary content-quality report rows from live QA were explicitly removed.
 
 ## Requirement Classification
 
@@ -108,22 +126,22 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - Supabase auth Site URL/redirects: complete and live-verified for fallback canonical URL.
 - Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in are live-verified. Public reset email request remains subject to Supabase provider rate-limit cooldown.
 - Google SSO: externally blocked pending Google OAuth credentials.
-- Owner `MAIN_ADMIN` bootstrap: externally blocked pending `PRAXISGRID_OWNER_EMAIL`.
-- Live RLS/two-user isolation tests: externally blocked pending live QA identity bootstrap credentials.
-- Role-boundary tests: repository/static validation only; live verification pending.
-- Audit-integrity tests: repository/static validation only; live verification pending.
-- Production browser auth tests: public unauthenticated/auth-route smoke complete; signed-in tests pending live QA identity bootstrap.
+- Owner `MAIN_ADMIN` bootstrap: complete and live-verified for `tobibabalola21@gmail.com`.
+- Live RLS/two-user isolation tests: complete and live-verified for the user-owned tables covered by the temporary QA run.
+- Role-boundary tests: complete and live-verified for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN boundaries covered by direct DB and browser checks.
+- Audit-integrity tests: partially live-verified. Role-change audit rows are created by server-side role assignment and MAIN_ADMIN can read them; forged caller audit fields and every privileged mutation class still need broader automated production-test coverage.
+- Production browser auth tests: signed-in admin route checks passed for USER denial and the three admin roles; broader signed-in product smoke remains pending.
 - Same-browser local account switching: repository/static validation complete; live signed-in browser verification pending live QA identity bootstrap.
 - Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
-- Temporary QA cleanup: pending creation of live QA identities.
+- Temporary QA cleanup: complete for the role/RLS QA users and bounded QA records created during this run.
 
 ## Remaining External Blockers
 
-- `PRAXISGRID_OWNER_EMAIL` is not present, so the real owner cannot be resolved or bootstrapped as `MAIN_ADMIN`.
 - Google OAuth client ID and client secret are not present, so Google SSO cannot be safely enabled or tested.
-- `SUPABASE_SERVICE_ROLE_KEY` is not present in the shell, so protected owner bootstrap and live production QA scripts cannot be executed from this environment.
+- Owner password-reset email is temporarily blocked by Supabase email rate limiting; the owner account exists and is `MAIN_ADMIN`, but the reset email must be retried after cooldown so the owner can set their own password.
 - Docker Desktop is unavailable, so local `supabase db reset` cannot run; hosted staging fallback passed.
 - `https://praxisgrid.vercel.app` is not assigned to the connected Vercel account; production auth uses the working fallback `https://azure-quest-pwa.vercel.app`.
+- Database password rotation is required because `supabase db dump --dry-run` printed a database password in local tool output. No value was committed or shown in project docs, but the password should be rotated from Supabase dashboard or a safe Management API call.
 
 ## Security Notes
 
@@ -131,3 +149,4 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - No database password was committed.
 - No service-role key was configured as a `VITE_` variable.
 - A Supabase CLI key-list command exposed legacy keys in local command output; legacy service-role use is therefore not accepted for production sign-off. The app uses the publishable browser key for frontend configuration.
+- A Supabase CLI database dump dry-run printed a database password in local tool output. The command path is now avoided; database password rotation remains required before final security sign-off.

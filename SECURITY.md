@@ -89,7 +89,8 @@ Live Supabase production status on 2026-07-29:
 
 Still pending before security sign-off:
 
-- Real owner `MAIN_ADMIN` bootstrap after `PRAXISGRID_OWNER_EMAIL` is supplied.
+- Real owner `MAIN_ADMIN` bootstrap is live-verified for `tobibabalola21@gmail.com`; owner self-service password reset email remains pending Supabase email-rate-limit cooldown.
+- Supabase database password rotation is required before final security sign-off because a CLI dry-run printed a database password in local tool output. No database password is committed to source or configured in frontend/browser environments.
 - Live two-user RLS isolation tests.
 - Live role-boundary tests for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN.
 - Live audit-integrity tests.
