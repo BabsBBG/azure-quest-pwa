@@ -124,7 +124,7 @@ Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 - Migration history match: complete and live-verified.
 - Vercel Production Supabase env: complete and live-verified.
 - Supabase auth Site URL/redirects: complete and live-verified for fallback canonical URL.
-- Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in are live-verified. Public reset email request remains subject to Supabase provider rate-limit cooldown.
+- Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in are live-verified. Owner password-reset email has been sent; owner completion remains pending.
 - Google SSO: externally blocked pending Google OAuth credentials.
 - Owner `MAIN_ADMIN` bootstrap: complete and live-verified for `tobibabalola21@gmail.com`.
 - Live RLS/two-user isolation tests: complete and live-verified for the user-owned tables covered by the temporary QA run.
@@ -138,7 +138,7 @@ Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 ## Remaining External Blockers
 
 - Google OAuth client ID and client secret are not present, so Google SSO cannot be safely enabled or tested.
-- Owner password-reset email is temporarily blocked by Supabase email rate limiting; the owner account exists and is `MAIN_ADMIN`, but the reset email must be retried after cooldown so the owner can set their own password.
+- Owner password-reset email has been sent; the owner account exists and is `MAIN_ADMIN`, and owner completion of the reset link remains pending.
 - Docker Desktop is unavailable, so local `supabase db reset` cannot run; hosted staging fallback passed.
 - `https://praxisgrid.vercel.app` is not assigned to the connected Vercel account; production auth uses the working fallback `https://azure-quest-pwa.vercel.app`.
 - Database password rotation is required because `supabase db dump --dry-run` printed a database password in local tool output. No value was committed or shown in project docs, but the password should be rotated from Supabase dashboard or a safe Management API call.

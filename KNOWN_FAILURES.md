@@ -43,10 +43,10 @@ Fix attempted:
 Owner account was still created and verified as `MAIN_ADMIN` using temporary bootstrap credentials stored outside the repository. Password reset email was not retried immediately to avoid worsening the provider throttle.
 
 Result:
-Owner bootstrap and fresh-session role verification passed. Owner self-service password reset remains pending cooldown.
+Owner bootstrap and fresh-session role verification passed. A later retry sent the owner password-reset email successfully.
 
 Remaining issue:
-Retry the owner reset email after the Supabase provider cooldown, or configure approved SMTP credentials and retest delivery.
+Owner must complete the reset link to replace the temporary bootstrap password. Configure approved SMTP credentials before final production email sign-off when available.
 
 ### M5 live auth recovery form required email after reset callback
 

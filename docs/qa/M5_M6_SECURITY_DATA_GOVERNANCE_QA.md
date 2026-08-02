@@ -14,12 +14,12 @@ Static validators pass, umbrella migration/RLS/repository-isolation gates exist 
 - Live RLS probes passed for MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, USER_A, and USER_B over the covered M5 tables.
 - Live two-user Project Intelligence repository-isolation probes passed.
 - Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values, and focused production authenticated browser verification passed.
-- Final sign-off remains blocked by database password rotation after local CLI dry-run exposure, owner reset email cooldown, absent Google OAuth credentials, absent canonical `praxisgrid.vercel.app` alias, and broader audit-forgery/privileged-mutation automation.
+- Final sign-off remains blocked by database password rotation after local CLI dry-run exposure, owner completion of the sent reset email, absent Google OAuth credentials, absent canonical `praxisgrid.vercel.app` alias, and broader audit-forgery/privileged-mutation automation.
 
 ## External Blockers
 
 - Google OAuth client ID and client secret are not present, so live Google SSO remains disabled/unverified.
-- Supabase built-in email delivery is rate-limiting the owner password-reset email.
+- Supabase owner password-reset email has been sent; owner completion remains pending.
 - Supabase database password must be rotated outside source control after a CLI dry-run printed it in local output.
 - Docker Desktop is unavailable, so hosted staging was used as the clean migration fallback.
 - `https://praxisgrid.vercel.app` is not assigned to the connected Vercel account; auth uses `https://azure-quest-pwa.vercel.app` as the working fallback canonical URL.

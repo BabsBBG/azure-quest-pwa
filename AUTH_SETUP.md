@@ -55,7 +55,7 @@ Production status on 2026-07-29:
 - Migrations `0001` through `0025` are applied and local/remote migration history matches.
 - Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values.
 - Google OAuth remains disabled/unverified until real Google OAuth provider credentials are supplied.
-- Real owner bootstrap is live-verified for `tobibabalola21@gmail.com` as `MAIN_ADMIN`. Owner self-service password reset email remains pending Supabase email-rate-limit cooldown.
+- Real owner bootstrap is live-verified for `tobibabalola21@gmail.com` as `MAIN_ADMIN`. Owner self-service password reset email has been sent; owner completion of the reset link remains pending.
 
 ## Not included
 
