@@ -61,10 +61,13 @@ export function AuthPage() {
       return;
     }
     if (mode === "update-password") {
+      setNotice("Updating your password...");
       const result = await auth.updatePassword({ password: newPassword });
       if (result.ok) {
         setNotice("Your password has been updated. You can continue to your workspace.");
         setNewPassword("");
+      } else {
+        setNotice(null);
       }
       return;
     }

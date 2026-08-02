@@ -17,13 +17,13 @@ Likely cause:
 The shared auth form did not hide the email field for `update-password` mode.
 
 Fix attempted:
-Hide the email field when `mode === "update-password"` and add a regression test proving the recovery password update form only requires the new password.
+Hide the email field when `mode === "update-password"`, add immediate update feedback, add a regression test proving the recovery password update form only requires the new password, and add the exact `/auth?mode=update-password` redirect URLs to the Supabase allow-list.
 
 Result:
-Resolved locally. `npm test -- src/pages/Account.test.tsx src/hooks/useAuth.test.tsx`, `npm run validate:auth-redirects`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed.
+Resolved locally and live. `npm test -- src/pages/Account.test.tsx src/hooks/useAuth.test.tsx`, `npm run validate:auth-redirects`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed for the form fix. After the merged production deploy and Supabase config push, live recovery landed on `/auth?mode=update-password`, the password update returned `PUT /auth/v1/user` 200, and sign-in with the rotated disposable QA password passed.
 
 Remaining issue:
-Deploy the fix to production, then rerun the live disposable-account recovery flow and rotate the temporary disposable password before continuing owner bootstrap.
+None for the disposable-account recovery update path. Public reset email delivery remains subject to Supabase provider rate limits and must be checked separately when the cooldown allows.
 
 ### M5 production Supabase browser key encoding failure
 
