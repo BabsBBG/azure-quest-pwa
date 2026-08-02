@@ -162,15 +162,19 @@ site_url = "https://azure-quest-pwa.vercel.app"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
   "https://praxisgrid.vercel.app/auth",
+  "https://praxisgrid.vercel.app/auth?mode=update-password",
   "https://praxisgrid.vercel.app/auth/callback",
   "https://praxisgrid.vercel.app/account",
   "https://azure-quest-pwa.vercel.app/auth",
+  "https://azure-quest-pwa.vercel.app/auth?mode=update-password",
   "https://azure-quest-pwa.vercel.app/auth/callback",
   "https://azure-quest-pwa.vercel.app/account",
   "http://localhost:4173/auth",
+  "http://localhost:4173/auth?mode=update-password",
   "http://localhost:4173/auth/callback",
   "http://localhost:4173/account",
   "http://127.0.0.1:4173/auth",
+  "http://127.0.0.1:4173/auth?mode=update-password",
   "http://127.0.0.1:4173/auth/callback",
   "http://127.0.0.1:4173/account"
 ]

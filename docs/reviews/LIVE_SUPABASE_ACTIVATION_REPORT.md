@@ -59,7 +59,7 @@ Latest update: 2026-08-02 on `main` after PR #6.
   - local development callback/account URLs on port `4173`.
 - Email/password signup: configured.
 - Email confirmation: enabled.
-- Password recovery redirect: repository implementation sends recovery links to `/auth?mode=update-password`; live disposable-account verification found the update form still required email, and the current branch fixes the form so recovery mode only requires a new password. Production retest is pending redeploy.
+- Password recovery redirect: live-verified after adding exact `/auth?mode=update-password` redirect URLs to the Supabase allow-list. Disposable QA recovery landed on the update form, returned `PUT /auth/v1/user` 200, and the account could sign in with the rotated temporary password.
 - Google OAuth: externally blocked because no Google OAuth client ID or client secret is available in the environment. The browser button is hidden unless `VITE_GOOGLE_AUTH_ENABLED=true`.
 
 ## Vercel Configuration
@@ -106,7 +106,7 @@ Latest update: 2026-08-02 on `main` after PR #6.
 - Migration history match: complete and live-verified.
 - Vercel Production Supabase env: complete and live-verified.
 - Supabase auth Site URL/redirects: complete and live-verified for fallback canonical URL.
-- Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, and re-sign-in are live-verified. Password reset/update remains pending production redeploy of the recovery-form fix and provider rate-limit cooldown.
+- Email auth configuration: repository and hosted configuration complete; disposable signup confirmation, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in are live-verified. Public reset email request remains subject to Supabase provider rate-limit cooldown.
 - Google SSO: externally blocked pending Google OAuth credentials.
 - Owner `MAIN_ADMIN` bootstrap: externally blocked pending `PRAXISGRID_OWNER_EMAIL`.
 - Live RLS/two-user isolation tests: externally blocked pending live QA identity bootstrap credentials.
