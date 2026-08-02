@@ -2,6 +2,52 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5 live auth recovery form required email after reset callback
+
+Date:
+2026-08-02
+
+Command:
+Live disposable-account password recovery browser verification against `https://azure-quest-pwa.vercel.app/auth?mode=update-password`.
+
+Error:
+The recovery callback reached the update-password screen, but the form still rendered a required email field. A password-only recovery session therefore could not submit the new password through the public UI.
+
+Likely cause:
+The shared auth form did not hide the email field for `update-password` mode.
+
+Fix attempted:
+Hide the email field when `mode === "update-password"` and add a regression test proving the recovery password update form only requires the new password.
+
+Result:
+Resolved locally. `npm test -- src/pages/Account.test.tsx src/hooks/useAuth.test.tsx`, `npm run validate:auth-redirects`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build` passed.
+
+Remaining issue:
+Deploy the fix to production, then rerun the live disposable-account recovery flow and rotate the temporary disposable password before continuing owner bootstrap.
+
+### M5 production Supabase browser key encoding failure
+
+Date:
+2026-08-02
+
+Command:
+Live disposable-account browser sign-in against `https://azure-quest-pwa.vercel.app/auth?mode=signin`.
+
+Error:
+The deployed browser auth call failed before reaching Supabase because the Vercel production `VITE_SUPABASE_ANON_KEY` value contained a non-ISO-8859-1 code point and could not be used as a request header value.
+
+Likely cause:
+The production Vercel environment variable contained malformed copied key material.
+
+Fix attempted:
+Replaced the production `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` with clean values retrieved from the Supabase project configuration, without printing or committing secret values, then redeployed production.
+
+Result:
+Resolved for disposable sign-in/onboarding/admin-denial/logout/sign-in-again browser verification.
+
+Remaining issue:
+Continue the full M5 live auth sequence after the recovery-form fix is deployed.
+
 ### PR #6 WebKit CI internal navigation error
 
 Date:
