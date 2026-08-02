@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### M5 local user-isolation mobile slice timeout
+
+Date:
+2026-08-02
+
+Command:
+`npm run test:e2e:mobile`
+
+Error:
+The first local mobile Playwright slice exceeded the 420-second tool timeout and Playwright emitted an `EPIPE` while writing final reporter output after the shell closed the pipe.
+
+Likely cause:
+The mobile slice runs 30 tests serially across `mobile-390` and `mobile-320`; the local desktop environment needed more than seven minutes for this full slice.
+
+Fix attempted:
+Checked for leftover `node` processes, found none, then reran the same command with a longer timeout.
+
+Result:
+Resolved locally. `npm run test:e2e:mobile` passed 30/30 on rerun with the longer timeout.
+
+Remaining issue:
+Use a longer local timeout for the mobile slice; CI remains the source of truth after push.
+
 ### M5 production-mobile auth contrast failure on main and PR 4
 
 Date:

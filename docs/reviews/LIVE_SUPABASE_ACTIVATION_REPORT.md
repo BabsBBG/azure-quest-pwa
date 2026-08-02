@@ -2,7 +2,7 @@
 
 Date: 2026-07-29
 
-Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
+Latest update: 2026-08-02 on branch `codex/m5-local-user-isolation`.
 
 ## Starting State
 
@@ -33,6 +33,7 @@ Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
 - Static RLS validation: PASS.
 - Static authorization validation: PASS.
 - Static repository-isolation validation: PASS.
+- Static local user-isolation validation: PASS.
 - Static GitHub import controls validation: PASS.
 - Static Project Intelligence validation: PASS.
 - Static privacy workflow validation: PASS.
@@ -79,6 +80,7 @@ Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
 - `npm run validate:rls`: PASS.
 - `npm run validate:authorization`: PASS.
 - `npm run validate:repository-isolation`: PASS, including the Project Intelligence owner-scoped row contract.
+- `npm run validate:local-user-isolation`: PASS, including authenticated localForage partitioning and auth-aware hydration.
 - `npm run validate:github-import-controls`: PASS.
 - `npm run validate:project-intelligence`: PASS.
 - `npm run validate:privacy-workflows`: PASS.
@@ -105,6 +107,7 @@ Latest update: 2026-08-01 on branch `codex/finish-m5-production`.
 - Role-boundary tests: repository/static validation only; live verification pending.
 - Audit-integrity tests: repository/static validation only; live verification pending.
 - Production browser auth tests: public unauthenticated/auth-route smoke complete; signed-in tests pending live QA identity bootstrap.
+- Same-browser local account switching: repository/static validation complete; live signed-in browser verification pending live QA identity bootstrap.
 - Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
 - Temporary QA cleanup: pending creation of live QA identities.
 

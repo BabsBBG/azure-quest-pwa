@@ -7,7 +7,7 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Public `/admin` route is runtime auth/role gated in repo; live role-browser and Supabase RLS verification remain pending.
 - Public learner routes are auth-gated and onboarding-gated in repo; live auth browser and onboarding verification remain pending.
 - Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for `praxisgrid-production`; production redeploy and public unauthenticated smoke verification pass, while authenticated smoke verification remains pending.
-- Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0025` are applied with matching local/remote history.
+- Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0026` are applied with matching local/remote history.
 - Live Supabase test identities and real owner role bootstrap are not configured/verified because `PRAXISGRID_OWNER_EMAIL` is not present in the environment.
 - Protected owner bootstrap, role/RLS/audit probes, and production cleanup cannot run from this shell until `SUPABASE_SERVICE_ROLE_KEY` is supplied securely outside source control.
 - Google SSO cannot be enabled live until real Google OAuth client ID and client secret values are supplied outside source control.
@@ -17,6 +17,7 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - GitHub import abuse controls are durable and authenticated in repo; live Supabase RPC/quota denial verification remains pending.
 - Project Intelligence analysis rows are user-scoped in repo; live two-user repository-isolation verification remains pending.
 - Project Intelligence parent ownership is now hardened in repo and applied live by migration `0026_project_intelligence_owner_fk.sql`; live two-user repository-isolation verification remains pending.
+- Same-browser local learner data is partitioned by authenticated user ID in repo; live signed-in account-switching browser verification remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo, but live Supabase RLS verification remains pending.
 - Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application is complete, while live RLS and live two-user repository-isolation probes remain pending.

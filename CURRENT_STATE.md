@@ -73,6 +73,7 @@ Harness state:
 - Latest production deployment `dpl_fheB6qE4yfT6y9JKru1dELXTug5K` is READY at `https://praxisgrid-pnsa9awqf-tonybabalola-1114s-projects.vercel.app` and aliased to `https://azure-quest-pwa.vercel.app`; public production smoke passed 20/20 with 10 expected signed-in skips.
 - Live owner bootstrap, Google SSO, two-user RLS isolation, role-boundary, audit-integrity, and production authenticated browser verification remain blocked until `PRAXISGRID_OWNER_EMAIL` and Google OAuth credentials are supplied where required.
 - Follow-up branch `codex/finish-m5-production` was merged through PR #5 and fixes the pushed production-mobile accessibility failure source by using explicit disabled button colors, makes production smoke skip pull requests because that gate targets the deployed production alias rather than the unmerged branch, converts auth methods to typed success/failure results, adds a real `/auth?mode=update-password` recovery-session flow, hides Google sign-in unless `VITE_GOOGLE_AUTH_ENABLED=true`, blocks onboarding navigation after failed profile saves, and adds migration `0026_project_intelligence_owner_fk.sql` so Project Intelligence analyses must reference an imported project owned by the same user. Local focused retests passed, PR #5 CI passed, merged `main` CI run `30718024880` passed after redeploying production, and production migration history now matches through `0026`.
+- Local user-isolation hardening branch `codex/m5-local-user-isolation` partitions localForage learner data by authenticated Supabase user ID, reruns hydration when the auth user changes, prevents signed-in users from falling back to anonymous legacy data, keeps reset scoped to the active local partition, and adds `validate:local-user-isolation` to CI. Local typecheck, targeted store tests, and the new validator passed; full PR CI and production redeploy remain pending.
 
 M5.0 rebrand status:
 
@@ -81,7 +82,7 @@ M5.0 rebrand status:
 - GitHub repo was renamed from `BabsBBG/azure-quest-pwa` to `BabsBBG/praxisgrid`.
 - Local `origin` now points to `https://github.com/BabsBBG/praxisgrid.git`.
 - PWA metadata, package name, layout header, nav, account copy, footer disclaimer, and core assessment notices use PraxisGrid/provider-neutral language.
-- localForage now writes to the `PraxisGrid` namespace with `praxisgrid:*` keys while preserving read/copy fallback from the old `AzureQuest` and `azure-quest:*` storage.
+- localForage now writes to the `PraxisGrid` namespace with anonymous `praxisgrid:*` keys and authenticated `praxisgrid:user:<auth-user-id>:*` partitions while preserving read/copy fallback from the old `AzureQuest` and `azure-quest:*` storage only for anonymous migration.
 - AZ-500 is marked RETIRING with retirement date 2026-08-31. New activation routes users toward SC-500 while preserving historical progress and attempts.
 - Role foundation migration adds MAIN_ADMIN, CONTENT_REVIEWER, SUPPORT_ADMIN, and USER with RLS and role-change audit tables.
 - Founder-specific sample project data was removed from Career Lab fixtures and replaced with fictional instructional examples.
