@@ -89,7 +89,7 @@ The GitHub repository has been renamed to `BabsBBG/praxisgrid`, and product surf
 Still blocked/deferred:
 
 - Production Vercel project is renamed to `praxisgrid`, but the public production domain still uses the historical `azure-quest-pwa.vercel.app` alias until a canonical PraxisGrid domain is assigned.
-- Supabase owner password-reset email is temporarily provider-rate-limited; retry after cooldown or configure approved SMTP.
+- Supabase owner password-reset email was sent after cooldown; owner must complete the reset link to replace the temporary bootstrap password.
 - Supabase database password rotation is required because the CLI `db dump --dry-run` printed a database password in local tool output.
 
 ## Cost-control blocker
@@ -130,7 +130,7 @@ Still blocked until broader live authenticated QA coverage is automated and the 
 - cross-device interview history verification
 - production imported project sync verification through the full UI
 - live browser account-switching verification
-- owner self-service password reset after Supabase email cooldown
+- owner self-service password reset completion after the sent reset email is used
 
 ## GitHub blocker
 
