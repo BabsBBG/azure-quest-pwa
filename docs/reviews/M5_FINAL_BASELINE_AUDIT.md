@@ -62,6 +62,7 @@ Decision: `FAIL - M5 production sign-off not granted`
 - `npm run build`: PASS with the existing large chunk warning.
 - `npm run test:e2e:chromium`: PASS, 15/15.
 - `npm run test:e2e:webkit`: PASS, 15/15.
+- `CI=true npm run test:e2e:webkit`: PASS, 15/15 after serializing Playwright workers for CI stability.
 - `npm run test:e2e:mobile`: PASS, 30/30 after rerun with a longer local timeout.
 - `npm run test:accessibility`: PASS, 36/36.
 - `npm run test:visual`: PASS, 6/6.

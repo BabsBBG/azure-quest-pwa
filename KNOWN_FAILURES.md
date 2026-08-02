@@ -2,6 +2,29 @@
 
 Every failed command, build error, deployment error, and attempted fix must be logged here.
 
+### PR #6 WebKit CI internal navigation error
+
+Date:
+2026-08-02
+
+Command:
+GitHub Actions run `30766356019`, step `npm run test:e2e:webkit`.
+
+Error:
+WebKit failed one public legal/status route test with `page.goto: WebKit encountered an internal error` while navigating to `/terms`; the other 14 WebKit tests passed.
+
+Likely cause:
+CI ran Playwright with two workers while WebKit route/navigation tests have historically been more stable in this repository when serialized.
+
+Fix attempted:
+Changed `playwright.config.ts` to use one worker in CI and local runs, matching the stable local browser-slice execution model.
+
+Result:
+Resolved locally. `CI=true npm run test:e2e:webkit` passed 15/15 with one worker.
+
+Remaining issue:
+PR #6 CI must be rerun after pushing the stabilization commit.
+
 ### M5 local user-isolation mobile slice timeout
 
 Date:
