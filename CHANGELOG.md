@@ -43,6 +43,7 @@
 - Fixed Assessment Shell final submit so the submission review panel closes and the analytical results screen renders.
 - Created Supabase production project `praxisgrid-production` in `eu-west-1`, linked the repository, applied migrations `0001` through `0025` after a hosted staging dry run, configured Supabase Auth redirects for the working production fallback, and added Vercel Production Supabase env vars.
 - Added opt-in live Supabase QA scripts for auth, RLS, roles, repository isolation, and GitHub import quota boundaries; applied migration `0027` to fix the live GitHub import quota RPC output ambiguity and verified migration history through `0027`.
+- Added opt-in live production browser auth smoke for temporary users covering onboarding, normal-user admin denial, seed-bank trust copy, and SUPPORT_ADMIN report inspection without approve actions.
 - Started M1.6 user accounts, Azure-blue/font/icon system, and tests/CI hardening.
 - Added Supabase Auth email/password account foundation with Account/Profile UI.
 - Added `.env.example`, `AUTH_SETUP.md`, and optional profiles RLS migration.
