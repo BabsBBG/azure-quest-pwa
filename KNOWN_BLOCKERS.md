@@ -20,7 +20,8 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Same-browser local learner data is partitioned by authenticated user ID in repo; database isolation is live-verified, while browser account-switching regression remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo and focused live Supabase RLS/role verification passed.
-- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application, focused live RLS, and two-user repository-isolation probes pass for the covered M5 surfaces.
+- Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application, focused live RLS, role-boundary, audit-forgery, and two-user repository-isolation probes pass for the covered M5 surfaces.
+- Opt-in live production scripts now exist for Supabase auth, RLS, roles, and repository isolation. They are intentionally excluded from public PR CI until protected production secrets are available through a trusted environment.
 - Connected Vercel project identity is now `praxisgrid`, and a fresh production deployment is READY. The canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves public production.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
@@ -48,10 +49,10 @@ The approved M5 sequence is now:
 
 Release blockers from the 2026-07-22 baseline audit:
 
-- Content reviewers can reach publication paths in source-pipeline RLS scaffolding. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
-- Public approved-question serving trusts `review_status` without enough database-level integrity enforcement. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
-- Audit rows can be caller-shaped or manually inserted by privileged users. Fixed in repo by migration `0006`; live Supabase RLS verification pending.
-- Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006` and `importedProjectRowId()`; live Supabase RLS verification pending.
+- Content reviewers can reach publication paths in source-pipeline RLS scaffolding. Fixed in repo by migration `0006`; focused live Supabase role-boundary verification passed for reviewer publication denial.
+- Public approved-question serving trusts `review_status` without enough database-level integrity enforcement. Fixed in repo by migration `0006`; focused live Supabase role-boundary verification passed for reviewer/support publication denial.
+- Audit rows can be caller-shaped or manually inserted by privileged users. Fixed in repo by migration `0006`; focused live Supabase audit verification passed for role-change event forgery denial, while broader privileged mutation audit coverage remains pending.
+- Imported project IDs collide globally when multiple users import the same public repo. Fixed in repo by migration `0006`, `0026`, and `importedProjectRowId()`; focused live two-user repository-isolation verification passed.
 - In-progress assessment sessions are fixed in repo with local/cloud persistence and recovery choices; M5.12 browser E2E and live Supabase verification pending.
 - Rich item type support is implemented in repo through walkthrough-only items and shared scoring contracts; production pool use remains blocked until source-grounded approved content, Admin publication, curated quiz placement, and Certification Run placement are complete.
 - `/admin` review studio is implemented in repo; live role-auth verification remains pending.
@@ -123,7 +124,7 @@ Any feature that calls an LLM, imports GitHub repositories, generates questions,
 
 Migrations `0001` through `0025` are applied to `praxisgrid-production`, and Vercel Production has the browser-safe Supabase project URL and publishable key.
 
-Still blocked until broader live authenticated QA coverage is automated and the remaining external auth constraints are cleared:
+Still blocked until broader live authenticated QA coverage is completed and the remaining external auth constraints are cleared:
 
 - production cloud sync verification beyond the focused database probes
 - cross-device attempt history verification

@@ -80,20 +80,19 @@ The current app does not yet have:
 - full admin review UI
 - full replacement of the demo/seed question bank
 
-Live Supabase production status on 2026-07-29:
+Live Supabase production status on 2026-08-03:
 
 - `praxisgrid-production` exists in `eu-west-1`.
-- Migrations `0001` through `0025` are applied, and local/remote migration history matches.
+- Migrations `0001` through `0026` are applied, and local/remote migration history matches.
 - Supabase Auth Site URL and redirects are configured for the working public fallback `https://azure-quest-pwa.vercel.app`.
 - Vercel Production has the browser-safe Supabase project URL and publishable key.
+- Focused live production QA passes through opt-in scripts for email auth, owner/user RLS, repository isolation, role boundaries, and role-change audit forgery denial.
 
 Still pending before security sign-off:
 
 - Real owner `MAIN_ADMIN` bootstrap is live-verified for `tobibabalola21@gmail.com`; owner self-service password reset email has been sent and reset completion remains pending.
 - Supabase database password rotation is required before final security sign-off because a CLI dry-run printed a database password in local tool output. No database password is committed to source or configured in frontend/browser environments.
-- Live two-user RLS isolation tests.
-- Live role-boundary tests for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN.
-- Live audit-integrity tests.
+- Broader signed-in production browser smoke, cross-device sync, and full privileged-mutation audit coverage.
 - Google SSO provider configuration and verification after Google OAuth credentials are supplied.
 
 ## Icon licensing
