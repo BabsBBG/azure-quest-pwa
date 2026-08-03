@@ -2,7 +2,7 @@
 
 Date: 2026-07-29
 
-Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
+Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding and passing the opt-in live Supabase QA harness.
 
 ## Starting State
 
@@ -90,6 +90,11 @@ Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 - `npm run validate:rls`: PASS.
 - `npm run validate:authorization`: PASS.
 - `npm run validate:repository-isolation`: PASS, including the Project Intelligence owner-scoped row contract.
+- `npm run validate:live-supabase`: PASS with `PRAXISGRID_LIVE_QA=1` against `ozf...agfd`; created bounded temporary users, verified auth, RLS, repository isolation, role boundaries, and role-audit forgery protection, then deleted all temporary users.
+- `npm run test:auth-production`: added as an opt-in production auth script.
+- `npm run test:live-rls`: added as an opt-in production RLS script.
+- `npm run test:roles-production`: added as an opt-in production role-boundary script.
+- `npm run test:repository-isolation-production`: added as an opt-in production repository-isolation script.
 - `npm run validate:local-user-isolation`: PASS, including authenticated localForage partitioning and auth-aware hydration.
 - `npm run validate:github-import-controls`: PASS.
 - `npm run validate:project-intelligence`: PASS.
@@ -113,6 +118,7 @@ Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 - Live role-boundary checks: PASS. USER cannot escalate or read audit events; CONTENT_REVIEWER cannot publish approved questions; SUPPORT_ADMIN can read support reports but cannot publish; MAIN_ADMIN can read audit events.
 - Live admin browser checks: PASS. Personal study USER is denied `/admin`; MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN can enter the protected Admin route.
 - Temporary role/RLS QA users: deleted after verification. Temporary content-quality report rows from live QA were explicitly removed.
+- Opt-in live QA harness: PASS. The harness refuses to run without explicit production opt-in, exact project-ref guard, exact Supabase host guard, and server-side service-role env.
 
 ## Requirement Classification
 
@@ -129,11 +135,12 @@ Latest update: 2026-08-03 on `main` after PR #8 and live role/RLS verification.
 - Owner `MAIN_ADMIN` bootstrap: complete and live-verified for `tobibabalola21@gmail.com`.
 - Live RLS/two-user isolation tests: complete and live-verified for the user-owned tables covered by the temporary QA run.
 - Role-boundary tests: complete and live-verified for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN boundaries covered by direct DB and browser checks.
-- Audit-integrity tests: partially live-verified. Role-change audit rows are created by server-side role assignment and MAIN_ADMIN can read them; forged caller audit fields and every privileged mutation class still need broader automated production-test coverage.
+- Audit-integrity tests: role-change audit integrity is live-verified for the covered role path. Normal users cannot forge role-change events or self-escalate, role assignments create server-side audit records, and MAIN_ADMIN can read them; every privileged mutation class still needs broader production-test coverage.
 - Production browser auth tests: signed-in admin route checks passed for USER denial and the three admin roles; broader signed-in product smoke remains pending.
 - Same-browser local account switching: repository/static validation complete; live signed-in browser verification pending live QA identity bootstrap.
 - Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
 - Temporary QA cleanup: complete for the role/RLS QA users and bounded QA records created during this run.
+- Live production-test scripts: repository implementation complete and one full `validate:live-supabase` run live-verified. The scripts are intentionally not wired into public pull-request CI because they require protected production secrets and create temporary production QA data.
 
 ## Remaining External Blockers
 

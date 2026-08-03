@@ -52,10 +52,11 @@ Production status on 2026-07-29:
 - Production project: `praxisgrid-production`.
 - Region: `eu-west-1`.
 - Project ref: `ozf...agfd`.
-- Migrations `0001` through `0025` are applied and local/remote migration history matches.
+- Migrations `0001` through `0026` are applied and local/remote migration history matches.
 - Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values.
 - Google OAuth remains disabled/unverified until real Google OAuth provider credentials are supplied.
 - Real owner bootstrap is live-verified for `tobibabalola21@gmail.com` as `MAIN_ADMIN`. Owner self-service password reset email has been sent; owner completion of the reset link remains pending.
+- Opt-in live production scripts exist for auth, RLS, roles, and repository isolation. They require `PRAXISGRID_LIVE_QA=1`, the exact PraxisGrid project ref, and server-side Supabase credentials supplied outside source control.
 
 ## Not included
 

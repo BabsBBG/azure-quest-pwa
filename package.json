@@ -55,6 +55,11 @@
     "validate:destructive-actions": "node scripts/validate-destructive-actions.mjs",
     "validate:typography": "node scripts/validate-typography.mjs",
     "validate:production-smoke-gate": "node scripts/validate-production-smoke-gate.mjs",
+    "validate:live-supabase": "node scripts/live-supabase-qa.mjs validate",
+    "test:auth-production": "node scripts/live-supabase-qa.mjs auth",
+    "test:live-rls": "node scripts/live-supabase-qa.mjs rls",
+    "test:roles-production": "node scripts/live-supabase-qa.mjs roles",
+    "test:repository-isolation-production": "node scripts/live-supabase-qa.mjs repository-isolation",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {

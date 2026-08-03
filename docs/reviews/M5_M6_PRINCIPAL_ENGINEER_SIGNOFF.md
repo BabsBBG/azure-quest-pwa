@@ -4,24 +4,25 @@ Status: FAIL - production sign-off not granted
 
 Date: 2026-07-29
 
-Basis: Baseline audit at commit `a12ba2c`, updated after the M5/M6 hardening slices through the PraxisGrid Vercel migration.
+Basis: Baseline audit at commit `a12ba2c`, updated after live Supabase activation, focused production role/RLS verification, and the opt-in live Supabase QA harness.
 
 ## Findings
 
 - M5 is reopened for production hardening.
 - Phase 6 is approved but not complete.
-- `/admin` is route-protected in repo, but live role-specific browser and Supabase RLS verification are still pending.
+- `/admin` is route-protected in repo, and focused live role-specific browser checks passed for USER denial and MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN access.
 - Source-grounded content is scaffolded with fixtures and migrations, not live production ingestion/review/publication.
-- Supabase migrations and RLS policies are not live-verified.
+- Supabase migrations are applied through `0026`, remote/local history matches, and focused live RLS, role-boundary, audit-forgery, and two-user isolation probes pass for the covered M5 surfaces.
 - GitHub import rate limiting and caching are durable in repo, but live Supabase RPC/quota denial verification is still pending.
-- Browser, accessibility, visual, production-smoke, migration, RLS, production-content, and repository-isolation gates now exist in repo/CI. Public production smoke passed against `https://azure-quest-pwa.vercel.app`; live Supabase and role-specific browser probes remain pending.
+- Browser, accessibility, visual, production-smoke, migration, RLS, production-content, and repository-isolation gates now exist in repo/CI. Public production smoke passed against `https://azure-quest-pwa.vercel.app`; opt-in live production scripts now cover Supabase auth, RLS, roles, and repository isolation but are not wired to public PR CI.
 
 ## Required Before PASS
 
 - Close all S1/S2 defects in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
-- Prove live Supabase auth, migrations, RLS, role boundaries, and user isolation.
+- Complete broader signed-in production browser smoke, cross-device sync verification, and GitHub import quota denial verification.
 - Replace or gate demo/static content so it is not presented as trusted production content.
 - Ship protected Admin operations with working mutations and audit records.
+- Rotate the Supabase database password exposed by the local CLI dry-run output path.
 - Pass the full required local, CI, browser, accessibility, visual, and production smoke suites.
 
 ## Sign-Off
