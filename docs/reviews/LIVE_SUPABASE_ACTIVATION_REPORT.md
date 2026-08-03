@@ -28,7 +28,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 
 ## Migration Verification
 
-- Repository migrations present: 26.
+- Repository migrations present: 27.
 - Static migration validation: PASS.
 - Static RLS validation: PASS.
 - Static authorization validation: PASS.
@@ -42,8 +42,9 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Staging apply: PASS, migrations `0001` through `0025`.
 - Production dry run: PASS, exactly migrations `0001` through `0025` before the latest M5 hardening slice.
 - Production apply: PASS, migrations `0001` through `0025` before the latest M5 hardening slice.
-- Production migration history: PASS, local and remote histories match for `0001` through `0026`.
+- Production migration history: PASS, local and remote histories match for `0001` through `0027`.
 - Latest repository migration `0026_project_intelligence_owner_fk.sql`: dry run PASS and production apply PASS.
+- Latest repository migration `0027_fix_github_import_quota_output_ambiguity.sql`: dry run PASS and production apply PASS after live `test:github-import-production` exposed an ambiguous `import_day` output-column reference in `claim_github_import_quota`.
 - Docker local reset: externally unavailable in this environment.
 
 ## Authentication Configuration
@@ -86,7 +87,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 ## Validation Run
 
 - `npm install --legacy-peer-deps`: PASS.
-- `npm run validate:migrations`: PASS for 26 sequential migrations.
+- `npm run validate:migrations`: PASS for 27 sequential migrations.
 - `npm run validate:rls`: PASS.
 - `npm run validate:authorization`: PASS.
 - `npm run validate:repository-isolation`: PASS, including the Project Intelligence owner-scoped row contract.
@@ -95,6 +96,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - `npm run test:live-rls`: added as an opt-in production RLS script.
 - `npm run test:roles-production`: added as an opt-in production role-boundary script.
 - `npm run test:repository-isolation-production`: added as an opt-in production repository-isolation script.
+- `npm run test:github-import-production`: PASS. Service-role quota claim works, the second claim is denied at the daily limit, anonymous RPC execution is denied, authenticated-client RPC execution is denied, and the temporary QA user was deleted.
 - `npm run validate:local-user-isolation`: PASS, including authenticated localForage partitioning and auth-aware hydration.
 - `npm run validate:github-import-controls`: PASS.
 - `npm run validate:project-intelligence`: PASS.
@@ -116,6 +118,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Live RLS flags: all returned public tables have row-level security enabled.
 - Live two-user isolation: PASS, 27 cross-user read/update/delete checks in each direction across profiles, assessment sessions, quiz attempts, question flags, imported projects, Project Intelligence analyses, interview sessions, active interview sessions, and content quality reports.
 - Live role-boundary checks: PASS. USER cannot escalate or read audit events; CONTENT_REVIEWER cannot publish approved questions; SUPPORT_ADMIN can read support reports but cannot publish; MAIN_ADMIN can read audit events.
+- Live GitHub import quota checks: PASS after migration `0027`. Service-role claim, daily-limit denial, anonymous denial, and authenticated-client denial all passed.
 - Live admin browser checks: PASS. Personal study USER is denied `/admin`; MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN can enter the protected Admin route.
 - Temporary role/RLS QA users: deleted after verification. Temporary content-quality report rows from live QA were explicitly removed.
 - Opt-in live QA harness: PASS. The harness refuses to run without explicit production opt-in, exact project-ref guard, exact Supabase host guard, and server-side service-role env.
@@ -141,6 +144,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
 - Temporary QA cleanup: complete for the role/RLS QA users and bounded QA records created during this run.
 - Live production-test scripts: repository implementation complete and one full `validate:live-supabase` run live-verified. The scripts are intentionally not wired into public pull-request CI because they require protected production secrets and create temporary production QA data.
+- GitHub import quota RPC: complete and live-verified for service-role execution, daily-limit denial, and anon/authenticated denial.
 
 ## Remaining External Blockers
 

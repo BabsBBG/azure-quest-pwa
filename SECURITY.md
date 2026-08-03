@@ -83,10 +83,10 @@ The current app does not yet have:
 Live Supabase production status on 2026-08-03:
 
 - `praxisgrid-production` exists in `eu-west-1`.
-- Migrations `0001` through `0026` are applied, and local/remote migration history matches.
+- Migrations `0001` through `0027` are applied, and local/remote migration history matches.
 - Supabase Auth Site URL and redirects are configured for the working public fallback `https://azure-quest-pwa.vercel.app`.
 - Vercel Production has the browser-safe Supabase project URL and publishable key.
-- Focused live production QA passes through opt-in scripts for email auth, owner/user RLS, repository isolation, role boundaries, and role-change audit forgery denial.
+- Focused live production QA passes through opt-in scripts for email auth, owner/user RLS, repository isolation, role boundaries, role-change audit forgery denial, and GitHub import quota boundaries.
 
 Still pending before security sign-off:
 
