@@ -8,7 +8,8 @@ const VALID_SCENARIOS = new Set([
   "auth",
   "rls",
   "roles",
-  "repository-isolation"
+  "repository-isolation",
+  "github-import"
 ]);
 
 const scenario = process.argv[2] || "validate";
@@ -405,6 +406,72 @@ async function verifyRoles(supabaseUrl, anonKey, service, runId) {
   });
 }
 
+async function verifyGithubImportQuota(supabaseUrl, anonKey, service, runId) {
+  const user = await createQaUser(service, "USER", runId);
+  const signedIn = await signInClient(supabaseUrl, anonKey, user.email, user.password);
+  const repoKey = `praxisgrid/live-qa-${runId}`;
+  const contentHash = `live-${runId}`;
+
+  const firstClaim = assertNoError(
+    "service-role GitHub import quota claim",
+    await service.rpc("claim_github_import_quota", {
+      p_user_id: user.id,
+      p_repo_key: repoKey,
+      p_content_hash: contentHash,
+      p_daily_limit: 1
+    })
+  );
+  if (firstClaim.length !== 1 || firstClaim[0].remaining !== 0) {
+    throw new Error("service-role quota claim did not return the expected remaining count");
+  }
+
+  const secondClaim = await service.rpc("claim_github_import_quota", {
+    p_user_id: user.id,
+    p_repo_key: `${repoKey}-second`,
+    p_content_hash: `${contentHash}-second`,
+    p_daily_limit: 1
+  });
+  if (!secondClaim.error) {
+    throw new Error("GitHub import quota did not block the second claim at the daily limit");
+  }
+
+  const anon = makeClient(supabaseUrl, anonKey);
+  const anonClaim = await anon.rpc("claim_github_import_quota", {
+    p_user_id: user.id,
+    p_repo_key: `${repoKey}-anon`,
+    p_content_hash: `${contentHash}-anon`,
+    p_daily_limit: 1
+  });
+  if (!anonClaim.error) {
+    throw new Error("anonymous caller unexpectedly executed the GitHub import quota RPC");
+  }
+
+  const authenticatedClaim = await signedIn.client.rpc("claim_github_import_quota", {
+    p_user_id: user.id,
+    p_repo_key: `${repoKey}-authenticated`,
+    p_content_hash: `${contentHash}-authenticated`,
+    p_daily_limit: 1
+  });
+  if (!authenticatedClaim.error) {
+    throw new Error("authenticated caller unexpectedly executed the GitHub import quota RPC");
+  }
+
+  const visibleEvents = assertNoError(
+    "user can read own GitHub import event",
+    await signedIn.client.from("github_import_events").select("repo_key").eq("repo_key", repoKey)
+  );
+  if (visibleEvents.length !== 1) {
+    throw new Error(`expected one visible GitHub import event, got ${visibleEvents.length}`);
+  }
+
+  record("GitHub import quota", "passed", {
+    serviceRoleClaim: true,
+    dailyLimitDenied: true,
+    anonymousRpcDenied: true,
+    authenticatedRpcDenied: true
+  });
+}
+
 async function cleanup(service) {
   for (const id of tempIds.projectAnalysisIds) {
     await service.from("project_intelligence_analyses").delete().eq("id", id);
@@ -455,6 +522,9 @@ async function main() {
     }
     if (scenario === "validate" || scenario === "roles") {
       await verifyRoles(supabaseUrl, anonKey, service, runId);
+    }
+    if (scenario === "validate" || scenario === "github-import") {
+      await verifyGithubImportQuota(supabaseUrl, anonKey, service, runId);
     }
     result.status = "passed";
   } catch (error) {

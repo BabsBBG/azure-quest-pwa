@@ -60,6 +60,7 @@
     "test:live-rls": "node scripts/live-supabase-qa.mjs rls",
     "test:roles-production": "node scripts/live-supabase-qa.mjs roles",
     "test:repository-isolation-production": "node scripts/live-supabase-qa.mjs repository-isolation",
+    "test:github-import-production": "node scripts/live-supabase-qa.mjs github-import",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {

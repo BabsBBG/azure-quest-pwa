@@ -7,21 +7,21 @@ The 2026-07-26 PraxisGrid Master Delivery Instruction reopened M5 for production
 - Public `/admin` route is runtime auth/role gated in repo; live browser verification passed for USER denial and MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN access.
 - Public learner routes are auth-gated and onboarding-gated in repo; live disposable auth and onboarding verification passed.
 - Vercel Production now has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values for `praxisgrid-production`; production redeploy, public unauthenticated smoke, and focused authenticated live auth verification pass.
-- Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0026` are applied with matching local/remote history.
+- Supabase CLI authenticated successfully, `praxisgrid-production` exists in `eu-west-1`, and migrations `0001` through `0027` are applied with matching local/remote history.
 - Live owner role bootstrap is configured and verified for `tobibabalola21@gmail.com` as `MAIN_ADMIN`; personal study account `tonybabalola@gmail.com` is verified as `USER`.
 - Protected role/RLS probes ran from this shell using service-role access retrieved only in-process. Temporary QA identities and bounded QA records were cleaned up.
 - Google SSO cannot be enabled live until real Google OAuth client ID and client secret values are supplied outside source control.
 - Google SSO is now hidden in the browser unless `VITE_GOOGLE_AUTH_ENABLED=true`; enable that flag only after the Supabase Google provider is live-configured and tested.
 - Source-grounded certification content remains fixture/scaffold-backed and cannot replace the seed bank.
 - Production quiz/run CTAs are blocked when approved coverage is incomplete in repo, but live source ingestion, review, publication, and production serving remain pending.
-- GitHub import abuse controls are durable and authenticated in repo; broader live RPC/quota denial verification remains pending.
+- GitHub import abuse controls are durable and authenticated in repo; live RPC/quota verification now passes for service-role claim, daily-limit denial, anonymous denial, and authenticated-client denial.
 - Project Intelligence analysis rows are user-scoped in repo; live two-user database isolation passed for imported projects and Project Intelligence analyses.
 - Project Intelligence parent ownership is now hardened in repo and applied live by migration `0026_project_intelligence_owner_fk.sql`; live two-user database isolation passed for the owner FK path.
 - Same-browser local learner data is partitioned by authenticated user ID in repo; database isolation is live-verified, while browser account-switching regression remains pending.
 - Secondary assessment-like surfaces have shared demo-bank trust notice and answer-reveal alignment in repo; browser verification remains pending.
 - Admin Review Studio is still not fully connected to protected live queues/mutations; support report queue boundaries are fixed in repo and focused live Supabase RLS/role verification passed.
 - Playwright, WebKit, mobile, accessibility, visual, production-smoke, production-content, assessment-shell, destructive-action, migration, RLS, and repository-isolation static gates exist in repo and CI. Public production smoke passed against the current public alias; live Supabase migration application, focused live RLS, role-boundary, audit-forgery, and two-user repository-isolation probes pass for the covered M5 surfaces.
-- Opt-in live production scripts now exist for Supabase auth, RLS, roles, and repository isolation. They are intentionally excluded from public PR CI until protected production secrets are available through a trusted environment.
+- Opt-in live production scripts now exist for Supabase auth, RLS, roles, repository isolation, and GitHub import quota checks. They are intentionally excluded from public PR CI until protected production secrets are available through a trusted environment.
 - Connected Vercel project identity is now `praxisgrid`, and a fresh production deployment is READY. The canonical `https://praxisgrid.vercel.app` alias is not live yet; the historical `https://azure-quest-pwa.vercel.app` alias still serves public production.
 
 Authoritative tracking now lives in `docs/qa/M5_M6_DEFECT_LEDGER.md`.
