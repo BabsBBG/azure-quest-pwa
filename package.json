@@ -61,6 +61,7 @@
     "test:roles-production": "node scripts/live-supabase-qa.mjs roles",
     "test:repository-isolation-production": "node scripts/live-supabase-qa.mjs repository-isolation",
     "test:github-import-production": "node scripts/live-supabase-qa.mjs github-import",
+    "test:browser-production-auth": "node scripts/live-production-browser-smoke.mjs",
     "check:routes": "node scripts/check-routes.mjs"
   },
   "dependencies": {

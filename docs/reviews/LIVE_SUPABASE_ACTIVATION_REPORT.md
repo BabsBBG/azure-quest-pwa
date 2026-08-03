@@ -98,6 +98,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - `npm run test:roles-production`: added as an opt-in production role-boundary script.
 - `npm run test:repository-isolation-production`: added as an opt-in production repository-isolation script.
 - `npm run test:github-import-production`: PASS. Service-role quota claim works, the second claim is denied at the daily limit, anonymous RPC execution is denied, authenticated-client RPC execution is denied, and the temporary QA user was deleted.
+- `npm run test:browser-production-auth`: PASS. Temporary live users verified learner onboarding, normal-user admin denial, seed-bank trust copy, and SUPPORT_ADMIN support-boundary UI on production, then were deleted.
 - `npm run validate:local-user-isolation`: PASS, including authenticated localForage partitioning and auth-aware hydration.
 - `npm run validate:github-import-controls`: PASS.
 - `npm run validate:project-intelligence`: PASS.
@@ -124,6 +125,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Live role-boundary checks: PASS. USER cannot escalate or read audit events; CONTENT_REVIEWER cannot publish approved questions; SUPPORT_ADMIN can read support reports but cannot publish; MAIN_ADMIN can read audit events.
 - Live GitHub import quota checks: PASS after migration `0027`. Service-role claim, daily-limit denial, anonymous denial, and authenticated-client denial all passed.
 - Live admin browser checks: PASS. Personal study USER is denied `/admin`; MAIN_ADMIN, CONTENT_REVIEWER, and SUPPORT_ADMIN can enter the protected Admin route.
+- Live production browser auth smoke: PASS. Learner onboarding, admin denial, and trust-copy checks passed on 1280x900 and 390x844; SUPPORT_ADMIN could inspect reports without approve actions.
 - Temporary role/RLS QA users: deleted after verification. Temporary content-quality report rows from live QA were explicitly removed.
 - Opt-in live QA harness: PASS. The harness refuses to run without explicit production opt-in, exact project-ref guard, exact Supabase host guard, and server-side service-role env.
 
@@ -143,7 +145,7 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Live RLS/two-user isolation tests: complete and live-verified for the user-owned tables covered by the temporary QA run.
 - Role-boundary tests: complete and live-verified for USER, CONTENT_REVIEWER, SUPPORT_ADMIN, and MAIN_ADMIN boundaries covered by direct DB and browser checks.
 - Audit-integrity tests: role-change audit integrity is live-verified for the covered role path. Normal users cannot forge role-change events or self-escalate, role assignments create server-side audit records, and MAIN_ADMIN can read them; every privileged mutation class still needs broader production-test coverage.
-- Production browser auth tests: signed-in admin route checks passed for USER denial and the three admin roles; broader signed-in product smoke remains pending.
+- Production browser auth tests: signed-in admin route checks passed for USER denial and the three admin roles; opt-in production browser auth smoke also passed for learner onboarding/admin denial/trust copy at desktop and mobile widths plus SUPPORT_ADMIN report inspection without approve actions.
 - Same-browser local account switching: repository/static validation complete; live signed-in browser verification pending live QA identity bootstrap.
 - Service-role absence from frontend bundle: repository build path keeps service-role variables out of `VITE_`; pending redeploy and built-bundle scan after the current branch merges.
 - Temporary QA cleanup: complete for the role/RLS QA users and bounded QA records created during this run.

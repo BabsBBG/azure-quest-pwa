@@ -6,7 +6,7 @@ Date: 2026-08-03
 
 ## Baseline Result
 
-Static validators pass, umbrella migration/RLS/repository-isolation gates exist in repo, and the production Supabase project is live with migrations applied. Focused live security and data governance probes now pass for owner bootstrap, email auth, role boundaries, admin route access, user-owned RLS, two-user isolation, repository isolation, role-change audit forgery denial, and GitHub import quota boundaries across the covered M5 tables.
+Static validators pass, umbrella migration/RLS/repository-isolation gates exist in repo, and the production Supabase project is live with migrations applied. Focused live security and data governance probes now pass for owner bootstrap, email auth, role boundaries, admin route access, user-owned RLS, two-user isolation, repository isolation, role-change audit forgery denial, GitHub import quota boundaries, and production browser auth smoke across the covered M5 surfaces.
 
 ## Blocking Issues
 
@@ -15,6 +15,7 @@ Static validators pass, umbrella migration/RLS/repository-isolation gates exist 
 - Live two-user Project Intelligence repository-isolation probes passed.
 - Vercel Production has encrypted `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values, and focused production authenticated browser verification passed.
 - Opt-in live production scripts now exist for Supabase auth, RLS, roles, repository isolation, and GitHub import quota boundaries. `npm run validate:live-supabase` passed against the exact production project guard and cleaned up all temporary users.
+- Opt-in `npm run test:browser-production-auth` passed against the production alias with temporary users, covering learner onboarding, normal-user admin denial, trust-copy visibility on desktop/mobile, and SUPPORT_ADMIN report inspection without approve actions.
 - Final sign-off remains blocked by database password rotation after local CLI dry-run exposure, owner completion of the sent reset email, absent Google OAuth credentials, absent canonical `praxisgrid.vercel.app` alias, and broader privileged-mutation automation.
 
 ## External Blockers
