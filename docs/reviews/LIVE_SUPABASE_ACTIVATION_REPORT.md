@@ -81,8 +81,9 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - M5 live-auth env refresh deployment URL: `https://praxisgrid-am85i7tkh-tonybabalola-1114s-projects.vercel.app`.
 - PR #7 recovery-form deployment ID: `dpl_C6V68F25yyWdRQDRZpnsCjazidcC`.
 - PR #8 recovery-redirect deployment ID: `dpl_2yfxrw9Ji7kjvfiahoCntv1sNaRu`.
-- Current production deployment URL: `https://praxisgrid-rg9891u72-tonybabalola-1114s-projects.vercel.app`.
-- Current deployment SHA: `af91959a`.
+- PR #12 merged-main deployment ID: `dpl_6N7bi3rzhVzmWLoxRmwFDzearukZ`.
+- Current production deployment URL: `https://praxisgrid-jd3v3rgow-tonybabalola-1114s-projects.vercel.app`.
+- Current deployment SHA: `17bd7dad`.
 
 ## Validation Run
 
@@ -112,6 +113,9 @@ Latest update: 2026-08-03 on `codex/m5-live-supabase-qa-scripts` after adding an
 - Merged `main` CI run `30770848102`: PASS.
 - PR #8 CI run `30771363518`: PASS.
 - Merged `main` CI run `30771557919`: PASS for the full CI-equivalent suite.
+- Merged `main` CI run `30774959344`: PASS for the full CI-equivalent suite after migration `0027`.
+- Public production smoke after deployment `dpl_6N7bi3rzhVzmWLoxRmwFDzearukZ`: PASS, 20 public checks passed and 10 signed-in production checks skipped because the dev-only signed-in E2E harness is intentionally disabled outside localhost.
+- Built-bundle secret scan after deployment `dpl_6N7bi3rzhVzmWLoxRmwFDzearukZ`: PASS. Local and deployed JS contain no service-role marker, service-role env marker, Supabase management-token marker, database-password marker, or `sb_secret_...` value.
 - Live disposable account verification: signup confirmation, role default, sign-in, onboarding persistence, admin denial, logout, re-sign-in, recovery redirect, password update, and rotated-password sign-in PASS.
 - Live owner bootstrap: `tobibabalola21@gmail.com` created and verified with fresh session role `MAIN_ADMIN`.
 - Live personal study account: `tonybabalola@gmail.com` created and verified with fresh session role `USER`.
